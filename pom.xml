@@ -1,33 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.arastreju</groupId>
 	<artifactId>arastreju.neo4j</artifactId>
 	<name>Arastreju Neo4J Binding</name>
-	<version>0.6.0-SNAPSHOT</version>	
-	
+	<version>0.6.0-SNAPSHOT</version>
 	<description>Binding for Arastreju to Neo4J Graph Database</description>
-	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<neo4j.version>1.5</neo4j.version>
 	</properties>
-	
 	<licenses>
-	  <license>
-	    <name>GPL 3</name>
-	    <url>http://www.gnu.org/copyleft/gpl.html</url>
-	  </license>
+		<license>
+			<name>GPL 3</name>
+			<url>http://www.gnu.org/copyleft/gpl.html</url>
+		</license>
 	</licenses>
-	
 	<organization>
 		<name>lichtflut Forschungs- und Entwicklungsgesellschaft mbH</name>
 		<url>http://www.lichtflut.de</url>
 	</organization>
-
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -51,8 +43,32 @@
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
-
 	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.google.code.maven-license-plugin</groupId>
+				<artifactId>maven-license-plugin</artifactId>
+				<version>1.4.0</version>
+				<configuration>
+					<header>license.txt</header>
+					<headerDefinitions>
+						<headerDefinition>header.xml</headerDefinition>
+					</headerDefinitions>
+					<includes>
+						<include>src/**</include>
+					</includes>
+					<excludes>
+						<exclude>target/**</exclude>
+						<exclude>.git/**</exclude>
+						<exclude>.idea/**</exclude>
+						<exclude>.settings/**</exclude>
+						<exclude>header.xml</exclude>
+						<exclude>**/*.rdf</exclude>
+						<exclude>**/*.profile</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+		</plugins>
 		<resources>
 			<resource>
 				<filtering>true</filtering>
@@ -92,7 +108,6 @@
 			<url>http://m2.neo4j.org</url>
 		</repository>
 	</repositories>
-
 	<pluginRepositories>
 		<pluginRepository>
 			<id>maven2-repository.dev.java.net</id>
@@ -123,5 +138,4 @@
 			<url>http://nexus.lichtflut.de/nexus/content/repositories/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
-
 </project>

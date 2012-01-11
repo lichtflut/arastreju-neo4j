@@ -45,6 +45,8 @@ public class GraphDataStore implements ProfileCloseListener {
 	private final Logger logger = LoggerFactory.getLogger(GraphDataStore.class);
 
 	private IndexManager indexManager;
+	
+	private boolean initialized;
 
 	// -----------------------------------------------------
 
@@ -82,6 +84,19 @@ public class GraphDataStore implements ProfileCloseListener {
 	}
 	
 	// -----------------------------------------------------
+	
+	/**
+	 * @return the initialized
+	 */
+	public boolean isInitialized() {
+		return initialized;
+	}
+	
+	public void markInitialized() {
+		this.initialized = true;
+	}
+	
+	// -- ProfileCloseListener ----------------------------
 	
 	/**
 	 * {@inheritDoc}

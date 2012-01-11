@@ -23,6 +23,7 @@ import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
 import org.arastreju.sge.ArastrejuGate;
 import org.arastreju.sge.ArastrejuProfile;
 import org.arastreju.sge.spi.ArastrejuGateFactory;
+import org.arastreju.sge.spi.DomainInitializer;
 import org.arastreju.sge.spi.GateContext;
 import org.arastreju.sge.spi.GateInitializationException;
 
@@ -56,45 +57,49 @@ public class Neo4jGateFactory extends ArastrejuGateFactory {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public ArastrejuGate create(final GateContext ctx) throws GateInitializationException {
-		SemanticNetworkAccess sna;
+	public synchronized ArastrejuGate create(final GateContext ctx) throws GateInitializationException {
 		try {
-			sna = obtainSemanticNetworkAccesss(ctx);
+			
+			final Neo4jGate gate;
+			
+			final ArastrejuProfile profile = ctx.getProfile();
+			final String domain = ctx.getDomain(GateContext.ROOT_DOMAIN);
+			final GraphDataStore store = getStore(profile, domain);
+			
+			if (store != null) {
+				gate = new Neo4jGate(ctx, new SemanticNetworkAccess(store));
+			} else {
+				final SemanticNetworkAccess sna = initialize(profile, domain);
+				gate = new Neo4jGate(ctx, sna);
+				new DomainInitializer().run(gate, domain);
+			}
+			getProfile().onOpen(gate);
+			return gate;
+			
 		} catch (IOException e) {
 			throw new GateInitializationException("Could not initialize gate", e);
 		}
-		final Neo4jGate gate = new Neo4jGate(ctx, sna);
-		getProfile().onOpen(gate);
-		return gate;
 	}
 	
 	// ----------------------------------------------------
-	
-	private synchronized SemanticNetworkAccess obtainSemanticNetworkAccesss(final GateContext ctx) throws IOException {
-		final ArastrejuProfile profile = ctx.getProfile();
-		final String domain = ctx.getDomain(GateContext.ROOT_DOMAIN);
-		GraphDataStore store = getStore(profile, domain);
-		if (store == null) {
-			store = createStore(profile, domain);
-			initStore(store, profile, domain);
-		}
-		return new SemanticNetworkAccess(store);
-	}
 
+	private SemanticNetworkAccess initialize(ArastrejuProfile profile, String domain) throws IOException {
+		final GraphDataStore store = createStore(profile, domain);
+		final SemanticNetworkAccess sna = new SemanticNetworkAccess(store);
+		profile.addListener(store);
+		if (isStoreDirDefined(profile)) {
+			final String key = KEY_GRAPH_DATA_STORE + ":" + domain;
+			profile.setProfileObject(key, store);
+		}
+		return sna;
+	}
+	
 	private GraphDataStore createStore(final ArastrejuProfile profile, final String domain) throws IOException {
 		if (isStoreDirDefined(profile)){
 			String basedir = profile.getProperty(ArastrejuProfile.ARAS_STORE_DIRECTORY);
 			return new GraphDataStore(basedir + "/" + domain);
 		} else {
 			return new GraphDataStore(GraphDataStore.prepareTempStore(domain));
-		}
-	}
-	
-	private void initStore(GraphDataStore store, ArastrejuProfile profile, String domain) {
-		profile.addListener(store);
-		if (isStoreDirDefined(profile)) {
-			final String key = KEY_GRAPH_DATA_STORE + ":" + domain;
-			profile.setProfileObject(key, store);
 		}
 	}
 	

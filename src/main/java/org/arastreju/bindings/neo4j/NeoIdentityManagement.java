@@ -45,7 +45,6 @@ import org.arastreju.sge.security.LoginException;
 import org.arastreju.sge.security.Permission;
 import org.arastreju.sge.security.Role;
 import org.arastreju.sge.security.User;
-import org.arastreju.sge.security.impl.AnonymousUser;
 import org.arastreju.sge.security.impl.ArastrejuRootUser;
 import org.arastreju.sge.security.impl.PermissionImpl;
 import org.arastreju.sge.security.impl.RoleImpl;
@@ -104,7 +103,6 @@ public class NeoIdentityManagement implements IdentityManagement {
 	 * {@inheritDoc}
 	 */
 	public User login(final String name, final Credential credential) throws LoginException {
-		
 		logger.debug("trying to login user '" + name + "'.");
 		if (name == null) {
 			throw new LoginException(ErrorCodes.LOGIN_INVALID_DATA, "No username given");	
@@ -117,8 +115,6 @@ public class NeoIdentityManagement implements IdentityManagement {
 		if (found.isEmpty()){
 			if (Identity.ROOT.equals(name)){
 				return new ArastrejuRootUser();
-			} else if (Identity.ANONYMOUS.equals(name)) {
-				return new AnonymousUser();
 			} else {
 				throw new LoginException(ErrorCodes.LOGIN_USER_NOT_FOUND, "User does not exist: " + name);	
 			}

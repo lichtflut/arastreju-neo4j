@@ -96,8 +96,8 @@ public class GraphDataStore implements ProfileCloseListener {
 	
 	// -----------------------------------------------------
 	
-	private static String prepareTempStore() throws IOException {
-		final File temp = File.createTempFile("aras", Long.toString(System.nanoTime()));
+	public static String prepareTempStore(String domain) throws IOException {
+		final File temp = File.createTempFile(domain, Long.toString(System.nanoTime()));
 		if (!temp.delete()) {
 			throw new IOException("Could not delete temp file: "
 					+ temp.getAbsolutePath());
@@ -108,6 +108,10 @@ public class GraphDataStore implements ProfileCloseListener {
 		}
 		
 		return temp.getAbsolutePath();
+	}
+	
+	private static String prepareTempStore() throws IOException {
+		return prepareTempStore("default");
 	}
 
 	

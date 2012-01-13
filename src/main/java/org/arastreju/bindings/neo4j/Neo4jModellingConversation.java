@@ -120,8 +120,8 @@ public class Neo4jModellingConversation implements ModelingConversation {
 	/**
 	 * {@inheritDoc}
 	 */
-	public SemanticGraph attach(final SemanticGraph graph) {
-		return store.getTxProvider().doTransacted(new TxResultAction<SemanticGraph>() {
+	public void attach(final SemanticGraph graph) {
+		store.getTxProvider().doTransacted(new TxResultAction<SemanticGraph>() {
 			public SemanticGraph execute() {
 				for(Statement stmt : graph.getStatements()) {
 					final ResourceNode subject = resolve(stmt.getSubject());

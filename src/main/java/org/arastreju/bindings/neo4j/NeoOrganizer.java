@@ -170,6 +170,14 @@ public class NeoOrganizer extends AbstractOrganizer {
 		return new DomainImpl(node); 
 	}
 	
+	/** 
+	 * {@inheritDoc}
+	 */
+	public void updateDomain(Domain domain) {
+		domain.getAssociatedResource();
+		sna.attach(domain.getAssociatedResource());
+	}
+	
 	// ----------------------------------------------------
 	
 	private Query query() {

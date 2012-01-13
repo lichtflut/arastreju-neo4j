@@ -23,9 +23,12 @@ import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.query.QueryBuilder;
 import org.arastreju.sge.query.QueryExpression;
+import org.arastreju.sge.query.QueryOperator;
 import org.arastreju.sge.query.QueryParam;
 import org.arastreju.sge.query.QueryResult;
 import org.neo4j.index.lucene.QueryContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.lichtflut.infra.exceptions.NotYetSupportedException;
 
@@ -41,6 +44,8 @@ import de.lichtflut.infra.exceptions.NotYetSupportedException;
  * @author Oliver Tigges
  */
 public class NeoQueryBuilder extends QueryBuilder {
+	
+	private final Logger logger = LoggerFactory.getLogger(NeoQueryBuilder.class);
 	
 	private final ResourceIndex index;
 	
@@ -73,6 +78,8 @@ public class NeoQueryBuilder extends QueryBuilder {
 	// -----------------------------------------------------
 	
 	protected QueryContext toQueryContext() {
+		final String queryString = toQueryString();
+		logger.debug("Query string: " + queryString);
 		final QueryContext qctx = new QueryContext(toQueryString());
 		qctx.tradeCorrectnessForSpeed();
 		if (getSortCriteria() != null) {
@@ -106,12 +113,15 @@ public class NeoQueryBuilder extends QueryBuilder {
 		if (exp.isLeaf()) {
 			appendLeaf(exp.getQueryParam(), sb);
 		} else {
+			if (QueryOperator.NOT.equals(exp.getOperator())) {
+				sb.append(" " + exp.getOperator().name() + " ");
+			}
 			sb.append("(");
 			boolean first = true;
 			for (QueryExpression child : exp.getChildren()) {
 				if (first) {
 					first = false;
-				} else {
+				} else if (!QueryOperator.NOT.equals(exp.getOperator())) { 
 					sb.append(" " + exp.getOperator().name() + " ");
 				}
 				append(child, sb);

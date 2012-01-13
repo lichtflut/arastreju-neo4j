@@ -118,13 +118,41 @@ public class NeoQueryManagerTest {
 		SNOPS.associate(car, RDFS.LABEL, new SNText("Automobil"));
 		sna.attach(car);
 		
-		final Query query = qm.buildQuery().add(new ValueParam("BMW"));
+		final Query query = qm.buildQuery()
+				.addValue("Automobil")
+				.and()
+				.add(new ValueParam("BMW"));
 		final QueryResult result = query.getResult();
 		final List<ResourceNode> list = result.toList();
 		Assert.assertEquals(1, list.size());
 		Assert.assertTrue(list.contains(car));
 		
 	}
+	
+	@Test
+	public void testFindByInvertedTag(){
+		final ResourceNode car = new SNResource(qnCar);
+		SNOPS.associate(car, Aras.HAS_PROPER_NAME, new SNText("BMW"));
+		SNOPS.associate(car, RDFS.LABEL, new SNText("Automobil"));
+		sna.attach(car);
+		
+		Query query = qm.buildQuery()
+				.addValue("Automobil")
+				.and()
+				.not().add(new ValueParam("BMW"));
+		
+		Assert.assertEquals(0, query.getResult().size());
+		
+		query = qm.buildQuery()
+				.addValue("Automobil")
+				.and()
+				.not().add(new ValueParam("VW"));
+		
+		Assert.assertEquals(1, query.getResult().size());
+		Assert.assertTrue(query.getResult().toList().contains(car));
+		
+	}
+	
 	
 	@Test
 	public void testFindByPredicateAndTag(){

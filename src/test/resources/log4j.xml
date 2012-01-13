@@ -28,7 +28,11 @@
 	</appender>
 
 	<logger name="org.arastreju">
-		<level value="info" />
+		<level value="warn" />
+	</logger>
+	
+	<logger name="org.arastreju.bindings.neo4j.query">
+		<level value="warn" />
 	</logger>
 
 	<root>

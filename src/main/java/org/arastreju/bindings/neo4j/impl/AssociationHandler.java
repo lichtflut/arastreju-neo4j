@@ -32,11 +32,11 @@ import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.context.Context;
 import org.arastreju.sge.inferencing.Inferencer;
 import org.arastreju.sge.model.DetachedStatement;
+import org.arastreju.sge.model.SimpleResourceID;
 import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.model.nodes.SemanticNode;
 import org.arastreju.sge.model.nodes.ValueNode;
-import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.persistence.TxAction;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
@@ -103,7 +103,7 @@ public class AssociationHandler implements NeoConstants {
 			} else if (rel.isType(ArasRelTypes.VALUE)){
 				object = new SNValueNeo(rel.getEndNode());
 			}
-			final ResourceNode predicate = resolver.findResource(new QualifiedName(rel.getProperty(PREDICATE_URI).toString()));
+			final ResourceNode predicate = resolver.resolve(new SimpleResourceID(rel.getProperty(PREDICATE_URI).toString()));
 			final Context[] ctx = ctxAccess.getContextInfo(rel);
 			keeper.addAssociationDirectly(new DetachedStatement(keeper.getID(), predicate, object, ctx));
 		}

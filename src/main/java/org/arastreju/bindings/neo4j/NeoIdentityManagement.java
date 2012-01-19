@@ -49,6 +49,7 @@ import org.arastreju.sge.security.impl.ArastrejuRootUser;
 import org.arastreju.sge.security.impl.PermissionImpl;
 import org.arastreju.sge.security.impl.RoleImpl;
 import org.arastreju.sge.security.impl.UserImpl;
+import org.arastreju.sge.spi.GateContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,14 +72,18 @@ public class NeoIdentityManagement implements IdentityManagement {
 	
 	private final SemanticNetworkAccess store;
 
+	private final GateContext ctx;
+
 	// -----------------------------------------------------
 	
 	/**
 	 * Constructor.
 	 * @param store The neo store.
+	 * @param ctx The gate context.
 	 */
-	public NeoIdentityManagement(final SemanticNetworkAccess store) {
+	public NeoIdentityManagement(final SemanticNetworkAccess store, GateContext ctx) {
 		this.store = store;
+		this.ctx = ctx;
 		this.index = store.getIndex();
 	}
 	
@@ -144,6 +149,7 @@ public class NeoIdentityManagement implements IdentityManagement {
 		associate(corresponding, Aras.IDENTIFIED_BY, new SNText(name), Aras.IDENT);
 		associate(corresponding, Aras.HAS_CREDENTIAL, new SNText(credential.stringRepesentation()), Aras.IDENT);
 		associate(corresponding, RDF.TYPE, Aras.USER, Aras.IDENT);
+		associate(corresponding, Aras.BELONGS_TO_DOMAIN, new SNText(ctx.getDomain()), Aras.IDENT);
 		store.attach(corresponding);
 		return new UserImpl(corresponding);
 	}

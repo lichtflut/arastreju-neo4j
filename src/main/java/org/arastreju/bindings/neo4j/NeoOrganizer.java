@@ -127,6 +127,22 @@ public class NeoOrganizer extends AbstractOrganizer {
 	/** 
 	 * {@inheritDoc}
 	 */
+	public Domain findDomain(String name) {
+		final Query query = query()
+				.addField(RDF.TYPE, Aras.DOMAIN)
+				.and()
+				.addField(Aras.HAS_UNIQUE_NAME, name);
+		ResourceNode node = query.getResult().getSingleNode();
+		if (node != null) {
+			return createDomain(node);
+		} else {
+			return null;
+		}
+	};
+	
+	/** 
+	 * {@inheritDoc}
+	 */
 	public Collection<Domain> getDomains() {
 		final List<Domain> result = new ArrayList<Domain>();
 		final List<ResourceNode> nodes = sna.getIndex().lookup(RDF.TYPE, Aras.DOMAIN).toList();
@@ -139,11 +155,11 @@ public class NeoOrganizer extends AbstractOrganizer {
 	/** 
 	 * {@inheritDoc}
 	 */
-	public Domain getMasterDomain() {
+	public Domain getDomesticDomain() {
 		final Query query = query()
 				.addField(RDF.TYPE, Aras.DOMAIN)
 				.and()
-				.addField(Aras.IS_MASTER_DOMAIN, Boolean.TRUE);
+				.addField(Aras.IS_DOMESTIC_DOMAIN, Boolean.TRUE);
 		ResourceNode node = query.getResult().getSingleNode();
 		if (node != null) {
 			return createDomain(node);
@@ -155,8 +171,8 @@ public class NeoOrganizer extends AbstractOrganizer {
 	/** 
 	 * {@inheritDoc}
 	 */
-	public Domain initMasterDomain(String name) {
-		final ResourceNode node = createMasterDomainNode(name);
+	public Domain initDomesticDomain(String name) {
+		final ResourceNode node = createDomesticDomainNode(name);
 		sna.attach(node);
 		return new DomainImpl(node); 
 	}

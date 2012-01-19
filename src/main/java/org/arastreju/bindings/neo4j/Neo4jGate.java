@@ -44,6 +44,7 @@ public class Neo4jGate implements ArastrejuGate {
 	
 	private final SemanticNetworkAccess sna;
 	private final User user;
+	private final GateContext ctx;
 
 	// -----------------------------------------------------
 
@@ -52,6 +53,7 @@ public class Neo4jGate implements ArastrejuGate {
 	 * @param ctx The gate context.
 	 */
 	public Neo4jGate(final GateContext ctx, SemanticNetworkAccess sna) throws GateInitializationException {
+		this.ctx = ctx;
 		this.sna = sna;
 		this.user = null;
 	}
@@ -62,6 +64,7 @@ public class Neo4jGate implements ArastrejuGate {
 	 * @param sna The semantic network access object.
 	 */
 	public Neo4jGate(final LoginContext ctx, SemanticNetworkAccess sna) throws GateInitializationException {
+		this.ctx = ctx;
 		this.sna = sna;
 		try {
 			user = getIdentityManagement().login(ctx.getUsername(), ctx.getCredential());
@@ -98,13 +101,20 @@ public class Neo4jGate implements ArastrejuGate {
 	 */
 
 	public IdentityManagement getIdentityManagement() {
-		return new NeoIdentityManagement(sna);
+		return new NeoIdentityManagement(sna, ctx);
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	public void close() {
+	}
+	
+	/** 
+	 * {@inheritDoc}
+	 */
+	public GateContext getContext() {
+		return ctx;
 	}
 	
 	// ----------------------------------------------------

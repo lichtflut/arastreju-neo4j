@@ -63,7 +63,7 @@ public class Neo4jGateFactory extends ArastrejuGateFactory {
 			final Neo4jGate gate;
 			
 			final ArastrejuProfile profile = ctx.getProfile();
-			final String domain = ctx.getDomain(GateContext.ROOT_DOMAIN);
+			final String domain = ctx.getDomain();
 			final GraphDataStore store = getStore(profile, domain);
 			
 			if (store != null) {

@@ -35,6 +35,7 @@ import org.arastreju.sge.security.PasswordCredential;
 import org.arastreju.sge.security.Permission;
 import org.arastreju.sge.security.Role;
 import org.arastreju.sge.security.User;
+import org.arastreju.sge.spi.GateContext;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -66,7 +67,7 @@ public class NeoIdentityManagementTest {
 	public void setUp() throws Exception {
 		store = new GraphDataStore();
 		sna = new SemanticNetworkAccess(store);
-		im = new NeoIdentityManagement(sna);
+		im = new NeoIdentityManagement(sna, new GateContext(null));
 	}
 
 	/**

@@ -141,6 +141,10 @@ public class NeoQueryBuilder extends QueryBuilder {
 		case HAS_VALUE:
 			sb.append(NeoIndex.INDEX_KEY_RESOURCE_VALUE + ":");
 			break;
+		case SUB_QUERY:
+			sb.append(param.getValue());
+			// abort here!
+			return;
 		default:
 			throw new NotYetSupportedException(param.getOperator());
 		}

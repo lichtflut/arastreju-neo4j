@@ -17,6 +17,7 @@
 package org.arastreju.bindings.neo4j;
 
 import static org.arastreju.sge.SNOPS.associate;
+import static org.arastreju.sge.SNOPS.remove;
 import static org.arastreju.sge.SNOPS.singleObject;
 
 import java.util.HashSet;
@@ -195,6 +196,16 @@ public class NeoIdentityManagement implements IdentityManagement {
 		store.attach(userNode);
 		for (Role role : roles) {
 			associate(userNode, Aras.HAS_ROLE, role.getAssociatedResource(), Aras.IDENT);
+		}
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void removeUserFromRoles(final User user, final Role... roles) {
+		final ResourceNode userNode = user.getAssociatedResource();
+		for (Role role : roles) {
+			remove(userNode, Aras.HAS_ROLE, role.getAssociatedResource());
 		}
 	}
 	

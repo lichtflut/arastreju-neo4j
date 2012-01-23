@@ -277,13 +277,5 @@ public class NeoIdentityManagement implements IdentityManagement {
 					"More than on user with name '" + name + "' found.");
 		}
 	}
-
-	/** 
-	 * {@inheritDoc}
-	 */
-	public void removeUserFromRoles(User user, Role... roles) {
-		// TODO Auto-generated method stub
-		
-	}
 	
 }

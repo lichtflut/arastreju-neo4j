@@ -28,6 +28,7 @@ import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.bindings.neo4j.query.NeoQueryBuilder;
 import org.arastreju.sge.IdentityManagement;
+import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.apriori.Aras;
 import org.arastreju.sge.apriori.RDF;
 import org.arastreju.sge.eh.ArastrejuException;
@@ -36,6 +37,7 @@ import org.arastreju.sge.eh.ErrorCodes;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.model.nodes.SNResource;
+import org.arastreju.sge.model.nodes.SemanticNode;
 import org.arastreju.sge.model.nodes.views.SNEntity;
 import org.arastreju.sge.model.nodes.views.SNText;
 import org.arastreju.sge.query.Query;
@@ -155,6 +157,24 @@ public class NeoIdentityManagement implements IdentityManagement {
 		return new UserImpl(corresponding);
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
+	public User changeID(User user, String newID) throws ArastrejuException {
+		assertUniqueIdentity(newID);
+		final ResourceNode userNode = store.resolve(user.getAssociatedResource());
+		SemanticNode uniqueNameNode = SNOPS.singleObject(userNode, Aras.HAS_UNIQUE_NAME);
+		for (SemanticNode idNode : SNOPS.objects(userNode, Aras.IDENTIFIED_BY)) {
+			if(idNode.toString().equals(uniqueNameNode.toString())) {
+				SNOPS.assure(userNode, Aras.HAS_UNIQUE_NAME, new SNText(newID), Aras.IDENT);
+				SNOPS.remove(userNode, Aras.IDENTIFIED_BY, idNode);
+				associate(userNode, Aras.IDENTIFIED_BY, new SNText(newID), Aras.IDENT);
+				break;
+			}
+		}
+		return findUser(newID);
+	}
+
 	/** 
 	* {@inheritDoc}
 	*/

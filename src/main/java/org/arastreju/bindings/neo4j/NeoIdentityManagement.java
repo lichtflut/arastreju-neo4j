@@ -43,12 +43,10 @@ import org.arastreju.sge.model.nodes.views.SNText;
 import org.arastreju.sge.query.Query;
 import org.arastreju.sge.query.QueryResult;
 import org.arastreju.sge.security.Credential;
-import org.arastreju.sge.security.Identity;
 import org.arastreju.sge.security.LoginException;
 import org.arastreju.sge.security.Permission;
 import org.arastreju.sge.security.Role;
 import org.arastreju.sge.security.User;
-import org.arastreju.sge.security.impl.ArastrejuRootUser;
 import org.arastreju.sge.security.impl.PermissionImpl;
 import org.arastreju.sge.security.impl.RoleImpl;
 import org.arastreju.sge.security.impl.UserImpl;
@@ -121,11 +119,7 @@ public class NeoIdentityManagement implements IdentityManagement {
 			throw new IllegalStateException("More than on user with name '" + name + "' found.");
 		}
 		if (found.isEmpty()){
-			if (Identity.ROOT.equals(name)){
-				return new ArastrejuRootUser();
-			} else {
-				throw new LoginException(ErrorCodes.LOGIN_USER_NOT_FOUND, "User does not exist: " + name);	
-			}
+			throw new LoginException(ErrorCodes.LOGIN_USER_NOT_FOUND, "User does not exist: " + name);	
 		}
 		
 		final SNEntity user = found.getSingleNode().asEntity();

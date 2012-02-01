@@ -83,6 +83,13 @@ public class Neo4jGateFactory extends ArastrejuGateFactory {
 	
 	// ----------------------------------------------------
 
+	/**
+	 * Initialize the domain.
+	 * @param profile The Arastreju Profile.
+	 * @param domain The domain name.
+	 * @return The {@link SemanticNetworkAccess}.
+	 * @throws IOException
+	 */
 	private SemanticNetworkAccess initialize(ArastrejuProfile profile, String domain) throws IOException {
 		final GraphDataStore store = createStore(profile, domain);
 		final SemanticNetworkAccess sna = new SemanticNetworkAccess(store);

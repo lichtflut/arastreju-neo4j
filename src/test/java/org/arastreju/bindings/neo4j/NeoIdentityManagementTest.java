@@ -120,7 +120,7 @@ public class NeoIdentityManagementTest {
 	public void testRegistration() throws LoginException, ArastrejuException {
 		final User user = im.register("bud", new PasswordCredential("spencer"));
 		Assert.assertEquals("bud", user.getName());
-		Assert.assertTrue(user.getAssociatedResource().isAttached());
+		Assert.assertTrue(user.isAttached());
 		
 		User loggedIn = im.login("bud", new PasswordCredential("spencer"));
 		Assert.assertNotNull(loggedIn);
@@ -129,12 +129,12 @@ public class NeoIdentityManagementTest {
 		final SNEntity node = new SNEntity();
 		final User user2 = im.register("terrence", new PasswordCredential("hill"), node);
 		Assert.assertEquals("terrence", user2.getName());
-		Assert.assertTrue(user2.getAssociatedResource().isAttached());
+		Assert.assertTrue(user2.isAttached());
 		
 		User loggedIn2 = im.login("terrence", new PasswordCredential("hill"));
 		Assert.assertNotNull(loggedIn2);
 		Assert.assertEquals(user2, loggedIn2);
-		Assert.assertEquals(node, loggedIn2.getAssociatedResource());
+		Assert.assertEquals(node, loggedIn2);
 	}
 	
 	@Test
@@ -143,10 +143,8 @@ public class NeoIdentityManagementTest {
 		Role nothing = im.registerRole("nothing");
 		
 		Assert.assertEquals("anything", anything.getName());
-		Assert.assertNotNull(anything.getAssociatedResource());
 		
 		Assert.assertEquals("nothing", nothing.getName());
-		Assert.assertNotNull(nothing.getAssociatedResource());
 		
 		Set<Role> roles = im.getRoles();
 		Assert.assertEquals(2, roles.size());
@@ -163,10 +161,8 @@ public class NeoIdentityManagementTest {
 		Permission nothing = im.registerPermission("nothing");
 		
 		Assert.assertEquals("anything", anything.getName());
-		Assert.assertNotNull(anything.getAssociatedResource());
 		
 		Assert.assertEquals("nothing", nothing.getName());
-		Assert.assertNotNull(nothing.getAssociatedResource());
 		
 		Set<Permission> permissions = im.getPermissions();
 		Assert.assertEquals(2, permissions.size());

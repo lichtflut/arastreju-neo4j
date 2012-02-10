@@ -22,6 +22,7 @@ import org.arastreju.bindings.neo4j.index.NeoIndex;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.query.QueryBuilder;
+import org.arastreju.sge.query.QueryException;
 import org.arastreju.sge.query.QueryExpression;
 import org.arastreju.sge.query.QueryOperator;
 import org.arastreju.sge.query.QueryParam;
@@ -131,6 +132,10 @@ public class NeoQueryBuilder extends QueryBuilder {
 	}
 	
 	private void appendLeaf(final QueryParam param, final StringBuilder sb) {
+		String value = normalizeValue(param.getValue());
+		if (value == null || value.length() == 0) {
+			throw new QueryException("Invalid query value: " + value);
+		}
 		switch(param.getOperator()) {
 		case EQUALS:
 			sb.append(normalizeKey(param.getName()) + ":");
@@ -155,8 +160,11 @@ public class NeoQueryBuilder extends QueryBuilder {
 		return key.replaceAll(":", "\\\\:");
 	}
 	
-	private String normalizeValue(final String key) {
-		return key.trim().toLowerCase().replaceAll(":", "\\\\:");
+	private String normalizeValue(final Object value) {
+		if (value == null) {
+			return null;
+		}
+		return value.toString().trim().toLowerCase().replaceAll(":", "\\\\:");
 	}
 	
 }

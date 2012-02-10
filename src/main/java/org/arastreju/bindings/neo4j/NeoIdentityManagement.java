@@ -47,9 +47,9 @@ import org.arastreju.sge.security.LoginException;
 import org.arastreju.sge.security.Permission;
 import org.arastreju.sge.security.Role;
 import org.arastreju.sge.security.User;
-import org.arastreju.sge.security.impl.PermissionImpl;
-import org.arastreju.sge.security.impl.RoleImpl;
-import org.arastreju.sge.security.impl.UserImpl;
+import org.arastreju.sge.security.impl.SNPermission;
+import org.arastreju.sge.security.impl.SNRole;
+import org.arastreju.sge.security.impl.SNUser;
 import org.arastreju.sge.spi.GateContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,7 +101,7 @@ public class NeoIdentityManagement implements IdentityManagement {
 		} else if (result.isEmpty()) {
 			return null;
 		} else {
-			return new UserImpl(result.getSingleNode());
+			return new SNUser(result.getSingleNode());
 		}
 	};
 
@@ -127,7 +127,7 @@ public class NeoIdentityManagement implements IdentityManagement {
 			throw new LoginException(ErrorCodes.LOGIN_USER_CREDENTIAL_NOT_MATCH, "Wrong credential");
 		}
 		
-		return new UserImpl(user);
+		return new SNUser(user);
 	}
 
 	/**
@@ -148,7 +148,7 @@ public class NeoIdentityManagement implements IdentityManagement {
 		associate(corresponding, RDF.TYPE, Aras.USER, Aras.IDENT);
 		associate(corresponding, Aras.BELONGS_TO_DOMAIN, new SNText(ctx.getDomain()), Aras.IDENT);
 		store.attach(corresponding);
-		return new UserImpl(corresponding);
+		return new SNUser(corresponding);
 	}
 	
 	/**
@@ -156,7 +156,7 @@ public class NeoIdentityManagement implements IdentityManagement {
 	 */
 	public User changeID(User user, String newID) throws ArastrejuException {
 		assertUniqueIdentity(newID);
-		final ResourceNode userNode = store.resolve(user.getAssociatedResource());
+		final ResourceNode userNode = store.resolve(user);
 		SemanticNode uniqueNameNode = SNOPS.singleObject(userNode, Aras.HAS_UNIQUE_NAME);
 		for (SemanticNode idNode : SNOPS.objects(userNode, Aras.IDENTIFIED_BY)) {
 			if(idNode.toString().equals(uniqueNameNode.toString())) {
@@ -174,7 +174,7 @@ public class NeoIdentityManagement implements IdentityManagement {
 	*/
 	public User registerAlternateID(User user, String uniqueName) throws ArastrejuException {
 		assertUniqueIdentity(uniqueName);
-		final ResourceNode node = store.resolve(user.getAssociatedResource());
+		final ResourceNode node = store.resolve(user);
 		associate(node, Aras.IDENTIFIED_BY, new SNText(uniqueName), Aras.IDENT);
 		return user;
 	}
@@ -187,13 +187,13 @@ public class NeoIdentityManagement implements IdentityManagement {
 	public Role registerRole(final String name) {
 		final ResourceNode existing = findItem(Aras.ROLE, name);
 		if (existing != null) {
-			return new RoleImpl(existing);
+			return new SNRole(existing);
 		}
 		final SNResource role = new SNResource();
 		associate(role, Aras.HAS_UNIQUE_NAME, new SNText(name), Aras.IDENT);
 		associate(role, RDF.TYPE, Aras.ROLE, Aras.IDENT);
 		store.attach(role);
-		return new RoleImpl(role);
+		return new SNRole(role);
 	}
 
 	/**
@@ -203,7 +203,7 @@ public class NeoIdentityManagement implements IdentityManagement {
 		final List<ResourceNode> nodes = index.lookup(RDF.TYPE, Aras.ROLE).toList();
 		final Set<Role> roles = new HashSet<Role>(nodes.size());
 		for(ResourceNode current: nodes) {
-			roles.add(new RoleImpl(current));
+			roles.add(new SNRole(current));
 		}
 		return roles;
 	}
@@ -212,10 +212,9 @@ public class NeoIdentityManagement implements IdentityManagement {
 	 * {@inheritDoc}
 	 */
 	public void addUserToRoles(final User user, final Role... roles) {
-		final ResourceNode userNode = user.getAssociatedResource();
-		store.attach(userNode);
+		store.attach(user);
 		for (Role role : roles) {
-			associate(userNode, Aras.HAS_ROLE, role.getAssociatedResource(), Aras.IDENT);
+			associate(user, Aras.HAS_ROLE, role, Aras.IDENT);
 		}
 	}
 	
@@ -223,9 +222,8 @@ public class NeoIdentityManagement implements IdentityManagement {
 	 * {@inheritDoc}
 	 */
 	public void removeUserFromRoles(final User user, final Role... roles) {
-		final ResourceNode userNode = user.getAssociatedResource();
 		for (Role role : roles) {
-			remove(userNode, Aras.HAS_ROLE, role.getAssociatedResource());
+			remove(user, Aras.HAS_ROLE, role);
 		}
 	}
 	
@@ -233,10 +231,9 @@ public class NeoIdentityManagement implements IdentityManagement {
 	 * {@inheritDoc}
 	 */
 	public void addPermissionsToRole(final Role role, final Permission... permissions) {
-		final ResourceNode roleNode = role.getAssociatedResource();
-		store.attach(roleNode);
+		store.attach(role);
 		for (Permission permission : permissions) {
-			associate(roleNode, Aras.CONTAINS, permission.getAssociatedResource(), Aras.IDENT);
+			associate(role, Aras.CONTAINS, permission, Aras.IDENT);
 		}
 	}
 
@@ -246,13 +243,13 @@ public class NeoIdentityManagement implements IdentityManagement {
 	public Permission registerPermission(final String name) {
 		final ResourceNode existing = findItem(Aras.PERMISSION, name);
 		if (existing != null) {
-			return new PermissionImpl(existing);
+			return new SNPermission(existing);
 		}
 		final SNResource permission = new SNResource();
 		associate(permission, Aras.HAS_UNIQUE_NAME, new SNText(name), Aras.IDENT);
 		associate(permission, RDF.TYPE, Aras.PERMISSION, Aras.IDENT);
 		store.attach(permission);
-		return new PermissionImpl(permission);
+		return new SNPermission(permission);
 	}
 
 	/**
@@ -262,7 +259,7 @@ public class NeoIdentityManagement implements IdentityManagement {
 		final List<ResourceNode> nodes = index.lookup(RDF.TYPE, Aras.PERMISSION).toList();
 		final Set<Permission> permissions = new HashSet<Permission>(nodes.size());
 		for(ResourceNode current: nodes) {
-			permissions.add(new PermissionImpl(current));
+			permissions.add(new SNPermission(current));
 		}
 		return permissions;
 	}

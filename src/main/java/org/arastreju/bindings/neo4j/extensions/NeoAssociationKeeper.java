@@ -16,7 +16,6 @@
  */
 package org.arastreju.bindings.neo4j.extensions;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.Set;
 
@@ -43,7 +42,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Oliver Tigges
  */
-public class NeoAssociationKeeper extends AbstractAssociationKeeper implements NeoConstants, Serializable {
+public class NeoAssociationKeeper extends AbstractAssociationKeeper implements NeoConstants {
 	
 	private final ResourceID id;
 	

@@ -36,7 +36,7 @@ import org.arastreju.sge.naming.SimpleNamespace;
 import org.arastreju.sge.query.Query;
 import org.arastreju.sge.query.QueryResult;
 import org.arastreju.sge.security.Domain;
-import org.arastreju.sge.security.impl.DomainImpl;
+import org.arastreju.sge.security.impl.SNDomain;
 import org.arastreju.sge.spi.abstracts.AbstractOrganizer;
 
 /**
@@ -174,7 +174,7 @@ public class NeoOrganizer extends AbstractOrganizer {
 	public Domain initDomesticDomain(String name) {
 		final ResourceNode node = createDomesticDomainNode(name);
 		sna.attach(node);
-		return new DomainImpl(node); 
+		return new SNDomain(node); 
 	}
 	
 	/** 
@@ -183,15 +183,14 @@ public class NeoOrganizer extends AbstractOrganizer {
 	public Domain registerDomain(String name, String title, String description) {
 		final ResourceNode node = createDomainNode(name, title, description);
 		sna.attach(node);
-		return new DomainImpl(node); 
+		return new SNDomain(node); 
 	}
 	
 	/** 
 	 * {@inheritDoc}
 	 */
 	public void updateDomain(Domain domain) {
-		domain.getAssociatedResource();
-		sna.attach(domain.getAssociatedResource());
+		sna.attach(domain);
 	}
 	
 	// ----------------------------------------------------

@@ -27,8 +27,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.GraphDataStore;
-import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.apriori.Aras;
 import org.arastreju.sge.apriori.RDFS;
@@ -59,9 +59,9 @@ import org.junit.Test;
  */
 public class Neo4jModellingConversationTest {
 	
-	private SemanticNetworkAccess sna;
 	private GraphDataStore store;
 	private Neo4jModellingConversation mc;
+	private GraphDataConnection connection;
 	
 	// -----------------------------------------------------
 
@@ -71,8 +71,8 @@ public class Neo4jModellingConversationTest {
 	@Before
 	public void setUp() throws Exception {
 		store = new GraphDataStore();
-		sna = new SemanticNetworkAccess(store);
-		mc = new Neo4jModellingConversation(sna);
+		connection = new GraphDataConnection(store);
+		mc = new Neo4jModellingConversation(connection);
 	}
 
 	/**
@@ -81,7 +81,7 @@ public class Neo4jModellingConversationTest {
 	@After
 	public void tearDown() throws Exception {
 		mc.close();
-		sna.close();
+		connection.close();
 		store.close();
 	}
 	
@@ -130,7 +130,7 @@ public class Neo4jModellingConversationTest {
 		
 		SNOPS.associate(car, RDFS.SUB_CLASS_OF, vehicle);
 		
-		mc.getIndex().clearCache();
+		mc.close();
 		
 		car = mc.findResource(qnCar);
 		vehicle = mc.findResource(qnVehicle);

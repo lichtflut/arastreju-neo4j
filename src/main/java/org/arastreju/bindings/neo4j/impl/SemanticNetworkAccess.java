@@ -16,13 +16,10 @@
  */
 package org.arastreju.bindings.neo4j.impl;
 
-import java.io.IOException;
 import java.util.Set;
 
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
-import org.arastreju.bindings.neo4j.extensions.SNResourceNeo;
-import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.bindings.neo4j.tx.TxProvider;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.eh.ArastrejuRuntimeException;
@@ -32,11 +29,8 @@ import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.model.associations.AssociationKeeper;
 import org.arastreju.sge.model.associations.DetachedAssociationKeeper;
 import org.arastreju.sge.model.nodes.ResourceNode;
-import org.arastreju.sge.model.nodes.SNResource;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.persistence.TxAction;
-import org.arastreju.sge.persistence.TxResultAction;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 
 /**
@@ -55,106 +49,29 @@ import org.neo4j.graphdb.Node;
  *
  * @author Oliver Tigges
  */
-public class SemanticNetworkAccess implements NeoConstants, NeoResourceResolver {
+public class SemanticNetworkAccess implements NeoConstants {
 	
-	private final GraphDatabaseService gdbService;
-	
-	private final ResourceIndex index;
-	
-	private final AssociationHandler assocHandler;
-	
-	private final TxProvider txProvider;
+	private final GraphDataConnection connection;
 	
 	// -----------------------------------------------------
 
 	/**
-	 * Default constructor. Will use a <b>temporary</b> datastore!.
-	 */
-	public SemanticNetworkAccess() throws IOException {
-		this(new GraphDataStore());
-	}
-	
-	/**
 	 * Constructor. Creates a store using given directory.
 	 * @param dir The directory for the store.
 	 */
-	public SemanticNetworkAccess(final String dir) {
-		this(new GraphDataStore(dir));
+	protected SemanticNetworkAccess(final GraphDataConnection connection) {
+		this.connection = connection;
 	}
-	
-	/**
-	 * Constructor. Creates a store using given directory.
-	 * @param dir The directory for the store.
-	 */
-	public SemanticNetworkAccess(final GraphDataStore store) {
-		this.gdbService = store.getGdbService();
-		this.txProvider = new TxProvider(gdbService);
-		this.index = new ResourceIndex(this, store.getIndexManager(), txProvider);
-		this.assocHandler = new AssociationHandler(this, index, txProvider);
-	}
-	
+
 	// -----------------------------------------------------
 	
-	public ResourceIndex getIndex() {
-		return index;
-	}
-	
-	public GraphDatabaseService getGdbService() {
-		return gdbService;
-	}
-	
-	public TxProvider getTxProvider() {
-		return txProvider;
-	}
-	
-	// -- FIND / RESOLVE ----------------------------------
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public ResourceNode findResource(final QualifiedName qn) {
-		final AssociationKeeper keeper = findAssociationKeeper(qn);
-		if (keeper != null) {
-			return createArasNode(keeper, qn);
-		} else {
-			return null;
-		}
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public ResourceNode resolve(final ResourceID resource) {
-		final ResourceNode node = resource.asResource();
-		if (node.isAttached()){
-			return node;
-		} else {
-			final ResourceNode attached = findResource(resource.getQualifiedName());
-			if (attached != null) {
-				return attached;
-			} else {
-				return txProvider.doTransacted(new TxResultAction<ResourceNode>() {
-					public ResourceNode execute() {
-						return persist(resource.asResource());
-					}
-				});
+	public void create(final ResourceNode resource) {
+		tx().doTransacted(new TxAction() {
+			public void execute() {
+				persist(resource);
 			}
-		}
+		});
 	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public ResourceNode resolve(final Node neoNode) {
-		final QualifiedName qn = new QualifiedName(neoNode.getProperty(PROPERTY_URI).toString());
-		AssociationKeeper keeper = index.findAssociationKeeper(qn);
-		if (keeper == null){
-			keeper = new NeoAssociationKeeper(SNOPS.id(qn), neoNode, assocHandler);
-		}
-		return createArasNode(keeper, qn);
-	}
-
-	// -----------------------------------------------------
 	
 	/**
 	 * Attach the given node if it is not already attached.
@@ -166,7 +83,7 @@ public class SemanticNetworkAccess implements NeoConstants, NeoResourceResolver 
 		if (resource.isAttached()){
 			return;
 		}
-		txProvider.doTransacted(new TxAction() {
+		tx().doTransacted(new TxAction() {
 			public void execute() {
 				// 2nd: check if node for qualified name exists and has to be merged
 				final AssociationKeeper attachedKeeper = findAssociationKeeper(resource.getQualifiedName());
@@ -185,7 +102,7 @@ public class SemanticNetworkAccess implements NeoConstants, NeoResourceResolver 
 	 * @param node The node to detach.
 	 */
 	public void detach(final ResourceNode node){
-		index.uncache(node.getQualifiedName());
+		workingContext().detach(node.getQualifiedName());
 		AssocKeeperAccess.setAssociationKeeper(node, new DetachedAssociationKeeper(node.getAssociations()));
 	}
 	
@@ -212,25 +129,16 @@ public class SemanticNetworkAccess implements NeoConstants, NeoResourceResolver 
 	 * @param id The ID.
 	 */
 	public void remove(final ResourceID id) {
-		final ResourceNode node = resolve(id);
+		final ResourceNode node = connection.getResourceResolver().resolve(id);
 		AssocKeeperAccess.getAssociationKeeper(node).getAssociations().clear();
-		txProvider.doTransacted(new TxAction() {
+		tx().doTransacted(new TxAction() {
 			public void execute() {
-				new NodeRemover(index).remove(node, false);
+				new NodeRemover(connection.getIndex()).remove(node, false);
 			}
 		});
 		detach(node);
 	}
 	
-	// -----------------------------------------------------
-
-	/**
-	 * Close the graph database;
-	 */
-	public void close() {
-		index.clearCache();
-	}
-
 	// -----------------------------------------------------
 	
 	/**
@@ -239,39 +147,16 @@ public class SemanticNetworkAccess implements NeoConstants, NeoResourceResolver 
 	 * @return The keeper or null.
 	 */
 	protected AssociationKeeper findAssociationKeeper(final QualifiedName qn) {
-		final AssociationKeeper registered = index.findAssociationKeeper(qn);
+		final AssociationKeeper registered = workingContext().getAssociationKeeper(qn);
 		if (registered != null) {
 			return registered;
 		}
-		final Node neoNode = index.findNeoNode(qn);
+		final Node neoNode = connection.getIndex().findNeoNode(qn);
 		if (neoNode != null) {
-			return new NeoAssociationKeeper(SNOPS.id(qn), neoNode, assocHandler);
+			return createKeeper(qn, neoNode);
 		} else {
 			return null;
 		}
-	}
-	
-	/**
-	 * Create a new Arastreju node for Neo node.
-	 * @param neoNode The Neo node.
-	 * @param qn The qualified name.
-	 * @return The Arastreju node.
-	 */
-	protected SNResource createArasNode(final Node neoNode, final QualifiedName qn) {
-		final NeoAssociationKeeper keeper = new NeoAssociationKeeper(SNOPS.id(qn), neoNode, assocHandler);
-		return createArasNode(keeper, qn);
-	}
-	
-	/**
-	 * Create a new Arastreju node 'around' given association keeper.
-	 * @param keeper The association keeper.
-	 * @param qn The qualified name.
-	 * @return The Arastreju node.
-	 */
-	protected SNResourceNeo createArasNode(final AssociationKeeper keeper, final QualifiedName qn) {
-		final SNResourceNeo arasNode = new SNResourceNeo(qn, keeper);
-		index.cache(arasNode);
-		return arasNode;
 	}
 	
 	/**
@@ -281,16 +166,16 @@ public class SemanticNetworkAccess implements NeoConstants, NeoResourceResolver 
 	 */
 	protected ResourceNode persist(final ResourceNode node) {
 		// 1st: create a corresponding Neo node.
-		final Node neoNode = gdbService.createNode();
+		final Node neoNode = connection.getStore().getGdbService().createNode();
 		neoNode.setProperty(PROPERTY_URI, node.getQualifiedName().toURI());
 		
 		// 2nd: retain copy of current associations and attach the Resource with this store.
 		final Set<Statement> copy = node.getAssociations();
-		final NeoAssociationKeeper keeper = new NeoAssociationKeeper(node, neoNode, assocHandler);
+		final NeoAssociationKeeper keeper = createKeeper(node.getQualifiedName(), neoNode);
 		AssocKeeperAccess.setAssociationKeeper(node, keeper);
 		
 		// 3rd: index the Neo node.
-		index.index(neoNode, node);
+		connection.getIndex().index(neoNode, node);
 		
 		// 4th: store all associations.
 		for (Statement assoc : copy) {
@@ -318,6 +203,23 @@ public class SemanticNetworkAccess implements NeoConstants, NeoResourceResolver 
 			}
 		}
 		AssocKeeperAccess.setAssociationKeeper(changed, attached);
+	}
+	
+	protected NeoAssociationKeeper createKeeper(QualifiedName qn, Node neoNode) {
+		final WorkingContext ctx = workingContext();
+		final NeoAssociationKeeper keeper = new NeoAssociationKeeper(SNOPS.id(qn), neoNode);
+		ctx.attach(qn, keeper);
+		return keeper;
+	}
+	
+	// ----------------------------------------------------
+	
+	private TxProvider tx() {
+		return connection.getTxProvider();
+	}
+	
+	private WorkingContext workingContext() {
+		return connection.getWorkingContext();
 	}
 	
 }

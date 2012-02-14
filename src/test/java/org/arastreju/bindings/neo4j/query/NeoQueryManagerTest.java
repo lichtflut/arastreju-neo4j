@@ -22,6 +22,7 @@ import java.util.Set;
 
 import junit.framework.Assert;
 
+import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.GraphDataStore;
 import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
 import org.arastreju.sge.SNOPS;
@@ -64,6 +65,7 @@ public class NeoQueryManagerTest {
 	private final QualifiedName qnBike = new QualifiedName("http://q#", "Bike");
 	
 	private GraphDataStore store;
+	private GraphDataConnection connection;
 	private SemanticNetworkAccess sna;
 	private NeoQueryManager qm;
 	
@@ -75,8 +77,9 @@ public class NeoQueryManagerTest {
 	@Before
 	public void setUp() throws Exception {
 		store = new GraphDataStore();
-		sna = new SemanticNetworkAccess(store);
-		qm = new NeoQueryManager(sna, sna.getIndex());
+		connection = new GraphDataConnection(store);
+		sna = connection.getSemanticNetworkAccess();
+		qm = new NeoQueryManager(connection.getResourceResolver(), connection.getIndex());
 	}
 
 	/**
@@ -84,7 +87,7 @@ public class NeoQueryManagerTest {
 	 */
 	@After
 	public void tearDown() throws Exception {
-		sna.close();
+		connection.close();
 		store.close();
 	}
 	

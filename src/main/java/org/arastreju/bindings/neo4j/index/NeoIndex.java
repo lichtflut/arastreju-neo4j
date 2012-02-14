@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.arastreju.bindings.neo4j.NeoConstants;
+import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.tx.TxProvider;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.nodes.ResourceNode;
@@ -81,9 +82,9 @@ public class NeoIndex implements NeoConstants {
 	 * Constructor.
 	 * @param store The neo data store.
 	 */
-	public NeoIndex(final TxProvider txProvider, final IndexManager service) {
-		this.txProvider = txProvider;
-		this.manager = service;
+	public NeoIndex(final GraphDataConnection connection) {
+		this.txProvider = connection.getTxProvider();
+		this.manager = connection.getStore().getIndexManager();
 	}
 	
 	// -- LOOKUP ------------------------------------------

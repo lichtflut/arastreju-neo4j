@@ -18,8 +18,8 @@ package org.arastreju.bindings.neo4j;
 
 import java.io.IOException;
 
+import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.GraphDataStore;
-import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
 import org.arastreju.sge.ArastrejuGate;
 import org.arastreju.sge.ArastrejuProfile;
 import org.arastreju.sge.spi.ArastrejuGateFactory;
@@ -67,10 +67,10 @@ public class Neo4jGateFactory extends ArastrejuGateFactory {
 			final GraphDataStore store = getStore(profile, domain);
 			
 			if (store != null) {
-				gate = new Neo4jGate(ctx, new SemanticNetworkAccess(store));
+				gate = new Neo4jGate(ctx, new GraphDataConnection(store));
 			} else {
-				final SemanticNetworkAccess sna = initialize(profile, domain);
-				gate = new Neo4jGate(ctx, sna);
+				final GraphDataConnection connection = new GraphDataConnection(initialize(profile, domain));
+				gate = new Neo4jGate(ctx, connection);
 				new DomainInitializer().run(gate, domain);
 			}
 			getProfile().onOpen(gate);
@@ -87,18 +87,17 @@ public class Neo4jGateFactory extends ArastrejuGateFactory {
 	 * Initialize the domain.
 	 * @param profile The Arastreju Profile.
 	 * @param domain The domain name.
-	 * @return The {@link SemanticNetworkAccess}.
+	 * @return The {@link GraphDataStore}.
 	 * @throws IOException
 	 */
-	private SemanticNetworkAccess initialize(ArastrejuProfile profile, String domain) throws IOException {
+	private GraphDataStore initialize(ArastrejuProfile profile, String domain) throws IOException {
 		final GraphDataStore store = createStore(profile, domain);
-		final SemanticNetworkAccess sna = new SemanticNetworkAccess(store);
 		profile.addListener(store);
 		if (isStoreDirDefined(profile)) {
 			final String key = KEY_GRAPH_DATA_STORE + ":" + domain;
 			profile.setProfileObject(key, store);
 		}
-		return sna;
+		return store;
 	}
 	
 	private GraphDataStore createStore(final ArastrejuProfile profile, final String domain) throws IOException {

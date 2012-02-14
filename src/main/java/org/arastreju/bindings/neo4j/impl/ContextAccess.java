@@ -17,6 +17,7 @@
 package org.arastreju.bindings.neo4j.impl;
 
 import org.arastreju.bindings.neo4j.NeoConstants;
+import org.arastreju.bindings.neo4j.extensions.NeoResourceResolver;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.context.Context;
 import org.arastreju.sge.model.AbstractStatement;

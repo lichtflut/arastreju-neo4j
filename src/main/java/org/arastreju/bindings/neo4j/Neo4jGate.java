@@ -16,7 +16,7 @@
  */
 package org.arastreju.bindings.neo4j;
 
-import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
+import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.query.NeoQueryManager;
 import org.arastreju.sge.ArastrejuGate;
 import org.arastreju.sge.IdentityManagement;
@@ -42,7 +42,7 @@ import org.arastreju.sge.spi.LoginContext;
  */
 public class Neo4jGate implements ArastrejuGate {
 	
-	private final SemanticNetworkAccess sna;
+	private final GraphDataConnection connection;
 	private final User user;
 	private final GateContext ctx;
 
@@ -52,9 +52,9 @@ public class Neo4jGate implements ArastrejuGate {
 	 * Initialize default gate.
 	 * @param ctx The gate context.
 	 */
-	public Neo4jGate(final GateContext ctx, SemanticNetworkAccess sna) throws GateInitializationException {
+	public Neo4jGate(final GateContext ctx, GraphDataConnection connection) throws GateInitializationException {
 		this.ctx = ctx;
-		this.sna = sna;
+		this.connection = connection;
 		this.user = null;
 	}
 	
@@ -63,9 +63,9 @@ public class Neo4jGate implements ArastrejuGate {
 	 * @param ctx The gate context.
 	 * @param sna The semantic network access object.
 	 */
-	public Neo4jGate(final LoginContext ctx, SemanticNetworkAccess sna) throws GateInitializationException {
+	public Neo4jGate(final LoginContext ctx, GraphDataConnection connection) throws GateInitializationException {
 		this.ctx = ctx;
-		this.sna = sna;
+		this.connection = connection;
 		try {
 			user = getIdentityManagement().login(ctx.getUsername(), ctx.getCredential());
 		} catch (LoginException e) {
@@ -79,21 +79,21 @@ public class Neo4jGate implements ArastrejuGate {
 	 * {@inheritDoc}
 	 */
 	public ModelingConversation startConversation() {
-		return new Neo4jModellingConversation(sna);
+		return new Neo4jModellingConversation(connection);
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	public QueryManager createQueryManager() {
-		return new NeoQueryManager(sna, sna.getIndex());
+		return new NeoQueryManager(connection.getResourceResolver(), connection.getIndex());
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public Organizer getOrganizer() {
-		return new NeoOrganizer(sna);
+		return new NeoOrganizer(connection);
 	}
 
 	/**
@@ -101,7 +101,7 @@ public class Neo4jGate implements ArastrejuGate {
 	 */
 
 	public IdentityManagement getIdentityManagement() {
-		return new NeoIdentityManagement(sna, ctx);
+		return new NeoIdentityManagement(connection, ctx);
 	}
 	
 	/**

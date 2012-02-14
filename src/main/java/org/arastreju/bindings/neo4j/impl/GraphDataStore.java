@@ -40,14 +40,12 @@ import org.slf4j.LoggerFactory;
  */
 public class GraphDataStore implements ProfileCloseListener {
 	
+	private final Logger logger = LoggerFactory.getLogger(GraphDataStore.class);
+	
 	private final GraphDatabaseService gdbService;
 	
-	private final Logger logger = LoggerFactory.getLogger(GraphDataStore.class);
-
-	private IndexManager indexManager;
+	private final IndexManager indexManager;
 	
-	private boolean initialized;
-
 	// -----------------------------------------------------
 
 	/**
@@ -81,19 +79,6 @@ public class GraphDataStore implements ProfileCloseListener {
 	 */
 	public IndexManager getIndexManager() {
 		return indexManager;
-	}
-	
-	// -----------------------------------------------------
-	
-	/**
-	 * @return the initialized
-	 */
-	public boolean isInitialized() {
-		return initialized;
-	}
-	
-	public void markInitialized() {
-		this.initialized = true;
 	}
 	
 	// -- ProfileCloseListener ----------------------------

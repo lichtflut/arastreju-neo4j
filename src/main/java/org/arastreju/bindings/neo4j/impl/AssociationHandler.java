@@ -25,6 +25,7 @@ import java.util.Set;
 import org.arastreju.bindings.neo4j.ArasRelTypes;
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
+import org.arastreju.bindings.neo4j.extensions.NeoResourceResolver;
 import org.arastreju.bindings.neo4j.extensions.SNValueNeo;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.bindings.neo4j.tx.TxProvider;
@@ -78,17 +79,17 @@ public class AssociationHandler implements NeoConstants {
 	 * Creates a new association handler.
 	 * @param resolver
 	 * @param index
-	 * @param txProvider
+	 * @param connection
 	 */
-	public AssociationHandler(final NeoResourceResolver resolver, final ResourceIndex index, final TxProvider txProvider) {
-		this.resolver = resolver;
-		this.txProvider = txProvider;
-		this.index = index;
+	public AssociationHandler(final GraphDataConnection connection) {
+		this.resolver = connection.getResourceResolver();
+		this.txProvider = connection.getTxProvider();
+		this.index = connection.getIndex();
 		this.ctxAccess = new ContextAccess(resolver);
 		this.softInferencer = new NeoSoftInferencer(resolver);
 		this.hardInferencer = new NeoHardInferencer(resolver);
 	}
-	
+
 	// ----------------------------------------------------
 
 	/**
@@ -123,7 +124,7 @@ public class AssociationHandler implements NeoConstants {
 				final ResourceNode predicate = resolver.resolve(stmt.getPredicate());
 				final SemanticNode object = resolve(stmt.getObject());
 				final Statement assoc = new DetachedStatement(keeper.getID(), predicate, object, stmt.getContexts());
-				keeper.getAssociations().add(assoc);
+				keeper.addAssociationDirectly(assoc);
 				
 				createRelationships(keeper.getNeoNode(), stmt);
 				final List<Statement> stmtList = Collections.singletonList(stmt);

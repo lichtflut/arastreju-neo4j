@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.arastreju.bindings.neo4j.extensions.NeoResourceResolver;
+import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
 import org.arastreju.bindings.neo4j.query.NeoQueryBuilder;
 import org.arastreju.sge.apriori.Aras;
@@ -52,16 +54,20 @@ import org.arastreju.sge.spi.abstracts.AbstractOrganizer;
  */
 public class NeoOrganizer extends AbstractOrganizer {
 
+	private final GraphDataConnection connection;
+	private final NeoResourceResolver resolver;
 	private final SemanticNetworkAccess sna;
 	
 	// -----------------------------------------------------
 	
 	/**
 	 * Constructor.
-	 * @param sna The semantic network access.
+	 * @param connection The connection.
 	 */
-	public NeoOrganizer(final SemanticNetworkAccess sna) {
-		this.sna = sna;
+	public NeoOrganizer(final GraphDataConnection connection) {
+		this.connection = connection;
+		this.resolver = connection.getResourceResolver();
+		this.sna = connection.getSemanticNetworkAccess();
 	}
 	
 	// -----------------------------------------------------
@@ -71,7 +77,7 @@ public class NeoOrganizer extends AbstractOrganizer {
 	 */
 	public Collection<Namespace> getNamespaces() {
 		final List<Namespace> result = new ArrayList<Namespace>();
-		final List<ResourceNode> nodes = sna.getIndex().lookup(RDF.TYPE, Aras.NAMESPACE).toList();
+		final List<ResourceNode> nodes = connection.getIndex().lookup(RDF.TYPE, Aras.NAMESPACE).toList();
 		for (ResourceNode node : nodes) {
 			result.add(createNamespace(node));
 		}
@@ -88,7 +94,7 @@ public class NeoOrganizer extends AbstractOrganizer {
 				.addField(Aras.HAS_URI, uri);
 		final QueryResult result = query.getResult();
 		if (!result.isEmpty()) {
-			final ResourceNode node = sna.resolve(result.iterator().next());
+			final ResourceNode node = resolver.resolve(result.iterator().next());
 			assure(node,  Aras.HAS_PREFIX, new SNText(prefix));
 			return new SimpleNamespace(uri, prefix);
 		} else {
@@ -106,7 +112,7 @@ public class NeoOrganizer extends AbstractOrganizer {
 	 */
 	public Collection<Context> getContexts() {
 		final List<Context> result = new ArrayList<Context>();
-		final List<ResourceNode> nodes = sna.getIndex().lookup(RDF.TYPE, Aras.CONTEXT).toList();
+		final List<ResourceNode> nodes = connection.getIndex().lookup(RDF.TYPE, Aras.CONTEXT).toList();
 		for (ResourceNode node : nodes) {
 			result.add(createContext(node));
 		}
@@ -145,7 +151,7 @@ public class NeoOrganizer extends AbstractOrganizer {
 	 */
 	public Collection<Domain> getDomains() {
 		final List<Domain> result = new ArrayList<Domain>();
-		final List<ResourceNode> nodes = sna.getIndex().lookup(RDF.TYPE, Aras.DOMAIN).toList();
+		final List<ResourceNode> nodes = connection.getIndex().lookup(RDF.TYPE, Aras.DOMAIN).toList();
 		for (ResourceNode node : nodes) {
 			result.add(createDomain(node));
 		}
@@ -196,7 +202,7 @@ public class NeoOrganizer extends AbstractOrganizer {
 	// ----------------------------------------------------
 	
 	private Query query() {
-		return new NeoQueryBuilder(sna.getIndex());
+		return new NeoQueryBuilder(connection.getIndex());
 	}
 	
 }

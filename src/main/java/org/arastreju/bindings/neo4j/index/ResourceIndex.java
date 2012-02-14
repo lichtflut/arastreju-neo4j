@@ -21,19 +21,17 @@ import static org.arastreju.sge.SNOPS.uri;
 import java.util.Collection;
 
 import org.arastreju.bindings.neo4j.NeoConstants;
-import org.arastreju.bindings.neo4j.impl.NeoResourceResolver;
+import org.arastreju.bindings.neo4j.extensions.NeoResourceResolver;
+import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.query.NeoQueryResult;
-import org.arastreju.bindings.neo4j.tx.TxProvider;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.Statement;
-import org.arastreju.sge.model.associations.AssociationKeeper;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.model.nodes.ValueNode;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.query.QueryResult;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.IndexHits;
-import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.index.lucene.QueryContext;
 
 /**
@@ -51,8 +49,6 @@ public class ResourceIndex implements NeoConstants {
 	
 	private final NeoIndex neoIndex;
 	
-	private final AssociationKeeperCache cache = new AssociationKeeperCache();
-
 	private final NeoResourceResolver resolver;
 	
 	// -----------------------------------------------------
@@ -63,19 +59,12 @@ public class ResourceIndex implements NeoConstants {
 	 * @param indexManager The index manager.
 	 * @param txProvider The tx provider.
 	 */
-	public ResourceIndex(final NeoResourceResolver resolver, final IndexManager indexManager, final TxProvider txProvider) {
-		this.resolver = resolver;
-		this.neoIndex = new NeoIndex(txProvider, indexManager);
+	public ResourceIndex(final GraphDataConnection connection) {
+		this.resolver = connection.getResourceResolver();
+		this.neoIndex = new NeoIndex(connection);
 	}
 	
 	// -----------------------------------------------------
-	
-	/**
-	 * Find Arastreju node by qualified name.
-	 */
-	public AssociationKeeper findAssociationKeeper(final QualifiedName qn) {
-		return cache.getAssociationKeeper(qn);
-	}
 	
 	/**
 	 * Find Neo node by qualified name.
@@ -122,7 +111,6 @@ public class ResourceIndex implements NeoConstants {
 	
 	public void index(final Node neoNode, final ResourceNode resourceNode) {
 		neoIndex.index(neoNode, resourceNode.getQualifiedName());
-		cache(resourceNode);
 	}
 	
 	/**
@@ -143,9 +131,6 @@ public class ResourceIndex implements NeoConstants {
 	
 	public void removeFromIndex(final Node node) {
 		neoIndex.remove(node);
-		if (node.hasProperty(NeoConstants.PROPERTY_URI)) {
-			uncache(new QualifiedName(node.getProperty(NeoConstants.PROPERTY_URI).toString()));
-		}
 	}
 
 	/**
@@ -157,24 +142,10 @@ public class ResourceIndex implements NeoConstants {
 		if (stmt.getObject().isValueNode()) {
 			final ValueNode value = stmt.getObject().asValue();
 			// TODO: Remove general value without predicate.
-			neoIndex.remove(neoNode,key, value.getStringValue());
+			neoIndex.remove(neoNode, key, value.getStringValue());
 		} else {
 			neoIndex.remove(neoNode, key, stmt.getObject().asResource().getQualifiedName().toURI());
 		}
-	}
-	
-	// -- CACHE ----------------------------------
-	
-	public void cache(final ResourceNode resource){
-		cache.put(resource.getQualifiedName(), resource);
-	}
-	
-	public void uncache(final QualifiedName qn) {
-		cache.remove(qn);
-	}
-	
-	public void clearCache(){
-		cache.clear();
 	}
 	
 	// -----------------------------------------------------

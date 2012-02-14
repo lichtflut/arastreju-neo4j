@@ -20,6 +20,7 @@ import java.util.Set;
 
 import junit.framework.Assert;
 
+import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.GraphDataStore;
 import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
 import org.arastreju.sge.SNOPS;
@@ -57,6 +58,7 @@ public class NeoIdentityManagementTest {
 	private SemanticNetworkAccess sna;
 	private NeoIdentityManagement im;
 	private GraphDataStore store;
+	private GraphDataConnection connection;
 	
 	// -----------------------------------------------------
 
@@ -66,8 +68,9 @@ public class NeoIdentityManagementTest {
 	@Before
 	public void setUp() throws Exception {
 		store = new GraphDataStore();
-		sna = new SemanticNetworkAccess(store);
-		im = new NeoIdentityManagement(sna, new GateContext(null));
+		connection = new GraphDataConnection(store);
+		sna = connection.getSemanticNetworkAccess();
+		im = new NeoIdentityManagement(connection, new GateContext(null));
 	}
 
 	/**
@@ -75,7 +78,7 @@ public class NeoIdentityManagementTest {
 	 */
 	@After
 	public void tearDown() throws Exception {
-		sna.close();
+		connection.close();
 		store.close();
 	}
 	
@@ -84,7 +87,7 @@ public class NeoIdentityManagementTest {
 	@Test
 	public void testLogin() {
 		final Context ctx = Aras.IDENT;
-		final SNClass identity = sna.resolve(Aras.IDENTITY).asClass();
+		final SNClass identity = connection.getResourceResolver().resolve(Aras.IDENTITY).asClass();
 		final SNEntity user = identity.createInstance(ctx);
 		
 		SNOPS.associate(user, Aras.IDENTIFIED_BY, new SNText("Bud Spencer"), ctx);

@@ -24,6 +24,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.arastreju.bindings.neo4j.extensions.NeoResourceResolver;
+import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.bindings.neo4j.query.NeoQueryBuilder;
@@ -69,23 +71,26 @@ public class NeoIdentityManagement implements IdentityManagement {
 	
 	private final Logger logger = LoggerFactory.getLogger(NeoIdentityManagement.class);
 	
+	private final GateContext ctx;
+	
 	private final ResourceIndex index;
 	
-	private final SemanticNetworkAccess store;
+	private final SemanticNetworkAccess sna;
 
-	private final GateContext ctx;
+	private final NeoResourceResolver resolver;
 
 	// -----------------------------------------------------
 	
 	/**
 	 * Constructor.
-	 * @param store The neo store.
+	 * @param connection The connection store.
 	 * @param ctx The gate context.
 	 */
-	public NeoIdentityManagement(final SemanticNetworkAccess store, GateContext ctx) {
-		this.store = store;
+	public NeoIdentityManagement(GraphDataConnection connection, GateContext ctx) {
 		this.ctx = ctx;
-		this.index = store.getIndex();
+		this.sna = connection.getSemanticNetworkAccess();
+		this.resolver = connection.getResourceResolver();
+		this.index = connection.getIndex();
 	}
 	
 	// -----------------------------------------------------
@@ -147,7 +152,7 @@ public class NeoIdentityManagement implements IdentityManagement {
 		associate(corresponding, Aras.HAS_CREDENTIAL, new SNText(credential.stringRepesentation()), Aras.IDENT);
 		associate(corresponding, RDF.TYPE, Aras.USER, Aras.IDENT);
 		associate(corresponding, Aras.BELONGS_TO_DOMAIN, new SNText(ctx.getDomain()), Aras.IDENT);
-		store.attach(corresponding);
+		sna.attach(corresponding);
 		return new SNUser(corresponding);
 	}
 	
@@ -156,7 +161,7 @@ public class NeoIdentityManagement implements IdentityManagement {
 	 */
 	public User changeID(User user, String newID) throws ArastrejuException {
 		assertUniqueIdentity(newID);
-		final ResourceNode userNode = store.resolve(user);
+		final ResourceNode userNode = resolver.resolve(user);
 		SemanticNode uniqueNameNode = SNOPS.singleObject(userNode, Aras.HAS_UNIQUE_NAME);
 		for (SemanticNode idNode : SNOPS.objects(userNode, Aras.IDENTIFIED_BY)) {
 			if(idNode.toString().equals(uniqueNameNode.toString())) {
@@ -174,7 +179,7 @@ public class NeoIdentityManagement implements IdentityManagement {
 	*/
 	public User registerAlternateID(User user, String uniqueName) throws ArastrejuException {
 		assertUniqueIdentity(uniqueName);
-		final ResourceNode node = store.resolve(user);
+		final ResourceNode node = resolver.resolve(user);
 		associate(node, Aras.IDENTIFIED_BY, new SNText(uniqueName), Aras.IDENT);
 		return user;
 	}
@@ -192,7 +197,7 @@ public class NeoIdentityManagement implements IdentityManagement {
 		final SNResource role = new SNResource();
 		associate(role, Aras.HAS_UNIQUE_NAME, new SNText(name), Aras.IDENT);
 		associate(role, RDF.TYPE, Aras.ROLE, Aras.IDENT);
-		store.attach(role);
+		sna.attach(role);
 		return new SNRole(role);
 	}
 
@@ -212,7 +217,7 @@ public class NeoIdentityManagement implements IdentityManagement {
 	 * {@inheritDoc}
 	 */
 	public void addUserToRoles(final User user, final Role... roles) {
-		store.attach(user);
+		sna.attach(user);
 		for (Role role : roles) {
 			associate(user, Aras.HAS_ROLE, role, Aras.IDENT);
 		}
@@ -231,7 +236,7 @@ public class NeoIdentityManagement implements IdentityManagement {
 	 * {@inheritDoc}
 	 */
 	public void addPermissionsToRole(final Role role, final Permission... permissions) {
-		store.attach(role);
+		sna.attach(role);
 		for (Permission permission : permissions) {
 			associate(role, Aras.CONTAINS, permission, Aras.IDENT);
 		}
@@ -248,7 +253,7 @@ public class NeoIdentityManagement implements IdentityManagement {
 		final SNResource permission = new SNResource();
 		associate(permission, Aras.HAS_UNIQUE_NAME, new SNText(name), Aras.IDENT);
 		associate(permission, RDF.TYPE, Aras.PERMISSION, Aras.IDENT);
-		store.attach(permission);
+		sna.attach(permission);
 		return new SNPermission(permission);
 	}
 

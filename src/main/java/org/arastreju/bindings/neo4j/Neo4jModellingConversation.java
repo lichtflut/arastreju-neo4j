@@ -16,8 +16,9 @@
  */
 package org.arastreju.bindings.neo4j;
 
+import org.arastreju.bindings.neo4j.extensions.NeoResourceResolver;
+import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
-import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.sge.ModelingConversation;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.model.ResourceID;
@@ -42,15 +43,21 @@ import org.arastreju.sge.persistence.TxResultAction;
  */
 public class Neo4jModellingConversation implements ModelingConversation {
 	
-	private final SemanticNetworkAccess store;
+	private final GraphDataConnection connection;
+	
+	private final SemanticNetworkAccess sna;
+	
+	private final NeoResourceResolver resolver;
 	
 	// -----------------------------------------------------
 
 	/**
 	 * Create a new Modelling Conversation instance using a given data store.
 	 */
-	public Neo4jModellingConversation(final SemanticNetworkAccess access) {
-		this.store = access;
+	public Neo4jModellingConversation(final GraphDataConnection connection) {
+		this.connection = connection;
+		this.sna = connection.getSemanticNetworkAccess();
+		this.resolver = connection.getResourceResolver();
 	}
 	
 	// -----------------------------------------------------
@@ -77,42 +84,42 @@ public class Neo4jModellingConversation implements ModelingConversation {
 	 * {@inheritDoc}
 	 */
 	public ResourceNode findResource(final QualifiedName qn) {
-		return store.findResource(qn);
+		return resolver.findResource(qn);
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	public ResourceNode resolve(final ResourceID resource) {
-		return store.resolve(resource);
+		return resolver.resolve(resource);
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	public void attach(final ResourceNode node) {
-		store.attach(node);
+		sna.attach(node);
 	}
 	
 	/** 
 	 * {@inheritDoc}
 	 */
 	public void reset(final ResourceNode node) {
-		store.reset(node);
+		sna.reset(node);
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	public void detach(final ResourceNode node) {
-		store.detach(node);
+		sna.detach(node);
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	public void remove(final ResourceID id) {
-		store.remove(id);
+		sna.remove(id);
 	}
 	
 	// -----------------------------------------------------
@@ -121,7 +128,7 @@ public class Neo4jModellingConversation implements ModelingConversation {
 	 * {@inheritDoc}
 	 */
 	public void attach(final SemanticGraph graph) {
-		store.getTxProvider().doTransacted(new TxResultAction<SemanticGraph>() {
+		connection.getTxProvider().doTransacted(new TxResultAction<SemanticGraph>() {
 			public SemanticGraph execute() {
 				for(Statement stmt : graph.getStatements()) {
 					final ResourceNode subject = resolve(stmt.getSubject());
@@ -138,7 +145,7 @@ public class Neo4jModellingConversation implements ModelingConversation {
 	public void detach(final SemanticGraph graph) {
 		for(SemanticNode node : graph.getNodes()){
 			if (node.isResourceNode() && node.asResource().isAttached()){
-				store.detach(node.asResource());
+				sna.detach(node.asResource());
 			}
 		}
 	}
@@ -149,7 +156,7 @@ public class Neo4jModellingConversation implements ModelingConversation {
 	 * {@inheritDoc}
 	 */
 	public TransactionControl beginTransaction() {
-		return store.getTxProvider().begin();
+		return connection.getTxProvider().begin();
 	}
 	
 	/**
@@ -159,10 +166,4 @@ public class Neo4jModellingConversation implements ModelingConversation {
 		// do nothing yet.
 	}
 	
-	// -----------------------------------------------------
-	
-	protected ResourceIndex getIndex() {
-		return store.getIndex();
-	}
-
 }

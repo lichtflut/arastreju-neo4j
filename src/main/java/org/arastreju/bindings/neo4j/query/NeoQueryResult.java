@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.arastreju.bindings.neo4j.impl.NeoResourceResolver;
+import org.arastreju.bindings.neo4j.extensions.NeoResourceResolver;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.query.Query;
 import org.arastreju.sge.query.QueryResult;

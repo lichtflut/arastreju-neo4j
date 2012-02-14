@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import org.arastreju.bindings.neo4j.NeoConstants;
-import org.arastreju.bindings.neo4j.impl.AssociationHandler;
+import org.arastreju.bindings.neo4j.impl.WorkingContext;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.model.associations.AbstractAssociationKeeper;
@@ -28,8 +28,6 @@ import org.arastreju.sge.model.associations.AssociationKeeper;
 import org.arastreju.sge.model.associations.DetachedAssociationKeeper;
 import org.arastreju.sge.naming.QualifiedName;
 import org.neo4j.graphdb.Node;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * <p>
@@ -43,14 +41,12 @@ import org.slf4j.LoggerFactory;
  * @author Oliver Tigges
  */
 public class NeoAssociationKeeper extends AbstractAssociationKeeper implements NeoConstants {
-	
+
 	private final ResourceID id;
 	
 	private final Node neoNode;
 	
-	private final AssociationHandler handler;
-	
-	private final Logger logger = LoggerFactory.getLogger(NeoAssociationKeeper.class);
+	private WorkingContext context;
 	
 	// -----------------------------------------------------
 	
@@ -58,12 +54,10 @@ public class NeoAssociationKeeper extends AbstractAssociationKeeper implements N
 	 * Create a new association keeper.
 	 * @param id The node's ID.
 	 * @param neoNode The neo node.
-	 * @param handler A link to the association handler.
 	 */
-	public NeoAssociationKeeper(final ResourceID id, final Node neoNode, final AssociationHandler handler) {
+	public NeoAssociationKeeper(final ResourceID id, final Node neoNode) {
 		this.id = id;
 		this.neoNode = neoNode;
-		this.handler = handler;
 	}
 	
 	// -----------------------------------------------------
@@ -87,9 +81,13 @@ public class NeoAssociationKeeper extends AbstractAssociationKeeper implements N
 	 */
 	@Override
 	public void addAssociation(final Statement assoc) {
-		if (!getAssociations().contains(assoc)) {
-			handler.addAssociation(this, assoc);
-			logger.debug("Added Association: " + assoc);	
+		if (getAssociations().contains(assoc)) {
+			return;
+		}
+		if (isAttached()) {
+			context.addAssociation(this, assoc);
+		} else {
+			super.addAssociation(assoc);
 		}
 	}
 	
@@ -98,9 +96,13 @@ public class NeoAssociationKeeper extends AbstractAssociationKeeper implements N
 	 */
 	@Override
 	public boolean removeAssociation(final Statement assoc) {
-		super.removeAssociation(assoc);
-		logger.debug("Removed Association: " + assoc);
-		return handler.removeAssociation(this, assoc);
+		if (isAttached()) {
+			super.removeAssociation(assoc);
+			return context.removeAssociation(this, assoc);
+		} else {
+			return super.removeAssociation(assoc);
+		}
+		
 	}
 	
 	// ----------------------------------------------------
@@ -116,24 +118,37 @@ public class NeoAssociationKeeper extends AbstractAssociationKeeper implements N
 	 * {@inheritDoc}
 	 */
 	public boolean isAttached() {
-		return true;
+		return context != null;
+	}
+	
+	/**
+	 * Set the working context.
+	 * @param context the context to set
+	 */
+	public void setWorkingContext(WorkingContext context) {
+		this.context = context;
 	}
 	
 	// ----------------------------------------------------
-	
+
 	/**
-	 * Add the association directly to the associations.
+	 * Add an association directly to the set, without resolving.
+	 * @param assoc The association to add.
 	 */
 	public void addAssociationDirectly(final Statement assoc) {
-		super.addAssociation(assoc);
+		getAssociationsDirectly().add(assoc);
 	}
+	
+	// ----------------------------------------------------
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	protected void resolveAssociations() {
-		handler.resolveAssociations(this);
+		if (isAttached()) {
+			context.resolveAssociations(this);
+		}
 	}
 	
 	// ----------------------------------------------------

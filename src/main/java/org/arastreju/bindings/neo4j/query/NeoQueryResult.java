@@ -17,6 +17,7 @@
 package org.arastreju.bindings.neo4j.query;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -100,6 +101,26 @@ public class NeoQueryResult implements QueryResult {
 		hits.close();
 		return result;
 	}
+	
+	/** 
+	 * {@inheritDoc}
+	 */
+	public List<ResourceNode> toList(int offset, int max) {
+		int absMax = Math.min(hits.size(), offset + max);
+		if (offset >= absMax) {
+			hits.close();
+			return Collections.emptyList();
+		}
+		final List<ResourceNode> result = new ArrayList<ResourceNode>(absMax - offset);
+		for (int i=0; i < absMax; i++) {
+			final Node next = hits.next();
+			if (i >= offset) {
+				result.add(resolver.resolve(next));
+			}
+		}
+		hits.close();
+		return result;
+	}
 
 	/** 
 	 * {@inheritDoc}
@@ -112,12 +133,16 @@ public class NeoQueryResult implements QueryResult {
 	* {@inheritDoc}
 	*/
 	public ResourceNode getSingleNode() {
-		if (isEmpty()) {
-			return null;
-		} else if (size() > 1) {
-			throw new IllegalStateException("More than one result found.");
-		} else {
-			return toList().get(0);
+		try {
+			if (isEmpty()) {
+				return null;
+			} else if (size() > 1) {
+				throw new IllegalStateException("More than one result found.");
+			} else {
+				return toList().get(0);
+			}
+		} finally {
+			close();
 		}
 	}
 	

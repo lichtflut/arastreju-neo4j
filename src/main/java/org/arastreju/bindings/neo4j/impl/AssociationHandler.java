@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.arastreju.bindings.neo4j.ArasRelTypes;
@@ -228,6 +229,7 @@ public class AssociationHandler implements NeoConstants {
 			final ValueNode value = stmt.getObject().asValue();
 			neoClient.setProperty(PROPERTY_DATATYPE, value.getDataType().name());
 			neoClient.setProperty(PROPERTY_VALUE, value.getStringValue());
+			addLocale(neoClient, value.getLocale());
 			createRelationShip(subject, neoClient, stmt);
 		}
 		index.index(subject, stmt);
@@ -269,6 +271,18 @@ public class AssociationHandler implements NeoConstants {
 		} else {
 			return node;
 		}
+	}
+	
+	private void addLocale(Node node, Locale locale) {
+		if (locale == null || locale.getLanguage() == null) {
+			return;
+		}
+		final StringBuilder sb = new StringBuilder(5);
+		sb.append(locale.getLanguage());
+		if (locale.getCountry() != null) {
+			sb.append ("_" + locale.getCountry());
+		}
+		node.setProperty(PROPERTY_LOCALE, sb.toString());
 	}
 	
 }

@@ -31,11 +31,21 @@ import org.neo4j.graphdb.Relationship;
  */
 public interface NeoConstants {
 	
+	/**
+	 * The URI of a resource node.. 
+	 */
 	String PROPERTY_URI = "resource-uri";
 	
+	/**
+	 * Value string of a value node. 
+	 */
 	String PROPERTY_VALUE = "value";
 	
+	String PROPERTY_LOCALE = "locale";
+	
 	String PROPERTY_DATATYPE = "datatype";
+	
+	// ----------------------------------------------------
 	
 	/**
 	 * Attribute of a {@link Relationship}.

@@ -16,6 +16,8 @@
  */
 package org.arastreju.bindings.neo4j.extensions;
 
+import java.util.Locale;
+
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.sge.model.ElementaryDataType;
 import org.arastreju.sge.model.nodes.SNValue;
@@ -39,7 +41,7 @@ public class SNValueNeo extends SNValue implements NeoConstants {
 	 * @param neoNode The Neo4j Node.
 	 */
 	public SNValueNeo(final Node neoNode){
-		super(getDatatype(neoNode), neoNode.getProperty(PROPERTY_VALUE));
+		super(getDatatype(neoNode), neoNode.getProperty(PROPERTY_VALUE), getLocale(neoNode));
 	}
 	
 	// -----------------------------------------------------
@@ -51,6 +53,24 @@ public class SNValueNeo extends SNValue implements NeoConstants {
 	private static ElementaryDataType getDatatype(final Node neoNode) {
 		final String datatypeName = (String) neoNode.getProperty(PROPERTY_DATATYPE);
 		return ElementaryDataType.valueOf(datatypeName);
+	}
+	
+	/**
+	 * @param neoNode The Neo Node.
+	 * @return The corresponding datatype.
+	 */
+	private static Locale getLocale(final Node neoNode) {
+		if (!neoNode.hasProperty(PROPERTY_LOCALE)) {
+			return null;
+		}
+		final String localeName = (String) neoNode.getProperty(PROPERTY_LOCALE);
+		String language = localeName.substring(0, 2);
+		if (localeName.length() >= 5 ) {
+			String country = localeName.substring(3, 5);
+			return new Locale(language, country);
+		} else {
+			return new Locale(language);
+		}
 	}
 
 }

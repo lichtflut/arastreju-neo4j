@@ -163,7 +163,7 @@ public class Neo4jModellingConversation implements ModelingConversation {
 	 * {@inheritDoc}
 	 */
 	public void close() {
-		// do nothing yet.
+		connection.getWorkingContext().clear();
 	}
 	
 }

@@ -22,7 +22,6 @@ import junit.framework.Assert;
 
 import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.GraphDataStore;
-import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
 import org.arastreju.sge.Organizer;
 import org.arastreju.sge.context.Context;
 import org.arastreju.sge.naming.Namespace;

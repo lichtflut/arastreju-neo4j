@@ -122,7 +122,6 @@ public class NeoIdentityManagementTest {
 	@Test
 	public void testRegistration() throws LoginException, ArastrejuException {
 		final User user = im.register("bud", new PasswordCredential("spencer"));
-		Assert.assertEquals("bud", user.getName());
 		Assert.assertTrue(user.isAttached());
 		
 		User loggedIn = im.login("bud", new PasswordCredential("spencer"));
@@ -131,7 +130,6 @@ public class NeoIdentityManagementTest {
 		
 		final SNEntity node = new SNEntity();
 		final User user2 = im.register("terrence", new PasswordCredential("hill"), node);
-		Assert.assertEquals("terrence", user2.getName());
 		Assert.assertTrue(user2.isAttached());
 		
 		User loggedIn2 = im.login("terrence", new PasswordCredential("hill"));

@@ -17,6 +17,7 @@
 package org.arastreju.bindings.neo4j;
 
 import static org.arastreju.sge.SNOPS.associate;
+import static org.arastreju.sge.SNOPS.assure;
 import static org.arastreju.sge.SNOPS.remove;
 import static org.arastreju.sge.SNOPS.singleObject;
 
@@ -71,13 +72,13 @@ public class NeoIdentityManagement implements IdentityManagement {
 	
 	private final Logger logger = LoggerFactory.getLogger(NeoIdentityManagement.class);
 	
-	private final GateContext ctx;
-	
 	private final ResourceIndex index;
 	
 	private final SemanticNetworkAccess sna;
 
 	private final NeoResourceResolver resolver;
+
+	private final GateContext ctx;
 
 	// -----------------------------------------------------
 	
@@ -139,7 +140,7 @@ public class NeoIdentityManagement implements IdentityManagement {
 	 * {@inheritDoc}
 	 */
 	public User register(final String uniqueName, final Credential credential) throws ArastrejuException {
-		return register(uniqueName, credential, new SNEntity());
+		return register(uniqueName, credential, new SNResource());
 	}
 
 	/**
@@ -147,11 +148,10 @@ public class NeoIdentityManagement implements IdentityManagement {
 	 */
 	public User register(final String name, final Credential credential, final ResourceNode corresponding) throws ArastrejuException {
 		assertUniqueIdentity(name);
-		associate(corresponding, Aras.HAS_UNIQUE_NAME, new SNText(name), Aras.IDENT);
+		assure(corresponding, RDF.TYPE, Aras.USER, Aras.IDENT);
+		assure(corresponding, Aras.BELONGS_TO_DOMAIN, ctx.getDomain(), Aras.IDENT);
+		assure(corresponding, Aras.HAS_CREDENTIAL, new SNText(credential.stringRepesentation()), Aras.IDENT);
 		associate(corresponding, Aras.IDENTIFIED_BY, new SNText(name), Aras.IDENT);
-		associate(corresponding, Aras.HAS_CREDENTIAL, new SNText(credential.stringRepesentation()), Aras.IDENT);
-		associate(corresponding, RDF.TYPE, Aras.USER, Aras.IDENT);
-		associate(corresponding, Aras.BELONGS_TO_DOMAIN, new SNText(ctx.getDomain()), Aras.IDENT);
 		sna.attach(corresponding);
 		return new SNUser(corresponding);
 	}

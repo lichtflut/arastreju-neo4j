@@ -148,7 +148,7 @@ public class AssociationHandler implements NeoConstants {
 		if (relationship != null) {
 			txProvider.doTransacted(new TxAction() {
 				public void execute() {
-					logger.info("Deleting: " + assoc);
+					logger.debug("Deleting: " + assoc);
 					relationship.delete();
 					//index.removeFromIndex(keeper.getNeoNode(), assoc);
 					removeHardInferences(keeper, Collections.singleton(assoc));

@@ -134,7 +134,7 @@ public class NeoQueryBuilder extends QueryBuilder {
 	private void appendLeaf(final QueryParam param, final StringBuilder sb) {
 		String value = normalizeValue(param.getValue());
 		if (value == null || value.length() == 0) {
-			throw new QueryException("Invalid query value: " + value);
+			throw new QueryException("Invalid query value: " + param);
 		}
 		switch(param.getOperator()) {
 		case EQUALS:

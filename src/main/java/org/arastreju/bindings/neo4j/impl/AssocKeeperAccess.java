@@ -47,10 +47,7 @@ public class AssocKeeperAccess {
 	 * Get the association keeper of given node.
 	 */
 	public static AssociationKeeper getAssociationKeeper(final ResourceNode node){
-		final ResourceNode resource = node.asResource();
-		if (!(resource instanceof SNResource)){
-			throw new IllegalArgumentException("Cannot get AssociationKeeper for class: " + node.getClass());
-		}
+		final SNResource resource = findSNResource(node);
 		try {
 			return (AssociationKeeper) INSTANCE.assocKeeperField.get(resource);
 		} catch (Exception e) {
@@ -83,10 +80,7 @@ public class AssocKeeperAccess {
 	 * @param ak The association keeper to be set. 
 	 */
 	public static void setAssociationKeeper(final ResourceNode node, final AssociationKeeper ak) {
-		final ResourceNode resource = node.asResource();
-		if (!(resource instanceof SNResource)){
-			throw new IllegalArgumentException("Cannot set AssociationKeeper for class: " + node.getClass());
-		}
+		final SNResource resource = findSNResource(node);
 		try {
 			INSTANCE.assocKeeperField.set(resource, ak);
 		} catch (Exception e) {
@@ -96,6 +90,19 @@ public class AssocKeeperAccess {
 	
 	// -----------------------------------------------------
 
+	private static SNResource findSNResource(ResourceNode node) {
+		ResourceNode resource = node.asResource();
+		int depth = 100;
+		while (!(resource instanceof SNResource)){
+			if (resource == resource.asResource() || depth <= 0) {
+				throw new IllegalArgumentException("Cannot get AssociationKeeper for class: " + node.getClass());	
+			}
+			resource = resource.asResource();
+			depth--;
+		}
+		return (SNResource) resource;
+	}
+	
 	/**
 	 * Private constructor.
 	 */

@@ -110,6 +110,16 @@ public class NeoAssociationKeeper extends AbstractAssociationKeeper implements N
 		return context != null;
 	}
 	
+
+	/**
+	 * Detaches this node from the working context.
+	 */
+	public void detach() {
+		// trigger resolving if not yet done.
+		getAssociations();
+		this.context = null;
+	}
+	
 	/**
 	 * Set the working context.
 	 * @param context the context to set

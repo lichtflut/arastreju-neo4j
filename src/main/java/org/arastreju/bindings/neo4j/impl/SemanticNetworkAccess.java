@@ -192,11 +192,11 @@ public class SemanticNetworkAccess implements NeoConstants {
 	 * @return The merged {@link ResourceNode}.
 	 */
 	protected void merge(final AssociationKeeper attached, final ResourceNode changed) {
+		final Set<Statement> currentAssocs = attached.getAssociations();
 		final AssociationKeeper detached = AssocKeeperAccess.getAssociationKeeper(changed);
 		for (Statement toBeRemoved : detached.getAssociationsForRemoval()) {
 			attached.removeAssociation(toBeRemoved);
 		}
-		final Set<Statement> currentAssocs = attached.getAssociations();
 		for(Statement assoc : detached.getAssociations()){
 			if (!currentAssocs.contains(assoc)){
 				attached.addAssociation(assoc);

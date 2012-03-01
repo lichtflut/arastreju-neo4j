@@ -76,7 +76,7 @@ public class WorkingContext implements NeoConstants {
 	public void detach(QualifiedName qn) {
 		final NeoAssociationKeeper removed = register.remove(qn);
 		if (removed != null) {
-			removed.setWorkingContext(null);
+			removed.detach();
 		}
 	}
 	
@@ -85,7 +85,7 @@ public class WorkingContext implements NeoConstants {
 	 */
 	public void clear() {
 		for (NeoAssociationKeeper keeper : register.values()) {
-			keeper.setWorkingContext(null);
+			keeper.detach();
 		}
 		register.clear();
 	}

@@ -16,9 +16,6 @@
  */
 package org.arastreju.bindings.neo4j.extensions;
 
-import java.util.Collections;
-import java.util.Set;
-
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.impl.WorkingContext;
 import org.arastreju.sge.model.ResourceID;
@@ -97,22 +94,14 @@ public class NeoAssociationKeeper extends AbstractAssociationKeeper implements N
 	@Override
 	public boolean removeAssociation(final Statement assoc) {
 		if (isAttached()) {
-			super.removeAssociation(assoc);
+			getAssociations().remove(assoc);
 			return context.removeAssociation(this, assoc);
 		} else {
 			return super.removeAssociation(assoc);
 		}
-		
 	}
 	
 	// ----------------------------------------------------
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public Set<Statement> getAssociationsForRemoval() {
-		return Collections.emptySet();
-	}
 	
 	/**
 	 * {@inheritDoc}
@@ -148,6 +137,8 @@ public class NeoAssociationKeeper extends AbstractAssociationKeeper implements N
 	protected void resolveAssociations() {
 		if (isAttached()) {
 			context.resolveAssociations(this);
+		} else {
+			throw new IllegalStateException("This node is no longer attached. Cannot resolve associations.");
 		}
 	}
 	

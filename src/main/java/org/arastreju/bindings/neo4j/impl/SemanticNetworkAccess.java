@@ -16,6 +16,7 @@
  */
 package org.arastreju.bindings.neo4j.impl;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.arastreju.bindings.neo4j.NeoConstants;
@@ -192,7 +193,7 @@ public class SemanticNetworkAccess implements NeoConstants {
 	 * @return The merged {@link ResourceNode}.
 	 */
 	protected void merge(final AssociationKeeper attached, final ResourceNode changed) {
-		final Set<Statement> currentAssocs = attached.getAssociations();
+		final Set<Statement> currentAssocs = new HashSet<Statement>(attached.getAssociations());
 		final AssociationKeeper detached = AssocKeeperAccess.getAssociationKeeper(changed);
 		for (Statement toBeRemoved : detached.getAssociationsForRemoval()) {
 			attached.removeAssociation(toBeRemoved);

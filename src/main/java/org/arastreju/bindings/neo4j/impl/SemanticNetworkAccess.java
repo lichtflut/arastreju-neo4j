@@ -102,8 +102,8 @@ public class SemanticNetworkAccess implements NeoConstants {
 	 * @param node The node to detach.
 	 */
 	public void detach(final ResourceNode node){
-		workingContext().detach(node.getQualifiedName());
 		AssocKeeperAccess.setAssociationKeeper(node, new DetachedAssociationKeeper(node.getAssociations()));
+		workingContext().detach(node.getQualifiedName());
 	}
 	
 	/**

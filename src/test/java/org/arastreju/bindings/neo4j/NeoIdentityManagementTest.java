@@ -91,7 +91,6 @@ public class NeoIdentityManagementTest {
 		final SNEntity user = identity.createInstance(ctx);
 		
 		SNOPS.associate(user, Aras.IDENTIFIED_BY, new SNText("Bud Spencer"), ctx);
-		SNOPS.associate(user, Aras.HAS_UNIQUE_NAME, new SNText("Bud Spencer"), ctx);
 		SNOPS.associate(user, Aras.HAS_CREDENTIAL, new SNText("bud"), ctx);
 		sna.attach(user);
 		sna.detach(user);
@@ -110,7 +109,7 @@ public class NeoIdentityManagementTest {
 		
 		try {
 			final User loggedIn = im.login("Bud Spencer", new PasswordCredential("bud"));
-			Assert.assertEquals("Bud Spencer", loggedIn.getName());
+			Assert.assertEquals("Bud Spencer", SNOPS.singleObject(loggedIn,  Aras.IDENTIFIED_BY).asValue().toString());
 		} catch (LoginException e) {
 			Assert.fail("User should have logged in.");
 		}

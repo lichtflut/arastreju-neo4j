@@ -8,7 +8,7 @@
 	<description>Binding for Arastreju to Neo4J Graph Database</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<neo4j.version>1.5</neo4j.version>
+		<neo4j.version>1.6</neo4j.version>
 	</properties>
 	<licenses>
 		<license>

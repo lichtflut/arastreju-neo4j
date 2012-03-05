@@ -108,6 +108,7 @@ public class Neo4jGate implements ArastrejuGate {
 	 * {@inheritDoc}
 	 */
 	public void close() {
+		connection.close();
 	}
 	
 	/** 

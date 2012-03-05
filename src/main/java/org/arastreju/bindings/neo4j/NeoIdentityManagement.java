@@ -280,7 +280,7 @@ public class NeoIdentityManagement implements IdentityManagement {
 	protected void assertUniqueIdentity(final String name) throws ArastrejuException {
 		final QueryResult found = index.lookup(Aras.IDENTIFIED_BY, name);
 		if (found.size() > 0) {
-			logger.error("More than on user with name '" + name + "' found.");
+			logger.error("More than one user with name '" + name + "' found.");
 			throw new ArastrejuException(ErrorCodes.REGISTRATION_NAME_ALREADY_IN_USE, 
 					"More than on user with name '" + name + "' found.");
 		}

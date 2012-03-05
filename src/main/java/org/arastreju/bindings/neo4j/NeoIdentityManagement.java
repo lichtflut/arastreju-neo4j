@@ -100,7 +100,7 @@ public class NeoIdentityManagement implements IdentityManagement {
 	public User findUser(final String identity) {
 		final QueryResult result = index.lookup(Aras.IDENTIFIED_BY, identity);
 		if (result.size() > 1) {
-			logger.error("More than on user with name '" + identity + "' found.");
+			logger.error("More than one user with name '" + identity + "' found.");
 			throw new IllegalStateException("More than on user with name '" + identity + "' found.");
 		} else if (result.isEmpty()) {
 			return null;

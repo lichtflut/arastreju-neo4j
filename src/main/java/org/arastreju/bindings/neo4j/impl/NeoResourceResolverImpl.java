@@ -75,7 +75,7 @@ public class NeoResourceResolverImpl implements NeoResourceResolver {
 	 * {@inheritDoc}
 	 */
 	public ResourceNode resolve(final Node neoNode) {
-		final QualifiedName qn = new QualifiedName(neoNode.getProperty(NeoConstants.PROPERTY_URI).toString());
+		final QualifiedName qn = QualifiedName.create(neoNode.getProperty(NeoConstants.PROPERTY_URI).toString());
 		NeoAssociationKeeper keeper = connection.getWorkingContext().getAssociationKeeper(qn);
 		if (keeper == null){
 			keeper = createKeeper(qn, neoNode);

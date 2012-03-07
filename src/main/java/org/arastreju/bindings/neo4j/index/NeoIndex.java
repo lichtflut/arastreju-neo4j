@@ -65,9 +65,15 @@ public class NeoIndex implements NeoConstants {
 	public static final String INDEX_KEY_RESOURCE_URI = "resource-uri";
 	
 	/**
-	 * Index key for a resource's value. 
+	 * Index key for a resource's values. 
 	 */
 	public static final String INDEX_KEY_RESOURCE_VALUE = "resource-value";
+	
+	/**
+	 * Index key for a resource's relations. 
+	 */
+	public static final String INDEX_KEY_RESOURCE_RELATION = "resource-relation";
+	
 	
 	// -----------------------------------------------------
 	
@@ -200,14 +206,12 @@ public class NeoIndex implements NeoConstants {
 	
 	public void index(Node subject, ResourceID predicate, ValueNode value) {
 		indexResource(subject, uri(predicate), value.getStringValue());
-	}
-	
-	public void index(Node subject, ResourceID predicate, ResourceNode value) {
-		indexResource(subject, uri(predicate), uri(value));	
-	}
-	
-	public void index(Node subject, ValueNode value) {
 		indexResource(subject, INDEX_KEY_RESOURCE_VALUE, value.asValue().getStringValue());
+	}
+	
+	public void index(Node subject, ResourceID predicate, ResourceNode relation) {
+		indexResource(subject, uri(predicate), uri(relation));
+		indexResource(subject, INDEX_KEY_RESOURCE_RELATION, relation.toURI());
 	}
 	
 	public void index(Node subject, QualifiedName qn) {

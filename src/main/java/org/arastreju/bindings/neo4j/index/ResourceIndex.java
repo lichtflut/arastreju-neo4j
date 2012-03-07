@@ -102,7 +102,6 @@ public class ResourceIndex implements NeoConstants {
 	public void index(final Node neoNode, final Statement stmt) {
 		if (stmt.getObject().isValueNode()) {
 			final ValueNode value = stmt.getObject().asValue();
-			neoIndex.index(neoNode, value);
 			neoIndex.index(neoNode, stmt.getPredicate(), value);
 		} else {
 			neoIndex.index(neoNode, stmt.getPredicate(), stmt.getObject().asResource());

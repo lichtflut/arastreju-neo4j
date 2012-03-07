@@ -146,6 +146,9 @@ public class NeoQueryBuilder extends QueryBuilder {
 		case HAS_VALUE:
 			sb.append(NeoIndex.INDEX_KEY_RESOURCE_VALUE + ":");
 			break;
+		case HAS_RELATION:
+			sb.append(NeoIndex.INDEX_KEY_RESOURCE_RELATION + ":");
+			break;
 		case SUB_QUERY:
 			sb.append(param.getValue());
 			// abort here!
@@ -153,7 +156,7 @@ public class NeoQueryBuilder extends QueryBuilder {
 		default:
 			throw new NotYetSupportedException(param.getOperator());
 		}
-		sb.append(normalizeValue(param.getValue().toString()));
+		sb.append(value);
 	}
 	
 	private String normalizeKey(final String key) {
@@ -164,7 +167,11 @@ public class NeoQueryBuilder extends QueryBuilder {
 		if (value == null) {
 			return null;
 		}
-		return value.toString().trim().toLowerCase().replaceAll(":", "\\\\:");
+		String normalized = value.toString().trim().toLowerCase();
+		if (normalized.indexOf(" ") > -1) {
+			normalized = "\"" + normalized + "\"";
+		}
+		return normalized.replaceAll(":", "\\\\:");
 	}
 	
 }

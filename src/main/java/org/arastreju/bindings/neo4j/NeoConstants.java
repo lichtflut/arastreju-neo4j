@@ -57,4 +57,9 @@ public interface NeoConstants {
 	 */
 	String PREDICATE_URI = "predicate-uri";
 	
+	/**
+	 * Attribute of a {@link Relationship}.
+	 */
+	String TIMESTAMP = "timestamp";
+	
 }

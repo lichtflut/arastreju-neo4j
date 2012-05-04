@@ -18,6 +18,7 @@ package org.arastreju.bindings.neo4j.impl;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -36,6 +37,7 @@ import org.arastreju.sge.inferencing.Inferencer;
 import org.arastreju.sge.model.DetachedStatement;
 import org.arastreju.sge.model.SimpleResourceID;
 import org.arastreju.sge.model.Statement;
+import org.arastreju.sge.model.StatementMetaInfo;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.model.nodes.SemanticNode;
 import org.arastreju.sge.model.nodes.ValueNode;
@@ -107,7 +109,8 @@ public class AssociationHandler implements NeoConstants {
 			}
 			final ResourceNode predicate = resolver.resolve(new SimpleResourceID(rel.getProperty(PREDICATE_URI).toString()));
 			final Context[] ctx = ctxAccess.getContextInfo(rel);
-			keeper.addAssociationDirectly(new DetachedStatement(keeper.getID(), predicate, object, ctx));
+			final StatementMetaInfo mi = new StatementMetaInfo(ctx, new Date((Long)rel.getProperty(TIMESTAMP, 0)));
+			keeper.addAssociationDirectly(new DetachedStatement(keeper.getID(), predicate, object, mi));
 		}
 	}
 	
@@ -124,7 +127,7 @@ public class AssociationHandler implements NeoConstants {
 				
 				final ResourceNode predicate = resolver.resolve(stmt.getPredicate());
 				final SemanticNode object = resolve(stmt.getObject());
-				final Statement assoc = new DetachedStatement(keeper.getID(), predicate, object, stmt.getContexts());
+				final Statement assoc = new DetachedStatement(keeper.getID(), predicate, object, stmt.getMetaInfo());
 				keeper.addAssociationDirectly(assoc);
 				
 				createRelationships(keeper.getNeoNode(), stmt);
@@ -239,6 +242,8 @@ public class AssociationHandler implements NeoConstants {
 		final RelationshipType type = stmt.getObject().isResourceNode() ? ArasRelTypes.REFERENCE : ArasRelTypes.VALUE;
 		final Relationship relationship = subject.createRelationshipTo(object, type);
 		relationship.setProperty(PREDICATE_URI, SNOPS.uri(stmt.getPredicate()));
+		relationship.setProperty(PREDICATE_URI, SNOPS.uri(stmt.getPredicate()));
+		relationship.setProperty(TIMESTAMP, new Date().getTime());
 		ctxAccess.assignContext(relationship, stmt.getContexts());
 		logger.debug("added relationship--> " + relationship + " to node " + subject);
 	}

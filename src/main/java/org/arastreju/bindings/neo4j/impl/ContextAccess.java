@@ -20,7 +20,6 @@ import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoResourceResolver;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.context.Context;
-import org.arastreju.sge.model.AbstractStatement;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.model.nodes.views.SNContext;
@@ -41,6 +40,8 @@ import scala.actors.threadpool.Arrays;
  */
 public class ContextAccess implements NeoConstants {
 	
+	public static final Context[] NO_CTX = new Context[0];
+	
 	private final NeoResourceResolver resolver;
 	
 	// -----------------------------------------------------
@@ -57,7 +58,7 @@ public class ContextAccess implements NeoConstants {
 	
 	public Context[] getContextInfo(final Relationship rel) {
 		if (!rel.hasProperty(CONTEXT_URI)) {
-			return AbstractStatement.NO_CTX;
+			return NO_CTX;
 		} 
 		final String[] ctxUris = (String[]) rel.getProperty(CONTEXT_URI);
 		final Context[] ctxs = new Context[ctxUris.length];

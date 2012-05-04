@@ -18,6 +18,7 @@ package org.arastreju.bindings.neo4j.query;
 
 import static org.arastreju.sge.SNOPS.uri;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,6 +34,7 @@ import org.arastreju.sge.context.Context;
 import org.arastreju.sge.model.DetachedStatement;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.Statement;
+import org.arastreju.sge.model.StatementMetaInfo;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.model.nodes.SemanticNode;
 import org.arastreju.sge.naming.QualifiedName;
@@ -124,7 +126,8 @@ public class NeoQueryManager implements QueryManager, NeoConstants {
 		final ResourceNode predicate = resolver.findResource(new QualifiedName(rel.getProperty(PREDICATE_URI).toString()));
 		final Context[] ctx = new ContextAccess(resolver).getContextInfo(rel);
 		
-		return new DetachedStatement(subject, predicate, object, ctx);
+		final StatementMetaInfo mi = new StatementMetaInfo(ctx, new Date((Long)rel.getProperty(TIMESTAMP, 0)));
+		return new DetachedStatement(subject, predicate, object, mi);
 	}
 
 }

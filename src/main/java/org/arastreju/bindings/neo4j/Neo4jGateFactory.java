@@ -23,7 +23,6 @@ import org.arastreju.bindings.neo4j.impl.GraphDataStore;
 import org.arastreju.sge.ArastrejuGate;
 import org.arastreju.sge.ArastrejuProfile;
 import org.arastreju.sge.spi.ArastrejuGateFactory;
-import org.arastreju.sge.spi.DomainInitializer;
 import org.arastreju.sge.spi.GateContext;
 import org.arastreju.sge.spi.GateInitializationException;
 
@@ -71,7 +70,6 @@ public class Neo4jGateFactory extends ArastrejuGateFactory {
 			} else {
 				final GraphDataConnection connection = new GraphDataConnection(initialize(profile, domain));
 				gate = new Neo4jGate(ctx, connection);
-				new DomainInitializer().run(gate, domain);
 			}
 			getProfile().onOpen(gate);
 			return gate;

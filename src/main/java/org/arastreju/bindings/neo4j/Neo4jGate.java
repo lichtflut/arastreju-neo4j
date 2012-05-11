@@ -104,6 +104,12 @@ public class Neo4jGate implements ArastrejuGate {
 		return new NeoIdentityManagement(connection, ctx);
 	}
 	
+	/** 
+	 * {@inheritDoc}
+	 */
+	public void open() {
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 */

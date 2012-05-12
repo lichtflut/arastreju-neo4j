@@ -37,8 +37,6 @@ import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.naming.SimpleNamespace;
 import org.arastreju.sge.query.Query;
 import org.arastreju.sge.query.QueryResult;
-import org.arastreju.sge.security.Domain;
-import org.arastreju.sge.security.impl.SNDomain;
 import org.arastreju.sge.spi.abstracts.AbstractOrganizer;
 
 /**
@@ -126,77 +124,6 @@ public class NeoOrganizer extends AbstractOrganizer {
 		final ResourceNode node = createContextNode(qn);
 		sna.attach(node);
 		return new SimpleContextID(qn);
-	}
-	
-	// ----------------------------------------------------
-	
-	/** 
-	 * {@inheritDoc}
-	 */
-	public Domain findDomain(String name) {
-		final Query query = query()
-				.addField(RDF.TYPE, Aras.DOMAIN)
-				.and()
-				.addField(Aras.HAS_UNIQUE_NAME, name);
-		ResourceNode node = query.getResult().getSingleNode();
-		if (node != null) {
-			return createDomain(node);
-		} else {
-			return null;
-		}
-	};
-	
-	/** 
-	 * {@inheritDoc}
-	 */
-	public Collection<Domain> getDomains() {
-		final List<Domain> result = new ArrayList<Domain>();
-		final List<ResourceNode> nodes = connection.getIndex().lookup(RDF.TYPE, Aras.DOMAIN).toList();
-		for (ResourceNode node : nodes) {
-			result.add(createDomain(node));
-		}
-		return result;
-	}
-	
-	/** 
-	 * {@inheritDoc}
-	 */
-	public Domain getDomesticDomain() {
-		final Query query = query()
-				.addField(RDF.TYPE, Aras.DOMAIN)
-				.and()
-				.addField(Aras.IS_DOMESTIC_DOMAIN, Boolean.TRUE);
-		ResourceNode node = query.getResult().getSingleNode();
-		if (node != null) {
-			return createDomain(node);
-		} else {
-			return null;
-		}
-	}
-	
-	/** 
-	 * {@inheritDoc}
-	 */
-	public Domain initDomesticDomain(String name) {
-		final ResourceNode node = createDomesticDomainNode(name);
-		sna.attach(node);
-		return new SNDomain(node); 
-	}
-	
-	/** 
-	 * {@inheritDoc}
-	 */
-	public Domain registerDomain(String name, String title, String description) {
-		final ResourceNode node = createDomainNode(name, title, description);
-		sna.attach(node);
-		return new SNDomain(node); 
-	}
-	
-	/** 
-	 * {@inheritDoc}
-	 */
-	public void updateDomain(Domain domain) {
-		sna.attach(domain);
 	}
 	
 	// ----------------------------------------------------

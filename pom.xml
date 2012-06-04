@@ -4,7 +4,7 @@
 	<groupId>org.arastreju</groupId>
 	<artifactId>arastreju.neo4j</artifactId>
 	<name>Arastreju Neo4J Binding</name>
-	<version>0.7.1-SNAPSHOT</version>
+	<version>0.7.1</version>
 	<description>Binding for Arastreju to Neo4J Graph Database</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -40,7 +40,7 @@
 		<dependency>
 			<groupId>org.arastreju</groupId>
 			<artifactId>arastreju.sge</artifactId>
-			<version>${project.version}</version>
+			<version>0.7.1</version>
 		</dependency>
 	</dependencies>
 	<build>

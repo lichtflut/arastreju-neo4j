@@ -195,4 +195,8 @@
 			<url>http://nexus.lichtflut.de/nexus/content/repositories/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
+	<scm>
+		<developerConnection>scm:git:git@github.com:lichtflut/arastreju-neo4j.git</developerConnection>
+		<tag>HEAD</tag>
+	</scm>
 </project>

@@ -118,6 +118,13 @@ public class NeoConversationContext implements NeoConstants, ConversationContext
 		}
 	}
 	
+	/**
+	 * @return the active
+	 */
+	public boolean isActive() {
+		return active;
+	}
+	
 	// ----------------------------------------------------
 
 	/**

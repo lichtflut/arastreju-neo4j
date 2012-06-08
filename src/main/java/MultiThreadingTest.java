@@ -85,7 +85,7 @@ public class MultiThreadingTest {
 			
 			sw.displayTime("created instances of " + clazz);
 			
-			final Query query = gate.createQueryManager().buildQuery().add(new FieldParam(RDF.TYPE, SNOPS.uri(clazz)));
+			final Query query = gate.startConversation().createQuery().add(new FieldParam(RDF.TYPE, SNOPS.uri(clazz)));
 			final List<ResourceNode> instances = query.getResult().toList();
 			sw.displayTime("found "+ instances.size() + " instances of " + clazz);
 			

@@ -107,7 +107,7 @@ public class NeoAssociationKeeper extends AbstractAssociationKeeper implements N
 	 * {@inheritDoc}
 	 */
 	public boolean isAttached() {
-		return context != null;
+		return context != null && context.isActive();
 	}
 	
 

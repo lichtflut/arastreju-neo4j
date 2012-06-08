@@ -319,7 +319,7 @@ public class AssociationHandler implements NeoConstants {
 	
 	private boolean regardContext(Context[] stmtContexts) {
 		if (stmtContexts.length == 0) {
-			logger.warn("Statement has no context.");
+			logger.debug("Statement has no context.");
 			return true;
 		}
 		Context[] readContexts = convContext.getReadContexts();

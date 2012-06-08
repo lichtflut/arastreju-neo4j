@@ -3,8 +3,6 @@
  */
 package org.arastreju.bindings.neo4j.impl;
 
-import org.arastreju.bindings.neo4j.extensions.NeoResourceResolver;
-import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.bindings.neo4j.tx.TxProvider;
 
 /**
@@ -23,27 +21,18 @@ public class GraphDataConnection {
 	private final GraphDataStore store;
 	
 	private final TxProvider txProvider;
+	
+	private NeoConversationContext workingContext;
 
-	private final SemanticNetworkAccess sna;
-	
-	private final ResourceIndex index;
-	
-	private final NeoResourceResolver resolver;
-	
-	private WorkingContext workingContext;
-	
 	// ----------------------------------------------------
 
 	/**
 	 * Constructor.
 	 * @param store The store.
 	 */
-	public GraphDataConnection(final GraphDataStore store) {
+	public GraphDataConnection(GraphDataStore store) {
 		this.store = store;
 		this.txProvider = new TxProvider(store.getGdbService());
-		this.resolver = new NeoResourceResolverImpl(this);
-		this.sna = new SemanticNetworkAccess(this);
-		this.index = new ResourceIndex(this);
 	}
 	
 	// ----------------------------------------------------
@@ -65,41 +54,26 @@ public class GraphDataConnection {
 	/**
 	 * @return the working context.
 	 */
-	public WorkingContext getWorkingContext() {
+	public NeoConversationContext getWorkingContext() {
 		if (workingContext == null) {
-			workingContext = new WorkingContext(this);
+			workingContext = new NeoConversationContext(this);
 		}
 		return workingContext;
 	}
 	
-	/**
-	 * @return The semantic network access.
-	 */
-	public SemanticNetworkAccess getSemanticNetworkAccess() {
-		return sna;
-	}
-	
-	/**
-	 * @return The semantic network access.
-	 */
-	public NeoResourceResolver getResourceResolver() {
-		return resolver;
-	}
-	
-	/**
-	 * @return The index.
-	 */
-	public ResourceIndex getIndex() {
-		return index;
-	}
-
 	// ----------------------------------------------------
+	
+	/**
+	 * (re-)open the connection.
+	 */
+	public void open() {
+    }
 	
 	/**
 	 * Close the connection and free all resources.
 	 */
 	public void close() {
-		getWorkingContext().clear();
+		getWorkingContext().close();
 	}
-	
+
 }

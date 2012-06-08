@@ -17,7 +17,7 @@
 package org.arastreju.bindings.neo4j.extensions;
 
 import org.arastreju.bindings.neo4j.NeoConstants;
-import org.arastreju.bindings.neo4j.impl.WorkingContext;
+import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.model.associations.AbstractAssociationKeeper;
@@ -43,7 +43,7 @@ public class NeoAssociationKeeper extends AbstractAssociationKeeper implements N
 	
 	private final Node neoNode;
 	
-	private WorkingContext context;
+	private NeoConversationContext context;
 	
 	// -----------------------------------------------------
 	
@@ -123,7 +123,7 @@ public class NeoAssociationKeeper extends AbstractAssociationKeeper implements N
 	 * Set the working context.
 	 * @param context the context to set
 	 */
-	public void setWorkingContext(WorkingContext context) {
+	public void setWorkingContext(NeoConversationContext context) {
 		this.context = context;
 	}
 	

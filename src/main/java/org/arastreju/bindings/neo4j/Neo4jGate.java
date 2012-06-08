@@ -39,7 +39,10 @@ import org.arastreju.sge.spi.GateInitializationException;
 public class Neo4jGate implements ArastrejuGate {
 	
 	private final GraphDataConnection connection;
+	
 	private final GateContext ctx;
+	
+	private boolean open;
 
 	// -----------------------------------------------------
 
@@ -50,6 +53,7 @@ public class Neo4jGate implements ArastrejuGate {
 	public Neo4jGate(final GateContext ctx, GraphDataConnection connection) throws GateInitializationException {
 		this.ctx = ctx;
 		this.connection = connection;
+		this.open = true;
 	}
 	
 	// -----------------------------------------------------
@@ -65,7 +69,7 @@ public class Neo4jGate implements ArastrejuGate {
 	 * {@inheritDoc}
 	 */
 	public QueryManager createQueryManager() {
-		return new NeoQueryManager(connection.getResourceResolver(), connection.getIndex());
+		return new NeoQueryManager(connection);
 	}
 
 	/**
@@ -79,6 +83,7 @@ public class Neo4jGate implements ArastrejuGate {
 	 * {@inheritDoc}
 	 */
 	public void open() {
+	    connection.open();
 	}
 	
 	/**
@@ -86,6 +91,7 @@ public class Neo4jGate implements ArastrejuGate {
 	 */
 	public void close() {
 		connection.close();
+		open = false;
 	}
 	
 	/** 

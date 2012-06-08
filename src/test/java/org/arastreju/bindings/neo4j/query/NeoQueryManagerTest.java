@@ -18,7 +18,6 @@ package org.arastreju.bindings.neo4j.query;
 
 
 import java.util.List;
-import java.util.Set;
 
 import junit.framework.Assert;
 
@@ -30,9 +29,7 @@ import org.arastreju.sge.apriori.Aras;
 import org.arastreju.sge.apriori.RDF;
 import org.arastreju.sge.apriori.RDFS;
 import org.arastreju.sge.context.Context;
-import org.arastreju.sge.model.DetachedStatement;
 import org.arastreju.sge.model.SimpleResourceID;
-import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.model.nodes.SNResource;
 import org.arastreju.sge.model.nodes.views.SNEntity;
@@ -78,8 +75,8 @@ public class NeoQueryManagerTest {
 	public void setUp() throws Exception {
 		store = new GraphDataStore();
 		connection = new GraphDataConnection(store);
-		sna = connection.getSemanticNetworkAccess();
-		qm = new NeoQueryManager(connection.getResourceResolver(), connection.getIndex());
+		sna = new SemanticNetworkAccess(connection);
+		qm = new NeoQueryManager(connection);
 	}
 
 	/**
@@ -228,44 +225,4 @@ public class NeoQueryManagerTest {
 		Assert.assertTrue("Expected Car to be a Class", result3.contains(car));
 	}
 	
-	@Test
-	public void testFindIncomingAssociations() {
-		final Context ctx = null;
-		final ResourceNode car = new SNResource(qnCar);
-		SNOPS.associate(car, RDF.TYPE, RDFS.CLASS);
-		sna.attach(car);
-		
-		final ResourceNode bike = new SNResource(qnBike);
-		SNOPS.associate(bike, RDF.TYPE, RDFS.CLASS);
-		sna.attach(bike);
-
-		final SNEntity car1 = car.asClass().createInstance(ctx);
-		sna.attach(car1);
-
-		final SNEntity car2 = car.asClass().createInstance(ctx);
-		sna.attach(car2);
-		
-		sna.detach(car1);
-		sna.detach(car2);
-		sna.detach(car);
-		sna.detach(bike);
-
-		final Set<Statement> result = qm.findIncomingStatements(RDFS.CLASS);
-		Assert.assertNotNull(result);
-		Assert.assertEquals(2, result.size());
-		Assert.assertTrue(result.contains(new DetachedStatement(car, RDF.TYPE, RDFS.CLASS)));
-		Assert.assertTrue(result.contains(new DetachedStatement(bike, RDF.TYPE, RDFS.CLASS)));
-		
-		final Set<Statement> result2 = qm.findIncomingStatements(bike);
-		Assert.assertNotNull(result2);
-		Assert.assertEquals(0, result2.size());
-		
-		final Set<Statement> result3 = qm.findIncomingStatements(car);
-		Assert.assertNotNull(result3);
-		Assert.assertEquals(2, result3.size());
-		Assert.assertTrue(result3.contains(new DetachedStatement(car1, RDF.TYPE, car)));
-		Assert.assertTrue(result3.contains(new DetachedStatement(car2, RDF.TYPE, car)));
-	}
-	
-
 }

@@ -31,6 +31,7 @@ import org.arastreju.bindings.neo4j.extensions.NeoResourceResolver;
 import org.arastreju.bindings.neo4j.extensions.SNValueNeo;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.bindings.neo4j.tx.TxProvider;
+import org.arastreju.sge.ConversationContext;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.context.Context;
 import org.arastreju.sge.inferencing.Inferencer;
@@ -48,6 +49,8 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import scala.actors.threadpool.Arrays;
 
 /**
  * <p>
@@ -75,19 +78,21 @@ public class AssociationHandler implements NeoConstants {
 	private final TxProvider txProvider;
 
 	private final ContextAccess ctxAccess;
+
+	private final ConversationContext convContext;
 	
 	// ----------------------------------------------------
 	
 	/**
 	 * Creates a new association handler.
-	 * @param resolver
-	 * @param index
-	 * @param connection
+	 * @param connection The connection.
+	 * @param workingContext The current working context.
 	 */
-	public AssociationHandler(final GraphDataConnection connection) {
-		this.resolver = connection.getResourceResolver();
+	public AssociationHandler(GraphDataConnection connection, ConversationContext workingContext) {
+		this.convContext = workingContext;
 		this.txProvider = connection.getTxProvider();
-		this.index = connection.getIndex();
+		this.resolver = new NeoResourceResolverImpl(connection);
+		this.index = new ResourceIndex(connection);
 		this.ctxAccess = new ContextAccess(resolver);
 		this.softInferencer = new NeoSoftInferencer(resolver);
 		this.hardInferencer = new NeoHardInferencer(resolver);
@@ -101,6 +106,10 @@ public class AssociationHandler implements NeoConstants {
 	 */
 	public void resolveAssociations(final NeoAssociationKeeper keeper) {
 		for(Relationship rel : keeper.getNeoNode().getRelationships(Direction.OUTGOING)){
+			final Context[] ctx = ctxAccess.getContextInfo(rel);
+			if (!regardContext(ctx)) {
+				continue;
+			}
 			SemanticNode object = null;
 			if (rel.isType(ArasRelTypes.REFERENCE)){
 				object = resolver.resolve(rel.getEndNode());	
@@ -108,7 +117,6 @@ public class AssociationHandler implements NeoConstants {
 				object = new SNValueNeo(rel.getEndNode());
 			}
 			final ResourceNode predicate = resolver.resolve(new SimpleResourceID(rel.getProperty(PREDICATE_URI).toString()));
-			final Context[] ctx = ctxAccess.getContextInfo(rel);
 			final StatementMetaInfo mi = new StatementMetaInfo(ctx, new Date((Long)rel.getProperty(TIMESTAMP, 0L)));
 			keeper.addAssociationDirectly(new DetachedStatement(keeper.getID(), predicate, object, mi));
 		}
@@ -244,7 +252,7 @@ public class AssociationHandler implements NeoConstants {
 		relationship.setProperty(PREDICATE_URI, SNOPS.uri(stmt.getPredicate()));
 		relationship.setProperty(PREDICATE_URI, SNOPS.uri(stmt.getPredicate()));
 		relationship.setProperty(TIMESTAMP, new Date().getTime());
-		ctxAccess.assignContext(relationship, stmt.getContexts());
+		ctxAccess.assignContext(relationship, getCurrentContexts(stmt));
 		logger.debug("added relationship--> " + relationship + " to node " + subject);
 	}
 	
@@ -288,6 +296,42 @@ public class AssociationHandler implements NeoConstants {
 			sb.append ("_" + locale.getCountry());
 		}
 		node.setProperty(PROPERTY_LOCALE, sb.toString());
+	}
+	
+	private Context[] getCurrentContexts(Statement stmt) {
+		if (stmt.getContexts().length == 0) {
+			if (convContext.getWriteContext() == null) {
+				return ContextAccess.NO_CTX;
+			} else {
+				return new Context[] { convContext.getWriteContext() };
+			}
+		} else if (convContext.getWriteContext() == null) {
+			return stmt.getContexts();
+		} else {
+			Set<Context> joined = new HashSet<Context>();
+			joined.add(convContext.getWriteContext());
+			for (Context c : stmt.getContexts()) {
+				joined.add(c);
+			}
+			return joined.toArray(new Context[joined.size()]);
+		}
+	}
+	
+	private boolean regardContext(Context[] stmtContexts) {
+		if (stmtContexts.length == 0) {
+			logger.warn("Statement has no context.");
+			return true;
+		}
+		Context[] readContexts = convContext.getReadContexts();
+		for (int i = 0; i < readContexts.length; i++) {
+			for (int j = 0; j < stmtContexts.length; j++) {
+				if (readContexts[i].equals(readContexts[j])) {
+					return true;
+				}
+			}
+		}
+		logger.warn("Contexts " + Arrays.toString(stmtContexts) + " not in read contexts." + Arrays.toString(readContexts));
+		return true;
 	}
 	
 }

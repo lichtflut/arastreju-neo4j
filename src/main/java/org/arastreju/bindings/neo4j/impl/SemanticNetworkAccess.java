@@ -21,6 +21,7 @@ import java.util.Set;
 
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
+import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.bindings.neo4j.tx.TxProvider;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.eh.ArastrejuRuntimeException;
@@ -53,6 +54,7 @@ import org.neo4j.graphdb.Node;
 public class SemanticNetworkAccess implements NeoConstants {
 	
 	private final GraphDataConnection connection;
+	private final ResourceIndex index;
 	
 	// -----------------------------------------------------
 
@@ -60,8 +62,9 @@ public class SemanticNetworkAccess implements NeoConstants {
 	 * Constructor. Creates a store using given directory.
 	 * @param dir The directory for the store.
 	 */
-	protected SemanticNetworkAccess(final GraphDataConnection connection) {
+	public SemanticNetworkAccess(final GraphDataConnection connection) {
 		this.connection = connection;
+		this.index = new ResourceIndex(connection);
 	}
 
 	// -----------------------------------------------------
@@ -130,11 +133,11 @@ public class SemanticNetworkAccess implements NeoConstants {
 	 * @param id The ID.
 	 */
 	public void remove(final ResourceID id) {
-		final ResourceNode node = connection.getResourceResolver().resolve(id);
+		final ResourceNode node = new NeoResourceResolverImpl(connection).resolve(id);
 		AssocKeeperAccess.getAssociationKeeper(node).getAssociations().clear();
 		tx().doTransacted(new TxAction() {
 			public void execute() {
-				new NodeRemover(connection.getIndex()).remove(node, false);
+				new NodeRemover(connection).remove(node, false);
 			}
 		});
 		detach(node);
@@ -152,7 +155,7 @@ public class SemanticNetworkAccess implements NeoConstants {
 		if (registered != null) {
 			return registered;
 		}
-		final Node neoNode = connection.getIndex().findNeoNode(qn);
+		final Node neoNode = index.findNeoNode(qn);
 		if (neoNode != null) {
 			return createKeeper(qn, neoNode);
 		} else {
@@ -176,7 +179,7 @@ public class SemanticNetworkAccess implements NeoConstants {
 		AssocKeeperAccess.setAssociationKeeper(node, keeper);
 		
 		// 3rd: index the Neo node.
-		connection.getIndex().index(neoNode, node);
+		index.index(neoNode, node);
 		
 		// 4th: store all associations.
 		for (Statement assoc : copy) {
@@ -207,7 +210,7 @@ public class SemanticNetworkAccess implements NeoConstants {
 	}
 	
 	protected NeoAssociationKeeper createKeeper(QualifiedName qn, Node neoNode) {
-		final WorkingContext ctx = workingContext();
+		final NeoConversationContext ctx = workingContext();
 		final NeoAssociationKeeper keeper = new NeoAssociationKeeper(SNOPS.id(qn), neoNode);
 		ctx.attach(qn, keeper);
 		return keeper;
@@ -219,7 +222,7 @@ public class SemanticNetworkAccess implements NeoConstants {
 		return connection.getTxProvider();
 	}
 	
-	private WorkingContext workingContext() {
+	private NeoConversationContext workingContext() {
 		return connection.getWorkingContext();
 	}
 	

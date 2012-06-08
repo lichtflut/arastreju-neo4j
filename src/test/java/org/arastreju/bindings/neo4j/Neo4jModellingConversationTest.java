@@ -130,7 +130,7 @@ public class Neo4jModellingConversationTest {
 		
 		SNOPS.associate(car, RDFS.SUB_CLASS_OF, vehicle);
 		
-		mc.close();
+		connection.getWorkingContext().clear();
 		
 		car = mc.findResource(qnCar);
 		vehicle = mc.findResource(qnVehicle);

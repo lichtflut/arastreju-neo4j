@@ -24,6 +24,7 @@ import java.util.List;
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.tx.TxProvider;
+import org.arastreju.sge.context.Context;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.model.nodes.ValueNode;
@@ -57,6 +58,11 @@ public class NeoIndex implements NeoConstants {
 	 */
 	public static final String INDEX_RESOURCES = "resources";
 	
+	/**
+     * Index representing the timeline of new statements.
+     */
+    public static final String INDEX_TIMELINE = "timeline";
+	
 	// -----------------------------------------------------
 	
 	/**
@@ -77,7 +83,7 @@ public class NeoIndex implements NeoConstants {
 	
 	// -----------------------------------------------------
 	
-	private final TxProvider txProvider;
+	private final GraphDataConnection connection;
 	private final IndexManager manager;
 	
 	private final Logger logger = LoggerFactory.getLogger(NeoIndex.class);
@@ -89,7 +95,7 @@ public class NeoIndex implements NeoConstants {
 	 * @param store The neo data store.
 	 */
 	public NeoIndex(final GraphDataConnection connection) {
-		this.txProvider = connection.getTxProvider();
+		this.connection = connection;
 		this.manager = connection.getStore().getIndexManager();
 	}
 	
@@ -119,7 +125,7 @@ public class NeoIndex implements NeoConstants {
 	/**
 	 * Find in Index by key and value.
 	 */
-	public IndexHits<Node>  lookup(final ResourceID predicate, final String value) {
+	public IndexHits<Node> lookup(final ResourceID predicate, final String value) {
 		return lookup(uri(predicate), value);
 	}
 	
@@ -134,9 +140,9 @@ public class NeoIndex implements NeoConstants {
 	 * Find in Index by key and value.
 	 */
 	public IndexHits<Node> lookup(final String key, final String value) {
-		return txProvider.doTransacted(new TxResultAction<IndexHits<Node>>() {
+		return tx().doTransacted(new TxResultAction<IndexHits<Node>>() {
 			public IndexHits<Node> execute() {
-				return resourceIndex().get(key, normalize(value));
+				return readIndex().get(key, normalize(value));
 			}
 		});
 	}
@@ -146,9 +152,9 @@ public class NeoIndex implements NeoConstants {
 	 */
 	public List<Node> lookupNodes(final String key, final String value) {
 		final List<Node> result = new ArrayList<Node>();
-		txProvider.doTransacted(new TxAction() {
+		tx().doTransacted(new TxAction() {
 			public void execute() {
-				toList(result, resourceIndex().get(key, normalize(value)));
+				toList(result, readIndex().get(key, normalize(value)));
 			}
 		});
 		return result;
@@ -169,9 +175,9 @@ public class NeoIndex implements NeoConstants {
 	 * @return The resulting index hits.
 	 */
 	public IndexHits<Node> search(final String query) {
-		return txProvider.doTransacted(new TxResultAction<IndexHits<Node>>() {
+		return tx().doTransacted(new TxResultAction<IndexHits<Node>>() {
 			public IndexHits<Node> execute() {
-				return resourceIndex().query(query);
+				return readIndex().query(query);
 			}
 		});
 	}
@@ -182,9 +188,9 @@ public class NeoIndex implements NeoConstants {
 	 * @return The resulting index hits.
 	 */
 	public IndexHits<Node> search(final QueryContext query) {
-		return txProvider.doTransacted(new TxResultAction<IndexHits<Node>>() {
+		return tx().doTransacted(new TxResultAction<IndexHits<Node>>() {
 			public IndexHits<Node> execute() {
-				return resourceIndex().query(query);
+				return readIndex().query(query);
 			}
 		});
 	}
@@ -194,9 +200,9 @@ public class NeoIndex implements NeoConstants {
 	 */
 	public List<Node> search(final String key, final String value) {
 		final List<Node> result = new ArrayList<Node>();
-		txProvider.doTransacted(new TxAction() {
+		tx().doTransacted(new TxAction() {
 			public void execute() {
-				toList(result, resourceIndex().query(key, normalize(value)));
+				toList(result, readIndex().query(key, normalize(value)));
 			}
 		});
 		return result;
@@ -221,7 +227,7 @@ public class NeoIndex implements NeoConstants {
 	// --REMOVE FROM INDEX --------------------------------
 	
 	public void remove(final Node node) {
-		resourceIndex().remove(node);
+	    writeIndex().remove(node);
 	}
 
 	/**
@@ -231,7 +237,7 @@ public class NeoIndex implements NeoConstants {
 	 */
 	public void remove(final Relationship rel) {
 		final String value = (String) rel.getProperty(PREDICATE_URI);
-		resourceIndex().remove(rel.getStartNode(), normalize(value));
+		writeIndex().remove(rel.getStartNode(), normalize(value));
 	}
 	
 
@@ -240,20 +246,20 @@ public class NeoIndex implements NeoConstants {
 	 * @param rel The relationship to be removed.
 	 */
 	public void remove(Node subject, String key, String value) {
-		resourceIndex().remove(subject, key, normalize(value));
+	    writeIndex().remove(subject, key, normalize(value));
 	}
 	
 	// -----------------------------------------------------
 	
 	private void indexResource(Node subject, String key, String value) {
-		resourceIndex().add(subject, key, normalize(value));
+	    writeIndex().add(subject, key, normalize(value));
 	}
 	
 	/**
 	 * @param result
 	 * @param nodes
 	 */
-	private void toList(final List<Node> result, final IndexHits<Node> nodes) {
+	private void toList(List<Node> result, IndexHits<Node> nodes) {
 		for (Node node : nodes) {
 			if (node.hasProperty(PROPERTY_URI)) {
 				result.add(node);
@@ -267,9 +273,22 @@ public class NeoIndex implements NeoConstants {
 		}
 	}
 	
-	private Index<Node> resourceIndex() {
+	private TxProvider tx() {
+		return connection.getTxProvider();
+	}
+	
+	private Index<Node> readIndex() {
 		return manager.forNodes(INDEX_RESOURCES);
 	}
+	
+	private Index<Node> writeIndex() {
+	    final Context writeContext = connection.getWorkingContext().getWriteContext();
+	    if (writeContext != null) {
+	        return manager.forNodes(INDEX_RESOURCES);    
+	    } else {
+	        return manager.forNodes(INDEX_RESOURCES);
+	    }
+    }
 	
 	// ----------------------------------------------------
 	

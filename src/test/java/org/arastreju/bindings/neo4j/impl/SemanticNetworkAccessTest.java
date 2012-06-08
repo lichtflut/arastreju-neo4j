@@ -79,6 +79,7 @@ public class SemanticNetworkAccessTest {
 	private GraphDataStore store;
 	private GraphDataConnection connection;
 	private NeoResourceResolver resolver;
+	private ResourceIndex index;
 	
 	// -----------------------------------------------------
 
@@ -89,8 +90,10 @@ public class SemanticNetworkAccessTest {
 	public void setUp() throws Exception {
 		store = new GraphDataStore();
 		connection = new GraphDataConnection(store);
-		sna = connection.getSemanticNetworkAccess();
-		resolver = connection.getResourceResolver();
+		index = new ResourceIndex(connection);
+		sna = new SemanticNetworkAccess(connection);
+		resolver = new NeoResourceResolverImpl(connection);
+		
 	}
 
 	/**
@@ -119,7 +122,7 @@ public class SemanticNetworkAccessTest {
 	
 	@Test
 	public void testValueIndexing() throws IOException {
-		final ResourceIndex index = connection.getIndex();
+		final ResourceIndex index = new ResourceIndex(connection);
 		
 		final ResourceNode car = new SNResource(qnCar);
 		SNOPS.associate(car, Aras.HAS_PROPER_NAME, new SNText("BMW"));
@@ -303,38 +306,6 @@ public class SemanticNetworkAccessTest {
 	}
 	
 	@Test
-	public void testMultipleContexts() {
-		final ResourceNode vehicle = new SNResource(qnVehicle);
-		final ResourceNode car1 = new SNResource(qnCar);
-		
-		final String ctxNamepsace = "http://lf.de/ctx#";
-		final SimpleContextID ctx1 = new SimpleContextID(ctxNamepsace, "ctx1");
-		final SimpleContextID ctx2 = new SimpleContextID(ctxNamepsace, "ctx2");
-		final SimpleContextID ctx3 = new SimpleContextID(ctxNamepsace, "ctx3");
-		
-		sna.attach(car1);
-		
-		associate(car1, Aras.HAS_BRAND_NAME, new SNText("BMW"), ctx1);
-		associate(car1, RDFS.SUB_CLASS_OF, vehicle, ctx1, ctx2);
-		associate(car1, Aras.HAS_PROPER_NAME, new SNText("Knut"), ctx1, ctx2, ctx3);
-		
-		// detach 
-		sna.detach(car1);
-		
-		final ResourceNode car2 = resolver.findResource(qnCar);
-		assertNotSame(car1, car2);
-		
-		final Context[] cl1 = SNOPS.singleAssociation(car2, Aras.HAS_BRAND_NAME).getContexts();
-		final Context[] cl2 = SNOPS.singleAssociation(car2, RDFS.SUB_CLASS_OF).getContexts();
-		final Context[] cl3 = SNOPS.singleAssociation(car2, Aras.HAS_PROPER_NAME).getContexts();
-		
-		assertArrayEquals(new Context[] {ctx1}, cl1);
-		assertArrayEquals(new Context[] {ctx1, ctx2}, cl2);
-		assertArrayEquals(new Context[] {ctx1, ctx2, ctx3}, cl3);
-		assertArrayEquals(new Context[] {ctx1, ctx2, ctx3}, cl3);
-	}
-	
-	@Test
 	public void testRemove() {
 		final SNClass vehicle = new SNResource(qnVehicle).asClass();
 		final SNClass car = new SNResource(qnCar).asClass();
@@ -449,13 +420,51 @@ public class SemanticNetworkAccessTest {
 		sna.attach(vehicle);
 		sna.attach(car);
 		
-		QueryResult hits = connection.getIndex().lookup(RDF.TYPE, id(qnVehicle));
+		QueryResult hits = index.lookup(RDF.TYPE, id(qnVehicle));
 		assertEquals(2, hits.size());
 		
 		SNOPS.remove(car, RDF.TYPE);
 		
-		hits = connection.getIndex().lookup(RDF.TYPE, id(qnVehicle));
+		hits = index.lookup(RDF.TYPE, id(qnVehicle));
 		assertEquals(1, hits.size());
+	}
+	
+	@Test
+	public void testMultipleContexts() {
+		final ResourceNode vehicle = new SNResource(qnVehicle);
+		final ResourceNode car1 = new SNResource(qnCar);
+		
+		final String ctxNamepsace = "http://lf.de/ctx#";
+		final SimpleContextID ctx1 = new SimpleContextID(ctxNamepsace, "ctx1");
+		final SimpleContextID ctx2 = new SimpleContextID(ctxNamepsace, "ctx2");
+		final SimpleContextID ctx3 = new SimpleContextID(ctxNamepsace, "ctx3");
+		
+		final SimpleContextID convCtx1 = new SimpleContextID(ctxNamepsace, "convCtx1");
+		final SimpleContextID convCtx2 = new SimpleContextID(ctxNamepsace, "convCtx1");
+		
+		sna.attach(car1);
+
+		connection.getWorkingContext().setReadContexts(ctx1, ctx2, ctx3, convCtx1, convCtx2);
+		
+		associate(car1, Aras.HAS_BRAND_NAME, new SNText("BMW"), ctx1);
+		connection.getWorkingContext().setWriteContext(convCtx1);
+		associate(car1, RDFS.SUB_CLASS_OF, vehicle, ctx1, ctx2);
+		connection.getWorkingContext().setWriteContext(convCtx2);
+		associate(car1, Aras.HAS_PROPER_NAME, new SNText("Knut"), ctx1, ctx2, ctx3);
+		
+		// detach 
+		sna.detach(car1);
+		
+		final ResourceNode car2 = resolver.findResource(qnCar);
+		assertNotSame(car1, car2);
+		
+		final Context[] cl1 = SNOPS.singleAssociation(car2, Aras.HAS_BRAND_NAME).getContexts();
+		final Context[] cl2 = SNOPS.singleAssociation(car2, RDFS.SUB_CLASS_OF).getContexts();
+		final Context[] cl3 = SNOPS.singleAssociation(car2, Aras.HAS_PROPER_NAME).getContexts();
+		
+		assertArrayEquals(new Context[] {ctx1}, cl1);
+		assertArrayEquals(new Context[] {convCtx1, ctx1, ctx2}, cl2);
+		assertArrayEquals(new Context[] {convCtx2, ctx1, ctx2, ctx3}, cl3);
 	}
 
 }

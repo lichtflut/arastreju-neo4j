@@ -53,6 +53,14 @@ public class NodeRemover {
 		this.index = index;
 	}
 	
+	/**
+	 * Constructor.
+	 * @param connection The connection.
+	 */
+	public NodeRemover(final GraphDataConnection connection) {
+		this(new ResourceIndex(connection));
+	}
+	
 	// -----------------------------------------------------
 
 	/**

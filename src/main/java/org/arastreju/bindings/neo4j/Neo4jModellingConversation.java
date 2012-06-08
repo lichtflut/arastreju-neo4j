@@ -18,7 +18,11 @@ package org.arastreju.bindings.neo4j;
 
 import org.arastreju.bindings.neo4j.extensions.NeoResourceResolver;
 import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
+import org.arastreju.bindings.neo4j.impl.NeoResourceResolverImpl;
 import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
+import org.arastreju.bindings.neo4j.index.ResourceIndex;
+import org.arastreju.bindings.neo4j.query.NeoQueryBuilder;
+import org.arastreju.sge.ConversationContext;
 import org.arastreju.sge.ModelingConversation;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.model.ResourceID;
@@ -29,6 +33,7 @@ import org.arastreju.sge.model.nodes.SemanticNode;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.persistence.TransactionControl;
 import org.arastreju.sge.persistence.TxResultAction;
+import org.arastreju.sge.query.Query;
 
 /**
  * <p>
@@ -56,8 +61,8 @@ public class Neo4jModellingConversation implements ModelingConversation {
 	 */
 	public Neo4jModellingConversation(final GraphDataConnection connection) {
 		this.connection = connection;
-		this.sna = connection.getSemanticNetworkAccess();
-		this.resolver = connection.getResourceResolver();
+		this.sna = new SemanticNetworkAccess(connection);
+		this.resolver = new NeoResourceResolverImpl(connection);
 	}
 	
 	// -----------------------------------------------------
@@ -76,6 +81,15 @@ public class Neo4jModellingConversation implements ModelingConversation {
 	public boolean removeStatement(final Statement stmt) {
 		final ResourceNode subject = resolve(stmt.getSubject());
 		return SNOPS.remove(subject, stmt.getPredicate(), stmt.getObject());
+	}
+	
+	// ----------------------------------------------------
+	
+	/** 
+	 * {@inheritDoc}
+	 */
+	public Query createQuery() {
+		return new NeoQueryBuilder(new ResourceIndex(connection));
 	}
 	
 	// ----------------------------------------------------
@@ -155,6 +169,13 @@ public class Neo4jModellingConversation implements ModelingConversation {
 	/**
 	 * {@inheritDoc}
 	 */
+	public ConversationContext getConversationContext() {
+		return connection.getWorkingContext();
+	};
+	
+	/**
+	 * {@inheritDoc}
+	 */
 	public TransactionControl beginTransaction() {
 		return connection.getTxProvider().begin();
 	}
@@ -163,7 +184,7 @@ public class Neo4jModellingConversation implements ModelingConversation {
 	 * {@inheritDoc}
 	 */
 	public void close() {
-		connection.getWorkingContext().clear();
+		connection.getWorkingContext().close();
 	}
 	
 }

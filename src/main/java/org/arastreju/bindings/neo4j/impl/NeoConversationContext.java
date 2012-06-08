@@ -21,8 +21,12 @@ import java.util.Map;
 
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
+import org.arastreju.sge.ConversationContext;
+import org.arastreju.sge.context.Context;
 import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.naming.QualifiedName;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>
@@ -35,20 +39,30 @@ import org.arastreju.sge.naming.QualifiedName;
  *
  * @author Oliver Tigges
  */
-public class WorkingContext implements NeoConstants {
+public class NeoConversationContext implements NeoConstants, ConversationContext {
+	
+	public static final Context[] NO_CTX = new Context[0];
+
+	private static final Logger logger = LoggerFactory.getLogger(NeoConversationContext.class);
 
 	private final Map<QualifiedName, NeoAssociationKeeper> register = new HashMap<QualifiedName, NeoAssociationKeeper>();
 	
 	private final AssociationHandler handler;
 	
+	private Context writeContext;
+	
+	private Context[] readContexts;
+	
+	private boolean active = true;
+
 	// ----------------------------------------------------
 	
 	/**
 	 * Creates a new Working Context.
 	 * @param connection The connection.
 	 */
-	public WorkingContext(final GraphDataConnection connection) {
-		this.handler = new AssociationHandler(connection);
+	public NeoConversationContext(GraphDataConnection connection) {
+		this.handler = new AssociationHandler(connection, this);
 	}
 
 	// ----------------------------------------------------
@@ -58,14 +72,16 @@ public class WorkingContext implements NeoConstants {
 	 * @return The association keeper or null;
 	 */
 	public NeoAssociationKeeper getAssociationKeeper(QualifiedName qn) {
+		assertActive();
 		return register.get(qn);
 	}
 	
 	/**
 	 * @param qn The resource's qualified name.
-	 * @param resource
+	 * @param keeper The keeper to be accessed.
 	 */
 	public void attach(QualifiedName qn, NeoAssociationKeeper keeper) {
+		assertActive();
 		register.put(qn, keeper);
 		keeper.setWorkingContext(this);
 	}
@@ -74,6 +90,7 @@ public class WorkingContext implements NeoConstants {
 	 * @param qn The resource's qualified name.
 	 */
 	public void detach(QualifiedName qn) {
+		assertActive();
 		final NeoAssociationKeeper removed = register.remove(qn);
 		if (removed != null) {
 			removed.detach();
@@ -84,10 +101,21 @@ public class WorkingContext implements NeoConstants {
 	 * Clear the cache.
 	 */
 	public void clear() {
+		assertActive();
 		for (NeoAssociationKeeper keeper : register.values()) {
 			keeper.detach();
 		}
 		register.clear();
+	}
+	
+	/**
+	 * Close and invalidate this context.
+	 */
+	public void close() {
+		if (active) {
+			clear();
+			active = false;
+		}
 	}
 	
 	// ----------------------------------------------------
@@ -97,6 +125,7 @@ public class WorkingContext implements NeoConstants {
 	 * @param keeper The association keeper to be resolved.
 	 */
 	public void resolveAssociations(final NeoAssociationKeeper keeper) {
+		assertActive();
 		handler.resolveAssociations(keeper);
 	}
 	
@@ -108,6 +137,7 @@ public class WorkingContext implements NeoConstants {
 	 * @param stmt The Association.
 	 */
 	public void addAssociation(final NeoAssociationKeeper keeper, final Statement stmt) {
+		assertActive();
 		handler.addAssociation(keeper, stmt);
 	}
 
@@ -118,7 +148,53 @@ public class WorkingContext implements NeoConstants {
 	 * @return true if the association has been removed.
 	 */
 	public boolean removeAssociation(final NeoAssociationKeeper keeper, final Statement assoc) {
+		assertActive();
 		return handler.removeAssociation(keeper, assoc);
 	}
 	
+	// ----------------------------------------------------
+	
+	/** 
+	 * {@inheritDoc}
+	 */
+	public Context[] getReadContexts() {
+		assertActive();
+		if (readContexts != null) {
+			return readContexts;
+		} else {
+			return NO_CTX;
+		}
+	}
+	
+   /** 
+	 * {@inheritDoc}
+	 */
+    public Context getWriteContext() {
+    	return writeContext;
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public ConversationContext setWriteContext(Context ctx) {
+		this.writeContext = ctx;
+		return this;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public ConversationContext setReadContexts(Context... ctxs) {
+		this.readContexts = ctxs;
+		return this;
+	}
+	
+    // ----------------------------------------------------
+	
+	private void assertActive() {
+		if (!active) {
+			logger.warn("Conversation already closed.");
+			//throw new IllegalStateException("Conversation already closed.");
+		}
+	}
 }

@@ -7,6 +7,7 @@ import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
 import org.arastreju.bindings.neo4j.extensions.NeoResourceResolver;
 import org.arastreju.bindings.neo4j.extensions.SNResourceNeo;
+import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.associations.AssociationKeeper;
@@ -65,7 +66,7 @@ public class NeoResourceResolverImpl implements NeoResourceResolver {
 			if (attached != null) {
 				return attached;
 			} else {
-				connection.getSemanticNetworkAccess().create(node);
+				new SemanticNetworkAccess(connection).create(node);
 				return node;
 			}
 		}
@@ -95,7 +96,7 @@ public class NeoResourceResolverImpl implements NeoResourceResolver {
 		if (registered != null) {
 			return registered;
 		}
-		final Node neoNode = connection.getIndex().findNeoNode(qn);
+		final Node neoNode = new ResourceIndex(connection).findNeoNode(qn);
 		if (neoNode != null) {
 			return createKeeper(qn, neoNode);
 		} else {

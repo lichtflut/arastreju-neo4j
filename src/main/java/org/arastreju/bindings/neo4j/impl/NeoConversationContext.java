@@ -115,6 +115,7 @@ public class NeoConversationContext implements NeoConstants, ConversationContext
 		if (active) {
 			clear();
 			active = false;
+			logger.warn("Conversation closed.");
 		}
 	}
 	

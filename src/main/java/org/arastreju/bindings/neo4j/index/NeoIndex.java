@@ -54,14 +54,14 @@ import org.slf4j.LoggerFactory;
 public class NeoIndex implements NeoConstants {
 	
 	/**
-	 * Index for resources.
+	 * Index for all resources in this graph data store.
 	 */
 	public static final String INDEX_RESOURCES = "resources";
 	
 	/**
-     * Index representing the timeline of new statements.
-     */
-    public static final String INDEX_TIMELINE = "timeline";
+	 * Index for all resources in this graph data store.
+	 */
+	public static final String CONTEXT_INDEX_PREFIX = "ctx-statements:";
 	
 	// -----------------------------------------------------
 	

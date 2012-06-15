@@ -22,6 +22,7 @@ import junit.framework.Assert;
 
 import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.GraphDataStore;
+import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.sge.Organizer;
 import org.arastreju.sge.context.Context;
 import org.arastreju.sge.naming.Namespace;
@@ -64,7 +65,7 @@ public class NeoOrganizerTest {
 	public void setUp() throws Exception {
 		store = new GraphDataStore();
 		connection = new GraphDataConnection(store);
-		organizer = new NeoOrganizer(connection);
+		organizer = new NeoOrganizer(connection, new NeoConversationContext(connection));
 	}
 	
 	/**

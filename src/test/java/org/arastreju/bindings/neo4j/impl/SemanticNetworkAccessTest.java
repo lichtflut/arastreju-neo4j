@@ -80,6 +80,7 @@ public class SemanticNetworkAccessTest {
 	private GraphDataConnection connection;
 	private NeoResourceResolver resolver;
 	private ResourceIndex index;
+	private NeoConversationContext ctx;
 	
 	// -----------------------------------------------------
 
@@ -90,9 +91,10 @@ public class SemanticNetworkAccessTest {
 	public void setUp() throws Exception {
 		store = new GraphDataStore();
 		connection = new GraphDataConnection(store);
-		index = new ResourceIndex(connection);
-		sna = new SemanticNetworkAccess(connection);
-		resolver = new NeoResourceResolverImpl(connection);
+		ctx = new NeoConversationContext(connection);
+		index = new ResourceIndex(connection, ctx);
+		sna = new SemanticNetworkAccess(connection, ctx);
+		resolver = new NeoResourceResolverImpl(connection, ctx);
 		
 	}
 
@@ -102,6 +104,7 @@ public class SemanticNetworkAccessTest {
 	@After
 	public void tearDown() throws Exception {
 		connection.close();
+		ctx.close();
 		store.close();
 	}
 	
@@ -122,7 +125,7 @@ public class SemanticNetworkAccessTest {
 	
 	@Test
 	public void testValueIndexing() throws IOException {
-		final ResourceIndex index = new ResourceIndex(connection);
+		final ResourceIndex index = new ResourceIndex(connection, ctx);
 		
 		final ResourceNode car = new SNResource(qnCar);
 		SNOPS.associate(car, Aras.HAS_PROPER_NAME, new SNText("BMW"));
@@ -444,12 +447,12 @@ public class SemanticNetworkAccessTest {
 		
 		sna.attach(car1);
 
-		connection.getWorkingContext().setReadContexts(ctx1, ctx2, ctx3, convCtx1, convCtx2);
+		ctx.setReadContexts(ctx1, ctx2, ctx3, convCtx1, convCtx2);
 		
 		associate(car1, Aras.HAS_BRAND_NAME, new SNText("BMW"), ctx1);
-		connection.getWorkingContext().setWriteContext(convCtx1);
+		ctx.setWriteContext(convCtx1);
 		associate(car1, RDFS.SUB_CLASS_OF, vehicle, ctx1, ctx2);
-		connection.getWorkingContext().setWriteContext(convCtx2);
+		ctx.setWriteContext(convCtx2);
 		associate(car1, Aras.HAS_PROPER_NAME, new SNText("Knut"), ctx1, ctx2, ctx3);
 		
 		// detach 

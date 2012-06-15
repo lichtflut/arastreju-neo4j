@@ -23,6 +23,7 @@ import junit.framework.Assert;
 
 import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.GraphDataStore;
+import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.apriori.Aras;
@@ -75,8 +76,8 @@ public class NeoQueryManagerTest {
 	public void setUp() throws Exception {
 		store = new GraphDataStore();
 		connection = new GraphDataConnection(store);
-		sna = new SemanticNetworkAccess(connection);
-		qm = new NeoQueryManager(connection);
+		sna = new SemanticNetworkAccess(connection, new NeoConversationContext(connection));
+		qm = new NeoQueryManager(connection, new NeoConversationContext(connection));
 	}
 
 	/**

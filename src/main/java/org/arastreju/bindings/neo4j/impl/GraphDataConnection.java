@@ -22,8 +22,6 @@ public class GraphDataConnection {
 	
 	private final TxProvider txProvider;
 	
-	private NeoConversationContext workingContext;
-
 	// ----------------------------------------------------
 
 	/**
@@ -51,16 +49,6 @@ public class GraphDataConnection {
 		return txProvider;
 	}
 	
-	/**
-	 * @return the working context.
-	 */
-	public NeoConversationContext getWorkingContext() {
-		if (workingContext == null) {
-			workingContext = new NeoConversationContext(this);
-		}
-		return workingContext;
-	}
-	
 	// ----------------------------------------------------
 	
 	/**
@@ -73,7 +61,6 @@ public class GraphDataConnection {
 	 * Close the connection and free all resources.
 	 */
 	public void close() {
-		getWorkingContext().close();
 	}
 
 }

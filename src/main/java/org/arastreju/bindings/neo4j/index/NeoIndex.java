@@ -24,6 +24,7 @@ import java.util.List;
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.tx.TxProvider;
+import org.arastreju.sge.ConversationContext;
 import org.arastreju.sge.context.Context;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.nodes.ResourceNode;
@@ -88,14 +89,18 @@ public class NeoIndex implements NeoConstants {
 	
 	private final Logger logger = LoggerFactory.getLogger(NeoIndex.class);
 
+	private final ConversationContext conversationContext;
+
 	// -----------------------------------------------------
 	
 	/**
 	 * Constructor.
-	 * @param store The neo data store.
+	 * @param connection The connection to the graph database.
+	 * @param ctx The current conversation context.
 	 */
-	public NeoIndex(final GraphDataConnection connection) {
+	public NeoIndex(GraphDataConnection connection, ConversationContext ctx) {
 		this.connection = connection;
+		this.conversationContext = ctx;
 		this.manager = connection.getStore().getIndexManager();
 	}
 	
@@ -282,7 +287,7 @@ public class NeoIndex implements NeoConstants {
 	}
 	
 	private Index<Node> writeIndex() {
-	    final Context writeContext = connection.getWorkingContext().getWriteContext();
+	    final Context writeContext = conversationContext.getWriteContext();
 	    if (writeContext != null) {
 	        return manager.forNodes(INDEX_RESOURCES);    
 	    } else {

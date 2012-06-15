@@ -17,6 +17,7 @@
 package org.arastreju.bindings.neo4j;
 
 import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
+import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.bindings.neo4j.query.NeoQueryManager;
 import org.arastreju.sge.ArastrejuGate;
 import org.arastreju.sge.ModelingConversation;
@@ -69,14 +70,14 @@ public class Neo4jGate implements ArastrejuGate {
 	 * {@inheritDoc}
 	 */
 	public QueryManager createQueryManager() {
-		return new NeoQueryManager(connection);
+		return new NeoQueryManager(connection, new NeoConversationContext(connection));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public Organizer getOrganizer() {
-		return new NeoOrganizer(connection);
+		return new NeoOrganizer(connection, new NeoConversationContext(connection));
 	}
 
 	/** 
@@ -99,6 +100,13 @@ public class Neo4jGate implements ArastrejuGate {
 	 */
 	public GateContext getContext() {
 		return ctx;
+	}
+	
+	/**
+	 * @return true if gate is open.
+	 */
+	public boolean isOpen() {
+		return open;
 	}
 	
 }

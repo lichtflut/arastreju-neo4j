@@ -8,6 +8,7 @@ import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
 import org.arastreju.bindings.neo4j.extensions.NeoResourceResolver;
 import org.arastreju.bindings.neo4j.extensions.SNResourceNeo;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
+import org.arastreju.sge.ConversationContext;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.associations.AssociationKeeper;
@@ -29,6 +30,7 @@ import org.neo4j.graphdb.Node;
 public class NeoResourceResolverImpl implements NeoResourceResolver {
 	
 	private final GraphDataConnection connection;
+	private final NeoConversationContext conversationContext;
 	
 	// ----------------------------------------------------
 	
@@ -36,8 +38,9 @@ public class NeoResourceResolverImpl implements NeoResourceResolver {
 	 * Constructor.
 	 * @param connection The connection.
 	 */
-	public NeoResourceResolverImpl(GraphDataConnection connection) {
+	public NeoResourceResolverImpl(GraphDataConnection connection, NeoConversationContext conversationContext) {
 		this.connection = connection;
+		this.conversationContext = conversationContext;
 	}
 	
 	// ----------------------------------------------------
@@ -66,7 +69,7 @@ public class NeoResourceResolverImpl implements NeoResourceResolver {
 			if (attached != null) {
 				return attached;
 			} else {
-				new SemanticNetworkAccess(connection).create(node);
+				new SemanticNetworkAccess(connection, conversationContext).create(node);
 				return node;
 			}
 		}
@@ -77,7 +80,7 @@ public class NeoResourceResolverImpl implements NeoResourceResolver {
 	 */
 	public ResourceNode resolve(final Node neoNode) {
 		final QualifiedName qn = QualifiedName.create(neoNode.getProperty(NeoConstants.PROPERTY_URI).toString());
-		NeoAssociationKeeper keeper = connection.getWorkingContext().getAssociationKeeper(qn);
+		NeoAssociationKeeper keeper = conversationContext.getAssociationKeeper(qn);
 		if (keeper == null){
 			keeper = createKeeper(qn, neoNode);
 		}
@@ -92,11 +95,11 @@ public class NeoResourceResolverImpl implements NeoResourceResolver {
 	 * @return The keeper or null.
 	 */
 	protected AssociationKeeper findAssociationKeeper(final QualifiedName qn) {
-		final AssociationKeeper registered = connection.getWorkingContext().getAssociationKeeper(qn);
+		final AssociationKeeper registered = conversationContext.getAssociationKeeper(qn);
 		if (registered != null) {
 			return registered;
 		}
-		final Node neoNode = new ResourceIndex(connection).findNeoNode(qn);
+		final Node neoNode = new ResourceIndex(connection, conversationContext).findNeoNode(qn);
 		if (neoNode != null) {
 			return createKeeper(qn, neoNode);
 		} else {
@@ -108,7 +111,7 @@ public class NeoResourceResolverImpl implements NeoResourceResolver {
 
 	protected NeoAssociationKeeper createKeeper(QualifiedName qn, Node neoNode) {
 		final NeoAssociationKeeper keeper = new NeoAssociationKeeper(SNOPS.id(qn), neoNode);
-		connection.getWorkingContext().attach(qn, keeper);
+		conversationContext.attach(qn, keeper);
 		return keeper;
 	}
 }

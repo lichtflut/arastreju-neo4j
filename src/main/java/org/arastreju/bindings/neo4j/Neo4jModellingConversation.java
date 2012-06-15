@@ -18,6 +18,7 @@ package org.arastreju.bindings.neo4j;
 
 import org.arastreju.bindings.neo4j.extensions.NeoResourceResolver;
 import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
+import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.bindings.neo4j.impl.NeoResourceResolverImpl;
 import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
@@ -34,6 +35,8 @@ import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.persistence.TransactionControl;
 import org.arastreju.sge.persistence.TxResultAction;
 import org.arastreju.sge.query.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>
@@ -48,7 +51,11 @@ import org.arastreju.sge.query.Query;
  */
 public class Neo4jModellingConversation implements ModelingConversation {
 	
+	private static final Logger logger = LoggerFactory.getLogger(Neo4jModellingConversation.class);
+	
 	private final GraphDataConnection connection;
+	
+	private final NeoConversationContext conversationContext;
 	
 	private final SemanticNetworkAccess sna;
 	
@@ -61,8 +68,9 @@ public class Neo4jModellingConversation implements ModelingConversation {
 	 */
 	public Neo4jModellingConversation(final GraphDataConnection connection) {
 		this.connection = connection;
-		this.sna = new SemanticNetworkAccess(connection);
-		this.resolver = new NeoResourceResolverImpl(connection);
+		this.conversationContext = new NeoConversationContext(connection);
+		this.sna = new SemanticNetworkAccess(connection, conversationContext);
+		this.resolver = new NeoResourceResolverImpl(connection, conversationContext);
 	}
 	
 	// -----------------------------------------------------
@@ -71,6 +79,7 @@ public class Neo4jModellingConversation implements ModelingConversation {
 	 * {@inheritDoc}
 	 */
 	public void addStatement(final Statement stmt) {
+		assertActive();
 		final ResourceNode subject = resolve(stmt.getSubject());
 		SNOPS.associate(subject, stmt.getPredicate(), stmt.getObject(), stmt.getContexts());
 	}
@@ -79,6 +88,7 @@ public class Neo4jModellingConversation implements ModelingConversation {
 	* {@inheritDoc}
 	*/
 	public boolean removeStatement(final Statement stmt) {
+		assertActive();
 		final ResourceNode subject = resolve(stmt.getSubject());
 		return SNOPS.remove(subject, stmt.getPredicate(), stmt.getObject());
 	}
@@ -89,7 +99,8 @@ public class Neo4jModellingConversation implements ModelingConversation {
 	 * {@inheritDoc}
 	 */
 	public Query createQuery() {
-		return new NeoQueryBuilder(new ResourceIndex(connection));
+		assertActive();
+		return new NeoQueryBuilder(new ResourceIndex(connection, conversationContext));
 	}
 	
 	// ----------------------------------------------------
@@ -98,6 +109,7 @@ public class Neo4jModellingConversation implements ModelingConversation {
 	 * {@inheritDoc}
 	 */
 	public ResourceNode findResource(final QualifiedName qn) {
+		assertActive();
 		return resolver.findResource(qn);
 	}
 	
@@ -105,6 +117,7 @@ public class Neo4jModellingConversation implements ModelingConversation {
 	 * {@inheritDoc}
 	 */
 	public ResourceNode resolve(final ResourceID resource) {
+		assertActive();
 		return resolver.resolve(resource);
 	}
 	
@@ -112,6 +125,7 @@ public class Neo4jModellingConversation implements ModelingConversation {
 	 * {@inheritDoc}
 	 */
 	public void attach(final ResourceNode node) {
+		assertActive();
 		sna.attach(node);
 	}
 	
@@ -119,6 +133,7 @@ public class Neo4jModellingConversation implements ModelingConversation {
 	 * {@inheritDoc}
 	 */
 	public void reset(final ResourceNode node) {
+		assertActive();
 		sna.reset(node);
 	}
 	
@@ -126,6 +141,7 @@ public class Neo4jModellingConversation implements ModelingConversation {
 	 * {@inheritDoc}
 	 */
 	public void detach(final ResourceNode node) {
+		assertActive();
 		sna.detach(node);
 	}
 	
@@ -133,6 +149,7 @@ public class Neo4jModellingConversation implements ModelingConversation {
 	 * {@inheritDoc}
 	 */
 	public void remove(final ResourceID id) {
+		assertActive();
 		sna.remove(id);
 	}
 	
@@ -142,6 +159,7 @@ public class Neo4jModellingConversation implements ModelingConversation {
 	 * {@inheritDoc}
 	 */
 	public void attach(final SemanticGraph graph) {
+		assertActive();
 		connection.getTxProvider().doTransacted(new TxResultAction<SemanticGraph>() {
 			public SemanticGraph execute() {
 				for(Statement stmt : graph.getStatements()) {
@@ -157,6 +175,7 @@ public class Neo4jModellingConversation implements ModelingConversation {
 	 * {@inheritDoc}
 	 */
 	public void detach(final SemanticGraph graph) {
+		assertActive();
 		for(SemanticNode node : graph.getNodes()){
 			if (node.isResourceNode() && node.asResource().isAttached()){
 				sna.detach(node.asResource());
@@ -170,13 +189,15 @@ public class Neo4jModellingConversation implements ModelingConversation {
 	 * {@inheritDoc}
 	 */
 	public ConversationContext getConversationContext() {
-		return connection.getWorkingContext();
+		assertActive();
+		return conversationContext;
 	};
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	public TransactionControl beginTransaction() {
+		assertActive();
 		return connection.getTxProvider().begin();
 	}
 	
@@ -184,7 +205,16 @@ public class Neo4jModellingConversation implements ModelingConversation {
 	 * {@inheritDoc}
 	 */
 	public void close() {
-		connection.getWorkingContext().close();
+		conversationContext.close();
+	}
+	
+	// ----------------------------------------------------
+	
+	private void assertActive() {
+		if (!conversationContext.isActive()) {
+			logger.warn("Conversation already closed.");
+			//throw new IllegalStateException("Conversation already closed.");
+		}
 	}
 	
 }

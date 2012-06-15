@@ -57,8 +57,8 @@ public class NodeRemover {
 	 * Constructor.
 	 * @param connection The connection.
 	 */
-	public NodeRemover(final GraphDataConnection connection) {
-		this(new ResourceIndex(connection));
+	public NodeRemover(GraphDataConnection connection, NeoConversationContext context) {
+		this(new ResourceIndex(connection, context));
 	}
 	
 	// -----------------------------------------------------

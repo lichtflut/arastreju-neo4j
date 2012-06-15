@@ -86,13 +86,13 @@ public class AssociationHandler implements NeoConstants {
 	/**
 	 * Creates a new association handler.
 	 * @param connection The connection.
-	 * @param workingContext The current working context.
+	 * @param conversationContext The current working context.
 	 */
-	public AssociationHandler(GraphDataConnection connection, ConversationContext workingContext) {
-		this.convContext = workingContext;
+	public AssociationHandler(GraphDataConnection connection, NeoConversationContext conversationContext) {
+		this.convContext = conversationContext;
 		this.txProvider = connection.getTxProvider();
-		this.resolver = new NeoResourceResolverImpl(connection);
-		this.index = new ResourceIndex(connection);
+		this.resolver = new NeoResourceResolverImpl(connection, conversationContext);
+		this.index = new ResourceIndex(connection, conversationContext);
 		this.ctxAccess = new ContextAccess(resolver);
 		this.softInferencer = new NeoSoftInferencer(resolver);
 		this.hardInferencer = new NeoHardInferencer(resolver);
@@ -249,8 +249,8 @@ public class AssociationHandler implements NeoConstants {
 	private void createRelationShip(final Node subject, final Node object, final Statement stmt) {
 		final RelationshipType type = stmt.getObject().isResourceNode() ? ArasRelTypes.REFERENCE : ArasRelTypes.VALUE;
 		final Relationship relationship = subject.createRelationshipTo(object, type);
-		relationship.setProperty(PREDICATE_URI, SNOPS.uri(stmt.getPredicate()));
-		relationship.setProperty(PREDICATE_URI, SNOPS.uri(stmt.getPredicate()));
+		relationship.setProperty(PREDICATE_URI, stmt.getPredicate().toURI());
+		relationship.setProperty(PREDICATE_URI, stmt.getPredicate().toURI());
 		relationship.setProperty(TIMESTAMP, new Date().getTime());
 		ctxAccess.assignContext(relationship, getCurrentContexts(stmt));
 		logger.debug("added relationship--> " + relationship + " to node " + subject);
@@ -330,7 +330,7 @@ public class AssociationHandler implements NeoConstants {
 				}
 			}
 		}
-		logger.warn("Contexts " + Arrays.toString(stmtContexts) + " not in read contexts." + Arrays.toString(readContexts));
+		logger.debug("Contexts " + Arrays.toString(stmtContexts) + " not in read contexts." + Arrays.toString(readContexts));
 		return true;
 	}
 	

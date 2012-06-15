@@ -23,6 +23,7 @@ import java.util.Collection;
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoResourceResolver;
 import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
+import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.bindings.neo4j.impl.NeoResourceResolverImpl;
 import org.arastreju.bindings.neo4j.query.NeoQueryResult;
 import org.arastreju.sge.model.ResourceID;
@@ -57,10 +58,11 @@ public class ResourceIndex implements NeoConstants {
 	/**
 	 * Constructor.
 	 * @param connection The connection to the graph database.
+	 * @param ctx The current conversation context.
 	 */
-	public ResourceIndex(GraphDataConnection connection) {
-		this.resolver = new NeoResourceResolverImpl(connection);
-		this.neoIndex = new NeoIndex(connection);
+	public ResourceIndex(GraphDataConnection connection, NeoConversationContext ctx) {
+		this.resolver = new NeoResourceResolverImpl(connection, ctx);
+		this.neoIndex = new NeoIndex(connection, ctx);
 	}
 	
 	// -----------------------------------------------------

@@ -21,6 +21,7 @@ import java.util.Set;
 
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
+import org.arastreju.bindings.neo4j.extensions.NeoResourceResolver;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.bindings.neo4j.tx.TxProvider;
 import org.arastreju.sge.SNOPS;
@@ -54,17 +55,23 @@ import org.neo4j.graphdb.Node;
 public class SemanticNetworkAccess implements NeoConstants {
 	
 	private final GraphDataConnection connection;
+	private final NeoConversationContext conversationContext;
 	private final ResourceIndex index;
+	private final NeoResourceResolver resourceResolver;
+	
 	
 	// -----------------------------------------------------
 
 	/**
 	 * Constructor. Creates a store using given directory.
-	 * @param dir The directory for the store.
+	 * @param connection The connection to the graph database.
+	 * @param conversationContext The conversation context.
 	 */
-	public SemanticNetworkAccess(final GraphDataConnection connection) {
+	public SemanticNetworkAccess(final GraphDataConnection connection, final NeoConversationContext conversationContext) {
 		this.connection = connection;
-		this.index = new ResourceIndex(connection);
+		this.conversationContext = conversationContext;
+		this.index = new ResourceIndex(connection, conversationContext);
+		this.resourceResolver = new NeoResourceResolverImpl(connection, conversationContext);
 	}
 
 	// -----------------------------------------------------
@@ -107,7 +114,7 @@ public class SemanticNetworkAccess implements NeoConstants {
 	 */
 	public void detach(final ResourceNode node){
 		AssocKeeperAccess.setAssociationKeeper(node, new DetachedAssociationKeeper(node.getAssociations()));
-		workingContext().detach(node.getQualifiedName());
+		conversationContext.detach(node.getQualifiedName());
 	}
 	
 	/**
@@ -133,11 +140,11 @@ public class SemanticNetworkAccess implements NeoConstants {
 	 * @param id The ID.
 	 */
 	public void remove(final ResourceID id) {
-		final ResourceNode node = new NeoResourceResolverImpl(connection).resolve(id);
+		final ResourceNode node = resourceResolver.resolve(id);
 		AssocKeeperAccess.getAssociationKeeper(node).getAssociations().clear();
 		tx().doTransacted(new TxAction() {
 			public void execute() {
-				new NodeRemover(connection).remove(node, false);
+				new NodeRemover(connection, conversationContext).remove(node, false);
 			}
 		});
 		detach(node);
@@ -151,7 +158,7 @@ public class SemanticNetworkAccess implements NeoConstants {
 	 * @return The keeper or null.
 	 */
 	protected AssociationKeeper findAssociationKeeper(final QualifiedName qn) {
-		final AssociationKeeper registered = workingContext().getAssociationKeeper(qn);
+		final AssociationKeeper registered = conversationContext.getAssociationKeeper(qn);
 		if (registered != null) {
 			return registered;
 		}
@@ -210,9 +217,8 @@ public class SemanticNetworkAccess implements NeoConstants {
 	}
 	
 	protected NeoAssociationKeeper createKeeper(QualifiedName qn, Node neoNode) {
-		final NeoConversationContext ctx = workingContext();
 		final NeoAssociationKeeper keeper = new NeoAssociationKeeper(SNOPS.id(qn), neoNode);
-		ctx.attach(qn, keeper);
+		conversationContext.attach(qn, keeper);
 		return keeper;
 	}
 	
@@ -220,10 +226,6 @@ public class SemanticNetworkAccess implements NeoConstants {
 	
 	private TxProvider tx() {
 		return connection.getTxProvider();
-	}
-	
-	private NeoConversationContext workingContext() {
-		return connection.getWorkingContext();
 	}
 	
 }

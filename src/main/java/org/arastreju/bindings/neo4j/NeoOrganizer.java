@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.arastreju.bindings.neo4j.extensions.NeoResourceResolver;
 import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
+import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.bindings.neo4j.impl.NeoResourceResolverImpl;
 import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
@@ -64,10 +65,10 @@ public class NeoOrganizer extends AbstractOrganizer {
 	 * Constructor.
 	 * @param connection The connection.
 	 */
-	public NeoOrganizer(final GraphDataConnection connection) {
-		this.resolver = new NeoResourceResolverImpl(connection);
-		this.sna = new SemanticNetworkAccess(connection);
-		this.index = new ResourceIndex(connection);
+	public NeoOrganizer(final GraphDataConnection connection, final NeoConversationContext convContext) {
+		this.resolver = new NeoResourceResolverImpl(connection, convContext);
+		this.sna = new SemanticNetworkAccess(connection, convContext);
+		this.index = new ResourceIndex(connection, convContext);
 	}
 	
 	// -----------------------------------------------------

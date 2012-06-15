@@ -29,6 +29,7 @@ import org.arastreju.bindings.neo4j.extensions.NeoResourceResolver;
 import org.arastreju.bindings.neo4j.extensions.SNValueNeo;
 import org.arastreju.bindings.neo4j.impl.ContextAccess;
 import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
+import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.bindings.neo4j.impl.NeoResourceResolverImpl;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.sge.apriori.RDF;
@@ -79,9 +80,9 @@ public class NeoQueryManager implements QueryManager, NeoConstants {
 	/**
 	 * Constructor.
 	 */
-	public NeoQueryManager(GraphDataConnection connection) {
-		this.resolver = new NeoResourceResolverImpl(connection);
-		this.index = new ResourceIndex(connection);
+	public NeoQueryManager(GraphDataConnection connection, NeoConversationContext ctx) {
+		this.resolver = new NeoResourceResolverImpl(connection, ctx);
+		this.index = new ResourceIndex(connection, ctx);
 	}
 	// -----------------------------------------------------
 	

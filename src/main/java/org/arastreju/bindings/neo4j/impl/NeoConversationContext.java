@@ -44,6 +44,10 @@ public class NeoConversationContext implements NeoConstants, ConversationContext
 	public static final Context[] NO_CTX = new Context[0];
 
 	private static final Logger logger = LoggerFactory.getLogger(NeoConversationContext.class);
+	
+	private static long ID_GEN = 0; 
+	
+	// ----------------------------------------------------
 
 	private final Map<QualifiedName, NeoAssociationKeeper> register = new HashMap<QualifiedName, NeoAssociationKeeper>();
 	
@@ -54,6 +58,8 @@ public class NeoConversationContext implements NeoConstants, ConversationContext
 	private Context[] readContexts;
 	
 	private boolean active = true;
+	
+	private final long ctxId = ++ID_GEN;
 
 	// ----------------------------------------------------
 	
@@ -63,6 +69,7 @@ public class NeoConversationContext implements NeoConstants, ConversationContext
 	 */
 	public NeoConversationContext(GraphDataConnection connection) {
 		this.handler = new AssociationHandler(connection, this);
+		logger.info("New Conversation Context startet. " + ctxId);
 	}
 
 	// ----------------------------------------------------
@@ -115,7 +122,7 @@ public class NeoConversationContext implements NeoConstants, ConversationContext
 		if (active) {
 			clear();
 			active = false;
-			logger.warn("Conversation closed.");
+			logger.info("Conversation will be closed. " + ctxId);
 		}
 	}
 	
@@ -201,8 +208,18 @@ public class NeoConversationContext implements NeoConstants, ConversationContext
 	
 	private void assertActive() {
 		if (!active) {
-			logger.warn("Conversation already closed.");
-			//throw new IllegalStateException("Conversation already closed.");
+			logger.warn("Conversation context already closed. " + ctxId);
+			//throw new IllegalStateException("ConversationContext already closed.");
+		}
+	}
+	
+	/** 
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void finalize() throws Throwable {
+		if (active) {
+			logger.warn("Conversation context will be removed by GC, but has not been closed. " + ctxId);
 		}
 	}
 }

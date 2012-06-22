@@ -4,11 +4,11 @@
 	<groupId>org.arastreju</groupId>
 	<artifactId>arastreju.neo4j</artifactId>
 	<name>Arastreju Neo4J Binding</name>
-	<version>0.7.2-SNAPSHOT</version>
+	<version>0.7.3-SNAPSHOT</version>
 	<description>Binding for Arastreju to Neo4J Graph Database</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<neo4j.version>1.6</neo4j.version>
+		<neo4j.version>1.7.1</neo4j.version>
 	</properties>
 	<licenses>
 		<license>

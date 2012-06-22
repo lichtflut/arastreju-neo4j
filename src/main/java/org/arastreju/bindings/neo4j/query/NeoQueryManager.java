@@ -86,15 +86,6 @@ public class NeoQueryManager implements QueryManager, NeoConstants {
 	}
 	// -----------------------------------------------------
 	
-	/** 
-	 * {@inheritDoc}
-	 */
-	public NeoQueryBuilder buildQuery() {
-		return new NeoQueryBuilder(index);
-	}
-	
-	// -----------------------------------------------------
-	
 	/**
 	 * {@inheritDoc}
 	 */

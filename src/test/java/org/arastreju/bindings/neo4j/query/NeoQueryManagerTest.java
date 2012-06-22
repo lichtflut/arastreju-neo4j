@@ -25,6 +25,7 @@ import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.GraphDataStore;
 import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
+import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.apriori.Aras;
 import org.arastreju.sge.apriori.RDF;
@@ -66,6 +67,7 @@ public class NeoQueryManagerTest {
 	private GraphDataConnection connection;
 	private SemanticNetworkAccess sna;
 	private NeoQueryManager qm;
+	private NeoConversationContext convCtx;
 	
 	// -----------------------------------------------------
 
@@ -76,8 +78,10 @@ public class NeoQueryManagerTest {
 	public void setUp() throws Exception {
 		store = new GraphDataStore();
 		connection = new GraphDataConnection(store);
-		sna = new SemanticNetworkAccess(connection, new NeoConversationContext(connection));
-		qm = new NeoQueryManager(connection, new NeoConversationContext(connection));
+		convCtx = new NeoConversationContext(connection);
+		sna = new SemanticNetworkAccess(connection, convCtx);
+		qm = new NeoQueryManager(connection, convCtx);
+		
 	}
 
 	/**
@@ -85,6 +89,7 @@ public class NeoQueryManagerTest {
 	 */
 	@After
 	public void tearDown() throws Exception {
+		convCtx.close();
 		connection.close();
 		store.close();
 	}
@@ -93,8 +98,9 @@ public class NeoQueryManagerTest {
 	
 	@Test
 	public void testQueryBuilder() {
-		final NeoQueryBuilder query = qm.buildQuery();
-			query.beginAnd()
+		final NeoQueryBuilder query = new NeoQueryBuilder(new ResourceIndex(connection, convCtx));
+
+		query.beginAnd()
 				.add(new FieldParam("a", 1))
 				.add(new FieldParam("b", 2))
 				.add(new FieldParam("c", 3))
@@ -119,7 +125,8 @@ public class NeoQueryManagerTest {
 		SNOPS.associate(car, RDFS.LABEL, new SNText("Automobil"));
 		sna.attach(car);
 		
-		final Query query = qm.buildQuery()
+		Query query = new NeoQueryBuilder(new ResourceIndex(connection, convCtx));
+		query
 				.addValue("Automobil")
 				.and()
 				.add(new ValueParam("BMW"));
@@ -137,14 +144,15 @@ public class NeoQueryManagerTest {
 		SNOPS.associate(car, RDFS.LABEL, new SNText("Automobil"));
 		sna.attach(car);
 		
-		Query query = qm.buildQuery()
-				.addValue("Automobil")
+		Query query = new NeoQueryBuilder(new ResourceIndex(connection, convCtx));
+		query.addValue("Automobil")
 				.and()
 				.not().add(new ValueParam("BMW"));
 		
 		Assert.assertEquals(0, query.getResult().size());
 		
-		query = qm.buildQuery()
+		query = new NeoQueryBuilder(new ResourceIndex(connection, convCtx));
+		query
 				.addValue("Automobil")
 				.and()
 				.not().add(new ValueParam("VW"));
@@ -162,7 +170,8 @@ public class NeoQueryManagerTest {
 		SNOPS.associate(car, RDFS.LABEL, new SNText("Automobil"));
 		sna.attach(car);
 		
-		final Query query = qm.buildQuery().add(new FieldParam(RDFS.LABEL, "Automobil"));
+		Query query = new NeoQueryBuilder(new ResourceIndex(connection, convCtx));
+		query.add(new FieldParam(RDFS.LABEL, "Automobil"));
 		final QueryResult result = query.getResult();
 		final List<ResourceNode> list = result.toList();
 		Assert.assertEquals(1, list.size());
@@ -187,43 +196,14 @@ public class NeoQueryManagerTest {
 		final SNEntity aBike = bike.asClass().createInstance(ctx);
 		sna.attach(aBike);
 		
-		final Query query = qm.buildQuery().add(new UriParam("*Car"));
+		Query query = new NeoQueryBuilder(new ResourceIndex(connection, convCtx));
+		query.add(new UriParam("*Car"));
+		
 		final QueryResult result = query.getResult();
 		final List<ResourceNode> list = result.toList();
 		Assert.assertEquals(1, list.size());
 		Assert.assertEquals(new SimpleResourceID(qnCar), list.get(0));
 		
-	}
-	
-	@Test
-	public void testFindByType(){
-		final Context ctx = null;
-		final ResourceNode car = new SNResource(qnCar);
-		SNOPS.associate(car, RDF.TYPE, RDFS.CLASS, ctx);
-		sna.attach(car);
-		
-		final ResourceNode bike = new SNResource(qnBike);
-		SNOPS.associate(bike, RDF.TYPE, RDFS.CLASS, ctx);
-		sna.attach(bike);
-		
-		final SNEntity aCar = car.asClass().createInstance(ctx);
-		sna.attach(aCar);
-		
-		final SNEntity aBike = bike.asClass().createInstance(ctx);
-		sna.attach(aBike);
-		
-		final List<ResourceNode> result = qm.findByType(new SimpleResourceID(qnCar));
-		Assert.assertEquals(1, result.size());
-		Assert.assertTrue(result.contains(aCar));
-		
-		final List<ResourceNode> result2 = qm.findByType(new SimpleResourceID(qnBike));
-		Assert.assertEquals(1, result2.size());
-		Assert.assertTrue("Expected aBike to be a Bike", result2.contains(aBike));
-		
-		final List<ResourceNode> result3 = qm.findByType(RDFS.CLASS);
-		Assert.assertEquals(2, result3.size());
-		Assert.assertTrue("Expected Bike to be a Class", result3.contains(bike));
-		Assert.assertTrue("Expected Car to be a Class", result3.contains(car));
 	}
 	
 }

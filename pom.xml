@@ -21,12 +21,11 @@
 		<url>http://www.lichtflut.de</url>
 	</organization>
 	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.5</version>
-			<scope>test</scope>
-		</dependency>
+        <dependency>
+            <groupId>org.arastreju</groupId>
+            <artifactId>arastreju.sge</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 		<dependency>
 			<groupId>org.neo4j</groupId>
 			<artifactId>neo4j</artifactId>
@@ -37,12 +36,13 @@
 			<artifactId>neo4j-lucene-index</artifactId>
 			<version>${neo4j.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.arastreju</groupId>
-			<artifactId>arastreju.sge</artifactId>
-			<version>0.7.2-SNAPSHOT</version>
-		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.5</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 	<build>
 		<plugins>
 			<plugin>

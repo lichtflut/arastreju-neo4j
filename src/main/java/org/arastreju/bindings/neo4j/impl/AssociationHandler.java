@@ -126,7 +126,7 @@ public class AssociationHandler implements NeoConstants {
 	
 	/**
 	 * Add a new Association to given Neo node, or rather create a corresponding Relation.
-	 * @param subject The neo node, which shall be the subject in the new Relation.
+	 * @param keeper The neo keeper, which shall be the subject in the new Relation.
 	 * @param stmt The Association.
 	 */
 	public void addAssociation(final NeoAssociationKeeper keeper, final Statement stmt) {

@@ -58,57 +58,60 @@ public class Neo4jGateFactory extends ArastrejuGateFactory {
 	@Override
 	public synchronized ArastrejuGate create(final GateContext ctx) throws GateInitializationException {
 		try {
-			
-			final Neo4jGate gate;
-			
-			final ArastrejuProfile profile = ctx.getProfile();
-			final String domain = ctx.getDomain();
-			final GraphDataStore store = getStore(profile, domain);
-			
-			if (store != null) {
-				gate = new Neo4jGate(ctx, new GraphDataConnection(store));
-			} else {
-				final GraphDataConnection connection = new GraphDataConnection(initialize(profile, domain));
-				gate = new Neo4jGate(ctx, connection);
-			}
+            final GraphDataConnection connection = openConnection(ctx);
+            final Neo4jGate gate = new Neo4jGate(ctx, connection);
 			getProfile().onOpen(gate);
 			return gate;
-			
 		} catch (IOException e) {
-			throw new GateInitializationException("Could not initialize gate", e);
+			throw new GateInitializationException("Could not initialize gate.", e);
 		}
 	}
 	
 	// ----------------------------------------------------
 
+    /**
+     * Open a new connection to the store corresponding to the context.
+     * @param ctx The context.
+     * @return The new connection.
+     * @throws IOException
+     */
+    private GraphDataConnection openConnection(GateContext ctx) throws IOException {
+        final GraphDataStore store = getStore(getProfile(), ctx.getDomain());
+        if (store != null) {
+            return new GraphDataConnection(store);
+        } else {
+            return new GraphDataConnection(initialize(getProfile(), ctx.getDomain()));
+        }
+    }
+
 	/**
 	 * Initialize the domain.
 	 * @param profile The Arastreju Profile.
-	 * @param domain The domain name.
+	 * @param storeName The name of the store name.
 	 * @return The {@link GraphDataStore}.
 	 * @throws IOException
 	 */
-	private GraphDataStore initialize(ArastrejuProfile profile, String domain) throws IOException {
-		final GraphDataStore store = createStore(profile, domain);
+	private GraphDataStore initialize(ArastrejuProfile profile, String storeName) throws IOException {
+		final GraphDataStore store = createStore(profile, storeName);
 		profile.addListener(store);
 		if (isStoreDirDefined(profile)) {
-			final String key = KEY_GRAPH_DATA_STORE + ":" + domain;
+			final String key = KEY_GRAPH_DATA_STORE + ":" + storeName;
 			profile.setProfileObject(key, store);
 		}
 		return store;
 	}
 	
-	private GraphDataStore createStore(final ArastrejuProfile profile, final String domain) throws IOException {
+	private GraphDataStore createStore(final ArastrejuProfile profile, final String store) throws IOException {
 		if (isStoreDirDefined(profile)){
 			String basedir = profile.getProperty(ArastrejuProfile.ARAS_STORE_DIRECTORY);
-			return new GraphDataStore(basedir + "/" + domain);
+			return new GraphDataStore(basedir + "/" + store);
 		} else {
-			return new GraphDataStore(GraphDataStore.prepareTempStore(domain));
+			return new GraphDataStore(GraphDataStore.prepareTempStore(store));
 		}
 	}
 	
-	private GraphDataStore getStore(ArastrejuProfile profile, String domain) {
-		final String key = KEY_GRAPH_DATA_STORE + ":" + domain;
+	private GraphDataStore getStore(ArastrejuProfile profile, String storeName) {
+		final String key = KEY_GRAPH_DATA_STORE + ":" + storeName;
 		return (GraphDataStore) profile.getProfileObject(key);
 	}
 	

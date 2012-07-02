@@ -49,7 +49,7 @@ import org.junit.Test;
 
 /**
  * <p>
- *  Test cases for {@link NeoQueryManager}.
+ *  Test cases for queries.
  * </p>
  *
  * <p>
@@ -66,7 +66,6 @@ public class NeoQueryManagerTest {
 	private GraphDataStore store;
 	private GraphDataConnection connection;
 	private SemanticNetworkAccess sna;
-	private NeoQueryManager qm;
 	private NeoConversationContext convCtx;
 	
 	// -----------------------------------------------------
@@ -80,8 +79,6 @@ public class NeoQueryManagerTest {
 		connection = new GraphDataConnection(store);
 		convCtx = new NeoConversationContext(connection);
 		sna = new SemanticNetworkAccess(connection, convCtx);
-		qm = new NeoQueryManager(connection, convCtx);
-		
 	}
 
 	/**

@@ -18,11 +18,9 @@ package org.arastreju.bindings.neo4j;
 
 import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
-import org.arastreju.bindings.neo4j.query.NeoQueryManager;
 import org.arastreju.sge.ArastrejuGate;
 import org.arastreju.sge.ModelingConversation;
 import org.arastreju.sge.Organizer;
-import org.arastreju.sge.query.QueryManager;
 import org.arastreju.sge.spi.GateContext;
 import org.arastreju.sge.spi.GateInitializationException;
 
@@ -50,6 +48,7 @@ public class Neo4jGate implements ArastrejuGate {
 	/**
 	 * Initialize default gate.
 	 * @param ctx The gate context.
+     * @param connection The connection to the graph datastore.
 	 */
 	public Neo4jGate(final GateContext ctx, GraphDataConnection connection) throws GateInitializationException {
 		this.ctx = ctx;
@@ -62,34 +61,23 @@ public class Neo4jGate implements ArastrejuGate {
 	/**
 	 * {@inheritDoc}
 	 */
+    @Override
 	public ModelingConversation startConversation() {
 		return new Neo4jModellingConversation(connection);
 	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public QueryManager createQueryManager() {
-		return new NeoQueryManager(connection, new NeoConversationContext(connection));
-	}
 
 	/**
 	 * {@inheritDoc}
 	 */
+    @Override
 	public Organizer getOrganizer() {
 		return new NeoOrganizer(connection, new NeoConversationContext(connection));
 	}
-
-	/** 
-	 * {@inheritDoc}
-	 */
-	public void open() {
-	    connection.open();
-	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
+    @Override
 	public void close() {
 		connection.close();
 		open = false;
@@ -98,15 +86,9 @@ public class Neo4jGate implements ArastrejuGate {
 	/** 
 	 * {@inheritDoc}
 	 */
+    @Override
 	public GateContext getContext() {
 		return ctx;
-	}
-	
-	/**
-	 * @return true if gate is open.
-	 */
-	public boolean isOpen() {
-		return open;
 	}
 	
 }

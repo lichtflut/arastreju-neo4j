@@ -191,7 +191,7 @@ public class Neo4jModellingConversation implements ModelingConversation {
 	public ConversationContext getConversationContext() {
 		assertActive();
 		return conversationContext;
-	};
+	}
 	
 	/**
 	 * {@inheritDoc}

@@ -22,6 +22,7 @@ import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.GraphDataStore;
 import org.arastreju.sge.ArastrejuGate;
 import org.arastreju.sge.ArastrejuProfile;
+import org.arastreju.sge.config.StoreIdentifier;
 import org.arastreju.sge.spi.ArastrejuGateFactory;
 import org.arastreju.sge.spi.GateContext;
 import org.arastreju.sge.spi.GateInitializationException;
@@ -63,7 +64,7 @@ public class Neo4jGateFactory extends ArastrejuGateFactory {
 			getProfile().onOpen(gate);
 			return gate;
 		} catch (IOException e) {
-			throw new GateInitializationException("Could not initialize gate.", e);
+			throw new GateInitializationException("Could not createStore gate.", e);
 		}
 	}
 	
@@ -76,45 +77,51 @@ public class Neo4jGateFactory extends ArastrejuGateFactory {
      * @throws IOException
      */
     private GraphDataConnection openConnection(GateContext ctx) throws IOException {
-        final GraphDataStore store = getStore(getProfile(), ctx.getDomain());
+        final GraphDataStore store = getOrCreateStore(ctx);
+        return new GraphDataConnection(store);
+    }
+
+    private GraphDataStore getOrCreateStore(GateContext ctx) throws IOException {
+        final GraphDataStore store = getStore(getProfile(), ctx.getStoreIdentifier());
         if (store != null) {
-            return new GraphDataConnection(store);
+            return store;
         } else {
-            return new GraphDataConnection(initialize(getProfile(), ctx.getDomain()));
+            return createStore(ctx.getStoreIdentifier());
         }
     }
 
-	/**
-	 * Initialize the domain.
-	 * @param profile The Arastreju Profile.
-	 * @param storeName The name of the store name.
-	 * @return The {@link GraphDataStore}.
-	 * @throws IOException
-	 */
-	private GraphDataStore initialize(ArastrejuProfile profile, String storeName) throws IOException {
-		final GraphDataStore store = createStore(profile, storeName);
-		profile.addListener(store);
-		if (isStoreDirDefined(profile)) {
-			final String key = KEY_GRAPH_DATA_STORE + ":" + storeName;
-			profile.setProfileObject(key, store);
-		}
-		return store;
-	}
+    private GraphDataStore getStore(ArastrejuProfile profile, StoreIdentifier storeIdentifier) {
+        final String key = KEY_GRAPH_DATA_STORE + ":" + storeIdentifier.getStorageName();
+        return (GraphDataStore) profile.getProfileObject(key);
+    }
 	
-	private GraphDataStore createStore(final ArastrejuProfile profile, final String store) throws IOException {
-		if (isStoreDirDefined(profile)){
-			String basedir = profile.getProperty(ArastrejuProfile.ARAS_STORE_DIRECTORY);
-			return new GraphDataStore(basedir + "/" + store);
-		} else {
-			return new GraphDataStore(GraphDataStore.prepareTempStore(store));
-		}
-	}
-	
-	private GraphDataStore getStore(ArastrejuProfile profile, String storeName) {
-		final String key = KEY_GRAPH_DATA_STORE + ":" + storeName;
-		return (GraphDataStore) profile.getProfileObject(key);
-	}
-	
+    /**
+     * Create and initialize the store.
+     * @param storeIdentifier The identified of the data store.
+     * @return The {@link GraphDataStore}.
+     * @throws IOException
+     */
+    private GraphDataStore createStore(StoreIdentifier storeIdentifier) throws IOException {
+        final ArastrejuProfile profile = getProfile();
+        final String storeName = storeIdentifier.getStorageName();
+        final GraphDataStore store = createStore(profile, storeName);
+        profile.addListener(store);
+        if (isStoreDirDefined(profile)) {
+            final String key = KEY_GRAPH_DATA_STORE + ":" + storeName;
+            profile.setProfileObject(key, store);
+        }
+        return store;
+    }
+
+    private GraphDataStore createStore(ArastrejuProfile profile, String store) throws IOException {
+        if (isStoreDirDefined(profile)){
+            String basedir = profile.getProperty(ArastrejuProfile.ARAS_STORE_DIRECTORY);
+            return new GraphDataStore(basedir + "/" + store);
+        } else {
+            return new GraphDataStore(GraphDataStore.prepareTempStore(store));
+        }
+    }
+
 	// -----------------------------------------------------
 	
 	private boolean isStoreDirDefined(final ArastrejuProfile profile) {

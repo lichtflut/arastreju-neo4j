@@ -67,11 +67,18 @@ public class Neo4jModellingConversation implements ModelingConversation {
 	 * Create a new Modelling Conversation instance using a given data store.
 	 */
 	public Neo4jModellingConversation(final GraphDataConnection connection) {
-		this.connection = connection;
-		this.conversationContext = new NeoConversationContext(connection);
-		this.sna = new SemanticNetworkAccess(connection, conversationContext);
-		this.resolver = new NeoResourceResolverImpl(connection, conversationContext);
+		this(connection, new NeoConversationContext(connection));
 	}
+
+    /**
+     * Create a new Modelling Conversation instance using a given data store.
+     */
+    public Neo4jModellingConversation(final GraphDataConnection connection, final NeoConversationContext context) {
+        this.connection = connection;
+        this.conversationContext = context;
+        this.sna = new SemanticNetworkAccess(connection, context);
+        this.resolver = new NeoResourceResolverImpl(connection, context);
+    }
 	
 	// -----------------------------------------------------
 	

@@ -191,6 +191,7 @@ public class NeoConversationContext implements NeoConstants, ConversationContext
 	/**
 	 * {@inheritDoc}
 	 */
+    @Override
 	public ConversationContext setWriteContext(Context ctx) {
 		this.writeContext = ctx;
 		return this;
@@ -199,6 +200,7 @@ public class NeoConversationContext implements NeoConstants, ConversationContext
 	/**
 	 * {@inheritDoc}
 	 */
+    @Override
 	public ConversationContext setReadContexts(Context... ctxs) {
 		this.readContexts = ctxs;
 		return this;

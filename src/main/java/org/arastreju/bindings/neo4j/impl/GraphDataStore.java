@@ -60,7 +60,11 @@ public class GraphDataStore implements ProfileCloseListener {
 	 * @param dir The directory for the store.
 	 */
 	public GraphDataStore(final String dir) {
-		logger.info("Neo4jDataStore created in " + dir);
+        if (new File(dir).exists()) {
+            logger.info("Using existing Neo4jDataStore in {}.", dir);
+        } else {
+            logger.info("New Neo4jDataStore created in {}.", dir);
+        }
 		gdbService = new EmbeddedGraphDatabase(dir); 
 		indexManager = gdbService.index();
 	}

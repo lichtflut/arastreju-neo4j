@@ -16,16 +16,15 @@
  */
 package org.arastreju.bindings.neo4j;
 
-import java.io.IOException;
-
 import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.GraphDataStore;
 import org.arastreju.sge.ArastrejuGate;
 import org.arastreju.sge.ArastrejuProfile;
-import org.arastreju.sge.config.StoreIdentifier;
+import org.arastreju.sge.context.DomainIdentifier;
 import org.arastreju.sge.spi.ArastrejuGateFactory;
-import org.arastreju.sge.spi.GateContext;
 import org.arastreju.sge.spi.GateInitializationException;
+
+import java.io.IOException;
 
 /**
  * <p>
@@ -57,10 +56,10 @@ public class Neo4jGateFactory extends ArastrejuGateFactory {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public synchronized ArastrejuGate create(final GateContext ctx) throws GateInitializationException {
+	public synchronized ArastrejuGate create(final DomainIdentifier domainIdentifier) throws GateInitializationException {
 		try {
-            final GraphDataConnection connection = openConnection(ctx);
-            final Neo4jGate gate = new Neo4jGate(ctx, connection);
+            final GraphDataConnection connection = openConnection(domainIdentifier);
+            final Neo4jGate gate = new Neo4jGate(domainIdentifier, connection);
 			getProfile().onOpen(gate);
 			return gate;
 		} catch (IOException e) {
@@ -76,35 +75,35 @@ public class Neo4jGateFactory extends ArastrejuGateFactory {
      * @return The new connection.
      * @throws IOException
      */
-    private GraphDataConnection openConnection(GateContext ctx) throws IOException {
+    private GraphDataConnection openConnection(DomainIdentifier ctx) throws IOException {
         final GraphDataStore store = getOrCreateStore(ctx);
         return new GraphDataConnection(store);
     }
 
-    private GraphDataStore getOrCreateStore(GateContext ctx) throws IOException {
-        final GraphDataStore store = getStore(getProfile(), ctx.getStoreIdentifier());
+    private GraphDataStore getOrCreateStore(DomainIdentifier domainIdentifier) throws IOException {
+        final GraphDataStore store = getStore(domainIdentifier);
         if (store != null) {
             return store;
         } else {
-            return createStore(ctx.getStoreIdentifier());
+            return createStore(domainIdentifier);
         }
     }
 
-    private GraphDataStore getStore(ArastrejuProfile profile, StoreIdentifier storeIdentifier) {
-        final String key = KEY_GRAPH_DATA_STORE + ":" + storeIdentifier.getStorageName();
-        return (GraphDataStore) profile.getProfileObject(key);
+    private GraphDataStore getStore(DomainIdentifier domainIdentifier) {
+        final String key = KEY_GRAPH_DATA_STORE + ":" + domainIdentifier.getStorage();
+        return (GraphDataStore) getProfile().getProfileObject(key);
     }
 	
     /**
      * Create and initialize the store.
-     * @param storeIdentifier The identified of the data store.
+     * @param domainIdentifier The identified of the data store.
      * @return The {@link GraphDataStore}.
      * @throws IOException
      */
-    private GraphDataStore createStore(StoreIdentifier storeIdentifier) throws IOException {
+    private GraphDataStore createStore(DomainIdentifier domainIdentifier) throws IOException {
         final ArastrejuProfile profile = getProfile();
-        final String storeName = storeIdentifier.getStorageName();
-        final GraphDataStore store = createStore(profile, storeName);
+        final String storeName = domainIdentifier.getStorage();
+        final GraphDataStore store = createStore(storeName);
         profile.addListener(store);
         if (isStoreDirDefined(profile)) {
             final String key = KEY_GRAPH_DATA_STORE + ":" + storeName;
@@ -113,7 +112,8 @@ public class Neo4jGateFactory extends ArastrejuGateFactory {
         return store;
     }
 
-    private GraphDataStore createStore(ArastrejuProfile profile, String store) throws IOException {
+    private GraphDataStore createStore(String store) throws IOException {
+        final ArastrejuProfile profile = getProfile();
         if (isStoreDirDefined(profile)){
             String basedir = profile.getProperty(ArastrejuProfile.ARAS_STORE_DIRECTORY);
             return new GraphDataStore(basedir + "/" + store);

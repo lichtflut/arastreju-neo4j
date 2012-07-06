@@ -21,8 +21,9 @@ import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.sge.ArastrejuGate;
 import org.arastreju.sge.ModelingConversation;
 import org.arastreju.sge.Organizer;
-import org.arastreju.sge.spi.GateContext;
+import org.arastreju.sge.context.DomainIdentifier;
 import org.arastreju.sge.spi.GateInitializationException;
+import org.arastreju.sge.spi.abstracts.AbstractArastrejuGate;
 
 /**
  * <p>
@@ -35,11 +36,9 @@ import org.arastreju.sge.spi.GateInitializationException;
  * 
  * @author Oliver Tigges
  */
-public class Neo4jGate implements ArastrejuGate {
-	
+public class Neo4jGate extends AbstractArastrejuGate {
+
 	private final GraphDataConnection connection;
-	
-	private final GateContext ctx;
 	
 	private boolean open;
 
@@ -47,11 +46,11 @@ public class Neo4jGate implements ArastrejuGate {
 
 	/**
 	 * Initialize default gate.
-	 * @param ctx The gate context.
+	 * @param domainIdentifier The gate context.
      * @param connection The connection to the graph datastore.
 	 */
-	public Neo4jGate(final GateContext ctx, GraphDataConnection connection) throws GateInitializationException {
-		this.ctx = ctx;
+	public Neo4jGate(DomainIdentifier domainIdentifier, GraphDataConnection connection) throws GateInitializationException {
+        super(domainIdentifier);
 		this.connection = connection;
 		this.open = true;
 	}
@@ -63,15 +62,15 @@ public class Neo4jGate implements ArastrejuGate {
 	 */
     @Override
 	public ModelingConversation startConversation() {
-		return new Neo4jModellingConversation(connection);
+        return new Neo4jModellingConversation(connection, newConversationContext());
 	}
 
-	/**
+    /**
 	 * {@inheritDoc}
 	 */
     @Override
 	public Organizer getOrganizer() {
-		return new NeoOrganizer(connection, new NeoConversationContext(connection));
+		return new NeoOrganizer(connection, newConversationContext());
 	}
 	
 	/**
@@ -82,13 +81,13 @@ public class Neo4jGate implements ArastrejuGate {
 		connection.close();
 		open = false;
 	}
-	
-	/** 
-	 * {@inheritDoc}
-	 */
-    @Override
-	public GateContext getContext() {
-		return ctx;
-	}
-	
+
+    // ----------------------------------------------------
+
+    private NeoConversationContext newConversationContext() {
+        NeoConversationContext cc = new NeoConversationContext(connection);
+        super.initContext(cc);
+        return cc;
+    }
+
 }

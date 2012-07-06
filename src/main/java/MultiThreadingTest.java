@@ -48,7 +48,7 @@ public class MultiThreadingTest {
 	public MultiThreadingTest(final int numberOfThreads) {
 		
 		for(int i = 0; i < numberOfThreads; i++) {
-			final Thread t = new Thread(new Worker(Arastreju.getInstance().rootContext()));
+			final Thread t = new Thread(new Worker(Arastreju.getInstance().openMasterGate()));
 			t.start();
 			System.out.println("Startet Thread: " + t.getId());
 		}

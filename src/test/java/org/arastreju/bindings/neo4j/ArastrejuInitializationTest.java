@@ -23,6 +23,9 @@ import junit.framework.Assert;
 import org.arastreju.sge.Arastreju;
 import org.arastreju.sge.ArastrejuGate;
 import org.arastreju.sge.ArastrejuProfile;
+import org.arastreju.sge.ConversationContext;
+import org.arastreju.sge.naming.Namespace;
+import org.arastreju.sge.naming.QualifiedName;
 import org.junit.Test;
 
 
@@ -53,13 +56,13 @@ public class ArastrejuInitializationTest {
 		final ArastrejuGate root = aras.rootContext();
 		Assert.assertNotNull(root);
 		
-		final ArastrejuGate myDomain = aras.rootContext("mydomain");
+		final ArastrejuGate myDomain = aras.openGate("mydomain");
 		Assert.assertNotNull(myDomain);
 	}
 	
 	@Test
 	public void testTempRootGate(){
-		final ArastrejuGate rootGate = Arastreju.getInstance().rootContext();
+		final ArastrejuGate rootGate = Arastreju.getInstance().openMasterGate();
 		
 		Assert.assertNotNull(rootGate);
 		
@@ -71,13 +74,35 @@ public class ArastrejuInitializationTest {
 	
 	@Test
 	public void testTempRootGateForDomain(){
-		final ArastrejuGate rootGate = Arastreju.getInstance().rootContext("mydomain");
+		final ArastrejuGate mydomain = Arastreju.getInstance().openGate("mydomain");
 		
-		Assert.assertNotNull(rootGate);
+		Assert.assertNotNull(mydomain);
 		
-		Assert.assertNotNull(rootGate.startConversation());
-		
-		rootGate.close();
+		Assert.assertNotNull(mydomain.startConversation());
+
+        mydomain.close();
 	}
+
+    @Test
+    public void shouldPropagateContextsOfVirtualDomains() {
+        final File tempDir = new File(System.getProperty("java.io.tmpdir"), Long.toString(System.currentTimeMillis()));
+
+        final ArastrejuProfile profile = new ArastrejuProfile("any profile");
+        profile.setProperty(ArastrejuProfile.GATE_FACTORY, Neo4jGateFactory.class.getCanonicalName());
+        profile.setProperty(ArastrejuProfile.ARAS_STORE_DIRECTORY, tempDir.getAbsolutePath());
+        profile.setProperty(ArastrejuProfile.ENABLE_VIRTUAL_DOMAINS, "true");
+
+        final Arastreju aras = Arastreju.getInstance(profile);
+        Assert.assertNotNull(aras);
+
+        final ArastrejuGate gate = aras.openGate("mydomain");
+        Assert.assertNotNull(gate);
+
+        ConversationContext cc = gate.startConversation().getConversationContext();
+        Assert.assertNotNull(cc);
+        Assert.assertNotNull(cc.getWriteContext());
+        Assert.assertEquals(new QualifiedName(Namespace.LOCAL_CONTEXTS, "mydomain"), cc.getWriteContext().getQualifiedName());
+
+    }
 	
 }

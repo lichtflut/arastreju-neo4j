@@ -25,6 +25,7 @@ import org.arastreju.sge.ConversationContext;
 import org.arastreju.sge.context.Context;
 import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.naming.QualifiedName;
+import org.arastreju.sge.spi.abstracts.AbstractConversationContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,28 +40,12 @@ import org.slf4j.LoggerFactory;
  *
  * @author Oliver Tigges
  */
-public class NeoConversationContext implements NeoConstants, ConversationContext {
-	
-	public static final Context[] NO_CTX = new Context[0];
-
-	private static final Logger logger = LoggerFactory.getLogger(NeoConversationContext.class);
-	
-	private static long ID_GEN = 0; 
-	
-	// ----------------------------------------------------
+public class NeoConversationContext extends AbstractConversationContext implements NeoConstants {
 
 	private final Map<QualifiedName, NeoAssociationKeeper> register = new HashMap<QualifiedName, NeoAssociationKeeper>();
 	
 	private final AssociationHandler handler;
 	
-	private Context writeContext;
-	
-	private Context[] readContexts;
-	
-	private boolean active = true;
-	
-	private final long ctxId = ++ID_GEN;
-
 	// ----------------------------------------------------
 	
 	/**
@@ -69,7 +54,6 @@ public class NeoConversationContext implements NeoConstants, ConversationContext
 	 */
 	public NeoConversationContext(GraphDataConnection connection) {
 		this.handler = new AssociationHandler(connection, this);
-		logger.info("New Conversation Context startet. " + ctxId);
 	}
 
 	// ----------------------------------------------------
@@ -102,35 +86,6 @@ public class NeoConversationContext implements NeoConstants, ConversationContext
 		if (removed != null) {
 			removed.detach();
 		}
-	}
-	
-	/**
-	 * Clear the cache.
-	 */
-	public void clear() {
-		assertActive();
-		for (NeoAssociationKeeper keeper : register.values()) {
-			keeper.detach();
-		}
-		register.clear();
-	}
-	
-	/**
-	 * Close and invalidate this context.
-	 */
-	public void close() {
-		if (active) {
-			clear();
-			active = false;
-			logger.info("Conversation will be closed. " + ctxId);
-		}
-	}
-	
-	/**
-	 * @return the active
-	 */
-	public boolean isActive() {
-		return active;
 	}
 	
 	// ----------------------------------------------------
@@ -168,68 +123,12 @@ public class NeoConversationContext implements NeoConstants, ConversationContext
 	}
 	
 	// ----------------------------------------------------
-	
-	/** 
-	 * {@inheritDoc}
-	 */
-	public Context[] getReadContexts() {
-		assertActive();
-		if (readContexts != null) {
-			return readContexts;
-		} else {
-			return NO_CTX;
-		}
-	}
-	
-   /** 
-	 * {@inheritDoc}
-	 */
-    public Context getWriteContext() {
-    	return writeContext;
+
+    @Override
+    protected void clearCaches() {
+        for (NeoAssociationKeeper keeper : register.values()) {
+            keeper.detach();
+        }
+        register.clear();
     }
-
-	/**
-	 * {@inheritDoc}
-	 */
-    @Override
-	public ConversationContext setWriteContext(Context ctx) {
-		this.writeContext = ctx;
-		return this;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-    @Override
-	public ConversationContext setReadContexts(Context... ctxs) {
-		this.readContexts = ctxs;
-		return this;
-	}
-
-    // ----------------------------------------------------
-
-    @Override
-    public String toString() {
-        return "ConversationContext[" +  ctxId + "]";
-    }
-
-
-    // ----------------------------------------------------
-	
-	private void assertActive() {
-		if (!active) {
-			logger.warn("Conversation context already closed. " + ctxId);
-			throw new IllegalStateException("ConversationContext already closed.");
-		}
-	}
-	
-	/** 
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void finalize() throws Throwable {
-		if (active) {
-			logger.warn("Conversation context will be removed by GC, but has not been closed. " + ctxId);
-		}
-	}
 }

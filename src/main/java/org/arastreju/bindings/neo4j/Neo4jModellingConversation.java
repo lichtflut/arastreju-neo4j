@@ -35,6 +35,7 @@ import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.persistence.TransactionControl;
 import org.arastreju.sge.persistence.TxResultAction;
 import org.arastreju.sge.query.Query;
+import org.arastreju.sge.spi.abstracts.AbstractModelingConversation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +50,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Oliver Tigges
  */
-public class Neo4jModellingConversation implements ModelingConversation {
+public class Neo4jModellingConversation extends AbstractModelingConversation implements ModelingConversation {
 	
 	private static final Logger logger = LoggerFactory.getLogger(Neo4jModellingConversation.class);
 	
@@ -80,27 +81,7 @@ public class Neo4jModellingConversation implements ModelingConversation {
         this.resolver = new NeoResourceResolverImpl(connection, context);
     }
 	
-	// -----------------------------------------------------
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public void addStatement(final Statement stmt) {
-		assertActive();
-		final ResourceNode subject = resolve(stmt.getSubject());
-		SNOPS.associate(subject, stmt.getPredicate(), stmt.getObject(), stmt.getContexts());
-	}
-	
-	/** 
-	* {@inheritDoc}
-	*/
-	public boolean removeStatement(final Statement stmt) {
-		assertActive();
-		final ResourceNode subject = resolve(stmt.getSubject());
-		return SNOPS.remove(subject, stmt.getPredicate(), stmt.getObject());
-	}
-	
-	// ----------------------------------------------------
+    // ----------------------------------------------------
 	
 	/** 
 	 * {@inheritDoc}
@@ -123,7 +104,8 @@ public class Neo4jModellingConversation implements ModelingConversation {
 	/**
 	 * {@inheritDoc}
 	 */
-	public ResourceNode resolve(final ResourceID resource) {
+	@Override
+    public ResourceNode resolve(final ResourceID resource) {
 		assertActive();
 		return resolver.resolve(resource);
 	}
@@ -217,7 +199,8 @@ public class Neo4jModellingConversation implements ModelingConversation {
 	
 	// ----------------------------------------------------
 	
-	private void assertActive() {
+	@Override
+    protected void assertActive() {
 		if (!conversationContext.isActive()) {
 			logger.warn("Conversation already closed.");
 			//throw new IllegalStateException("Conversation already closed.");

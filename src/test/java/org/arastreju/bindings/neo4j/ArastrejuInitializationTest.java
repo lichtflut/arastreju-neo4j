@@ -87,7 +87,7 @@ public class ArastrejuInitializationTest {
     public void shouldPropagateContextsOfVirtualDomains() {
         final File tempDir = new File(System.getProperty("java.io.tmpdir"), Long.toString(System.currentTimeMillis()));
 
-        final ArastrejuProfile profile = new ArastrejuProfile("any profile");
+        final ArastrejuProfile profile = new ArastrejuProfile("virtual profile");
         profile.setProperty(ArastrejuProfile.GATE_FACTORY, Neo4jGateFactory.class.getCanonicalName());
         profile.setProperty(ArastrejuProfile.ARAS_STORE_DIRECTORY, tempDir.getAbsolutePath());
         profile.setProperty(ArastrejuProfile.ENABLE_VIRTUAL_DOMAINS, "true");

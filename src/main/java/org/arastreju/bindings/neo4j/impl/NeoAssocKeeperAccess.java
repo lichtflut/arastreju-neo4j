@@ -16,12 +16,11 @@
  */
 package org.arastreju.bindings.neo4j.impl;
 
-import java.lang.reflect.Field;
-
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
 import org.arastreju.sge.model.associations.AssociationKeeper;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.model.nodes.SNResource;
+import org.arastreju.sge.spi.AssocKeeperAccess;
 import org.neo4j.graphdb.Node;
 
 /**
@@ -35,24 +34,13 @@ import org.neo4j.graphdb.Node;
  *
  * @author Oliver Tigges
  */
-public class AssocKeeperAccess {
-	
-	private final Field assocKeeperField;
-	
-	private static final AssocKeeperAccess INSTANCE = new AssocKeeperAccess();
-	
-	// -----------------------------------------------------
+public class NeoAssocKeeperAccess {
 	
 	/**
 	 * Get the association keeper of given node.
 	 */
 	public static AssociationKeeper getAssociationKeeper(final ResourceNode node){
-		final SNResource resource = findSNResource(node);
-		try {
-			return (AssociationKeeper) INSTANCE.assocKeeperField.get(resource);
-		} catch (Exception e) {
-			throw new IllegalArgumentException("Cannot get AssociationKeeper", e);
-		}
+        return AssocKeeperAccess.getInstance().getAssociationKeeper(node);
 	}
 	
 	/**
@@ -80,40 +68,8 @@ public class AssocKeeperAccess {
 	 * @param ak The association keeper to be set. 
 	 */
 	public static void setAssociationKeeper(final ResourceNode node, final AssociationKeeper ak) {
-		final SNResource resource = findSNResource(node);
-		try {
-			INSTANCE.assocKeeperField.set(resource, ak);
-		} catch (Exception e) {
-			throw new IllegalArgumentException("Cannot get AssociationKeeper", e);
-		}
+        AssocKeeperAccess.getInstance().setAssociationKeeper(node, ak);
 	}
 	
-	// -----------------------------------------------------
-
-	private static SNResource findSNResource(ResourceNode node) {
-		ResourceNode resource = node.asResource();
-		int depth = 100;
-		while (!(resource instanceof SNResource)){
-			if (resource == resource.asResource() || depth <= 0) {
-				throw new IllegalArgumentException("Cannot get AssociationKeeper for class: " + node.getClass());	
-			}
-			resource = resource.asResource();
-			depth--;
-		}
-		return (SNResource) resource;
-	}
-	
-	/**
-	 * Private constructor.
-	 */
-	private AssocKeeperAccess() {
-		try {
-			assocKeeperField = SNResource.class
-					.getDeclaredField("associationKeeper");
-			assocKeeperField.setAccessible(true);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-}
 
 }

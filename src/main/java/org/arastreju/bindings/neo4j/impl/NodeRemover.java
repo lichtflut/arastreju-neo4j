@@ -70,7 +70,7 @@ public class NodeRemover {
 	 * @return The set of removed nodes.
 	 */
 	public Set<Node> remove(final ResourceNode node, final boolean cascade) {
-		return remove(AssocKeeperAccess.getNeoNode(node), cascade);
+		return remove(NeoAssocKeeperAccess.getNeoNode(node), cascade);
 	}
 	
 	// -----------------------------------------------------

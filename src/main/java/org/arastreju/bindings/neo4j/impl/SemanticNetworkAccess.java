@@ -87,7 +87,6 @@ public class SemanticNetworkAccess implements NeoConstants {
 	/**
 	 * Attach the given node if it is not already attached.
 	 * @param resource The node to attach.
-	 * @return A node attached by guaranty.
 	 */
 	public void attach(final ResourceNode resource) {
 		// 1st: check if node is already attached.
@@ -113,7 +112,7 @@ public class SemanticNetworkAccess implements NeoConstants {
 	 * @param node The node to detach.
 	 */
 	public void detach(final ResourceNode node){
-		AssocKeeperAccess.setAssociationKeeper(node, new DetachedAssociationKeeper(node.getAssociations()));
+		NeoAssocKeeperAccess.setAssociationKeeper(node, new DetachedAssociationKeeper(node.getAssociations()));
 		conversationContext.detach(node.getQualifiedName());
 	}
 	
@@ -128,7 +127,7 @@ public class SemanticNetworkAccess implements NeoConstants {
 		}
 		final AssociationKeeper keeper = findAssociationKeeper(node.getQualifiedName());
 		if (keeper != null) {
-			AssocKeeperAccess.setAssociationKeeper(node, keeper);
+			NeoAssocKeeperAccess.setAssociationKeeper(node, keeper);
 		} else {
 			throw new ArastrejuRuntimeException(ErrorCodes.GENERAL_CONSISTENCY_FAILURE, 
 					"Can't find node/keeper for attached node " + node.getQualifiedName());
@@ -141,7 +140,7 @@ public class SemanticNetworkAccess implements NeoConstants {
 	 */
 	public void remove(final ResourceID id) {
 		final ResourceNode node = resourceResolver.resolve(id);
-		AssocKeeperAccess.getAssociationKeeper(node).getAssociations().clear();
+		NeoAssocKeeperAccess.getAssociationKeeper(node).getAssociations().clear();
 		tx().doTransacted(new TxAction() {
 			public void execute() {
 				new NodeRemover(connection, conversationContext).remove(node, false);
@@ -183,7 +182,7 @@ public class SemanticNetworkAccess implements NeoConstants {
 		// 2nd: retain copy of current associations and attach the Resource with this store.
 		final Set<Statement> copy = node.getAssociations();
 		final NeoAssociationKeeper keeper = createKeeper(node.getQualifiedName(), neoNode);
-		AssocKeeperAccess.setAssociationKeeper(node, keeper);
+		NeoAssocKeeperAccess.setAssociationKeeper(node, keeper);
 		
 		// 3rd: index the Neo node.
 		index.index(neoNode, node);
@@ -200,11 +199,10 @@ public class SemanticNetworkAccess implements NeoConstants {
 	 * Merges all associations from the 'changed' node to the 'attached' keeper and put's keeper in 'changed'.
 	 * @param attached The currently attached keeper for this resource.
 	 * @param changed An unattached node referencing the same resource.
-	 * @return The merged {@link ResourceNode}.
 	 */
 	protected void merge(final AssociationKeeper attached, final ResourceNode changed) {
 		final Set<Statement> currentAssocs = new HashSet<Statement>(attached.getAssociations());
-		final AssociationKeeper detached = AssocKeeperAccess.getAssociationKeeper(changed);
+		final AssociationKeeper detached = NeoAssocKeeperAccess.getAssociationKeeper(changed);
 		for (Statement toBeRemoved : detached.getAssociationsForRemoval()) {
 			attached.removeAssociation(toBeRemoved);
 		}
@@ -213,7 +211,7 @@ public class SemanticNetworkAccess implements NeoConstants {
 				attached.addAssociation(assoc);
 			}
 		}
-		AssocKeeperAccess.setAssociationKeeper(changed, attached);
+		NeoAssocKeeperAccess.setAssociationKeeper(changed, attached);
 	}
 	
 	protected NeoAssociationKeeper createKeeper(QualifiedName qn, Node neoNode) {

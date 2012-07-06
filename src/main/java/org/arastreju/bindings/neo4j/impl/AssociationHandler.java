@@ -233,7 +233,7 @@ public class AssociationHandler implements NeoConstants {
 	private void createRelationships(Node subject, Statement stmt) {
 		if (stmt.getObject().isResourceNode()){
 			final ResourceNode arasClient = resolver.resolve(stmt.getObject().asResource());
-			final Node neoClient = AssocKeeperAccess.getNeoNode(arasClient);
+			final Node neoClient = NeoAssocKeeperAccess.getNeoNode(arasClient);
 			createRelationShip(subject, neoClient, stmt);
 		} else {
 			final Node neoClient = subject.getGraphDatabase().createNode();

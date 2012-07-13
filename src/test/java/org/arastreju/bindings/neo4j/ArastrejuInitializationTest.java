@@ -53,7 +53,7 @@ public class ArastrejuInitializationTest {
 		final Arastreju aras = Arastreju.getInstance(profile);
 		Assert.assertNotNull(aras);
 		
-		final ArastrejuGate root = aras.rootContext();
+		final ArastrejuGate root = aras.openMasterGate();
 		Assert.assertNotNull(root);
 		
 		final ArastrejuGate myDomain = aras.openGate("mydomain");

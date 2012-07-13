@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * <p>
- *  Wrapper around the Neo {@link IndexService} with convenience methods.
+ *  Wrapper around the lucene indexes with convenience methods.
  * </p>
  *
  * <p>
@@ -53,37 +53,38 @@ import org.slf4j.LoggerFactory;
  * @author Oliver Tigges
  */
 public class NeoIndex implements NeoConstants {
+
+    /**
+     * Index key representing a resource'id.
+     */
+    public static final String INDEX_KEY_RESOURCE_URI = "resource-uri";
+
+    /**
+     * Index key for a resource's values.
+     */
+    public static final String INDEX_KEY_RESOURCE_VALUE = "resource-value";
+
+    /**
+     * Index key for a resource's relations.
+     */
+    public static final String INDEX_KEY_RESOURCE_RELATION = "resource-relation";
+
+    // ----------------------------------------------------
+
+
+    /**
+	 * Index for all resources in this graph data store.
+	 */
+	private static final String INDEX_RESOURCES = "resources";
 	
 	/**
 	 * Index for all resources in this graph data store.
 	 */
-	public static final String INDEX_RESOURCES = "resources";
-	
-	/**
-	 * Index for all resources in this graph data store.
-	 */
-	public static final String CONTEXT_INDEX_PREFIX = "ctx-statements:";
+	private static final String CONTEXT_INDEX_PREFIX = "ctx-statements:";
 	
 	// -----------------------------------------------------
 	
-	/**
-	 * Index key representing a resource'id.
-	 */
-	public static final String INDEX_KEY_RESOURCE_URI = "resource-uri";
-	
-	/**
-	 * Index key for a resource's values. 
-	 */
-	public static final String INDEX_KEY_RESOURCE_VALUE = "resource-value";
-	
-	/**
-	 * Index key for a resource's relations. 
-	 */
-	public static final String INDEX_KEY_RESOURCE_RELATION = "resource-relation";
-	
-	
-	// -----------------------------------------------------
-	
+
 	private final GraphDataConnection connection;
 	private final IndexManager manager;
 	
@@ -248,7 +249,6 @@ public class NeoIndex implements NeoConstants {
 
 	/**
 	 * Remove relationship from index.
-	 * @param rel The relationship to be removed.
 	 */
 	public void remove(Node subject, String key, String value) {
 	    writeIndex().remove(subject, key, normalize(value));
@@ -283,13 +283,22 @@ public class NeoIndex implements NeoConstants {
 	}
 	
 	private Index<Node> readIndex() {
-		return manager.forNodes(INDEX_RESOURCES);
+        final Context writeContext = conversationContext.getWriteContext();
+        if (writeContext != null) {
+            //TODO: enable
+            //return manager.forNodes(writeContext.toURI());
+            return manager.forNodes(INDEX_RESOURCES);
+        } else {
+            return manager.forNodes(INDEX_RESOURCES);
+        }
 	}
 	
 	private Index<Node> writeIndex() {
 	    final Context writeContext = conversationContext.getWriteContext();
 	    if (writeContext != null) {
-	        return manager.forNodes(INDEX_RESOURCES);    
+            //TODO: enable
+            //return manager.forNodes(writeContext.toURI());
+            return manager.forNodes(INDEX_RESOURCES);
 	    } else {
 	        return manager.forNodes(INDEX_RESOURCES);
 	    }

@@ -65,7 +65,9 @@ import scala.actors.threadpool.Arrays;
  */
 public class AssociationHandler implements NeoConstants {
 
-	private final Logger logger = LoggerFactory.getLogger(AssociationHandler.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(AssociationHandler.class);
+
+    // ----------------------------------------------------
 	
 	private final Inferencer hardInferencer;
 	
@@ -133,15 +135,15 @@ public class AssociationHandler implements NeoConstants {
 		txProvider.doTransacted(new TxAction() {
 			public void execute() {
 				
-				final ResourceNode predicate = resolver.resolve(stmt.getPredicate());
-				final SemanticNode object = resolve(stmt.getObject());
-				final Statement assoc = new DetachedStatement(keeper.getID(), predicate, object, stmt.getMetaInfo());
-				keeper.addAssociationDirectly(assoc);
-				
-				createRelationships(keeper.getNeoNode(), stmt);
-				final List<Statement> stmtList = Collections.singletonList(stmt);
-				addHardInferences(keeper, stmtList);
-				addSoftInferences(keeper, stmtList);
+            final ResourceNode predicate = resolver.resolve(stmt.getPredicate());
+            final SemanticNode object = resolve(stmt.getObject());
+            final Statement assoc = new DetachedStatement(keeper.getID(), predicate, object, stmt.getMetaInfo());
+            keeper.addAssociationDirectly(assoc);
+
+            createRelationships(keeper.getNeoNode(), stmt);
+            final List<Statement> stmtList = Collections.singletonList(stmt);
+            addHardInferences(stmtList);
+            addSoftInferences(keeper, stmtList);
 				
 			}
 		});
@@ -159,17 +161,17 @@ public class AssociationHandler implements NeoConstants {
 		if (relationship != null) {
 			txProvider.doTransacted(new TxAction() {
 				public void execute() {
-					logger.debug("Deleting: " + assoc);
-					relationship.delete();
-					//index.removeFromIndex(keeper.getNeoNode(), assoc);
-					removeHardInferences(keeper, Collections.singleton(assoc));
-					index.reindex(keeper.getNeoNode(), keeper.getQualifiedName(), keeper.getAssociations());
-					addSoftInferences(keeper, keeper.getAssociations());
+                LOGGER.debug("Deleting: " + assoc);
+                relationship.delete();
+                //index.removeFromIndex(keeper.getNeoNode(), assoc);
+                removeHardInferences(Collections.singleton(assoc));
+                index.reindex(keeper.getNeoNode(), keeper.getQualifiedName(), keeper.getAssociations());
+                addSoftInferences(keeper, keeper.getAssociations());
 				}
 			});
 			return true;
 		} else {
-			logger.warn("Didn't find corresponding relationship to delete: " + assoc);
+			LOGGER.warn("Didn't find corresponding relationship to delete: " + assoc);
 			return false;	
 		}
 	}
@@ -185,12 +187,12 @@ public class AssociationHandler implements NeoConstants {
 			if (stmt.getSubject().getQualifiedName().equals(keeper.getQualifiedName())) {
 				index.index(keeper.getNeoNode(), stmt);
 			} else {
-				logger.warn("Inferred statement can not be indexed: " + stmt);
+				LOGGER.warn("Inferred statement can not be indexed: " + stmt);
 			}
 		}
 	}
 	
-	private void addHardInferences(final NeoAssociationKeeper keeper, final Collection<? extends Statement> originals) {
+	private void addHardInferences(final Collection<? extends Statement> originals) {
 		final Set<Statement> inferenced = new HashSet<Statement>();
 		for (Statement stmt : originals) {
 			hardInferencer.addInferenced(stmt, inferenced);
@@ -200,7 +202,7 @@ public class AssociationHandler implements NeoConstants {
 		}
 	}
 	
-	private void removeHardInferences(final NeoAssociationKeeper keeper, final Collection<? extends Statement> originals) {
+	private void removeHardInferences(final Collection<? extends Statement> originals) {
 		final Set<Statement> inferenced = new HashSet<Statement>();
 		for (Statement stmt : originals) {
 			hardInferencer.addInferenced(stmt, inferenced);
@@ -253,7 +255,7 @@ public class AssociationHandler implements NeoConstants {
 		relationship.setProperty(PREDICATE_URI, stmt.getPredicate().toURI());
 		relationship.setProperty(TIMESTAMP, new Date().getTime());
 		ctxAccess.assignContext(relationship, getCurrentContexts(stmt));
-		logger.debug("added relationship--> " + relationship + " to node " + subject);
+		LOGGER.debug("added relationship--> " + relationship + " to node " + subject);
 	}
 	
 	private Relationship findCorresponding(final Node neoNode, final Statement stmt) {
@@ -293,45 +295,43 @@ public class AssociationHandler implements NeoConstants {
 		final StringBuilder sb = new StringBuilder(5);
 		sb.append(locale.getLanguage());
 		if (locale.getCountry() != null) {
-			sb.append ("_" + locale.getCountry());
+			sb.append("_").append(locale.getCountry());
 		}
 		node.setProperty(PROPERTY_LOCALE, sb.toString());
 	}
 	
 	private Context[] getCurrentContexts(Statement stmt) {
 		if (stmt.getContexts().length == 0) {
-			if (convContext.getWriteContext() == null) {
+			if (convContext.getPrimaryContext() == null) {
 				return ContextAccess.NO_CTX;
 			} else {
-				return new Context[] { convContext.getWriteContext() };
+				return new Context[] { convContext.getPrimaryContext() };
 			}
-		} else if (convContext.getWriteContext() == null) {
+		} else if (convContext.getPrimaryContext() == null) {
 			return stmt.getContexts();
 		} else {
 			Set<Context> joined = new HashSet<Context>();
-			joined.add(convContext.getWriteContext());
-			for (Context c : stmt.getContexts()) {
-				joined.add(c);
-			}
+			joined.add(convContext.getPrimaryContext());
+            Collections.addAll(joined, stmt.getContexts());
 			return joined.toArray(new Context[joined.size()]);
 		}
 	}
 	
 	private boolean regardContext(Context[] stmtContexts) {
 		if (stmtContexts.length == 0) {
-			logger.debug("Statement has no context.");
+			LOGGER.debug("Statement has no context.");
 			return true;
 		}
 		Context[] readContexts = convContext.getReadContexts();
 		for (int i = 0; i < readContexts.length; i++) {
 			for (int j = 0; j < stmtContexts.length; j++) {
-				if (readContexts[i].equals(readContexts[j])) {
+				if (readContexts[i].equals(stmtContexts[j])) {
 					return true;
 				}
 			}
 		}
-		logger.debug("Contexts " + Arrays.toString(stmtContexts) + " not in read contexts." + Arrays.toString(readContexts));
-		return true;
+		LOGGER.debug("Contexts " + Arrays.toString(stmtContexts) + " not in read contexts." + Arrays.toString(readContexts));
+		return false;
 	}
 	
 }

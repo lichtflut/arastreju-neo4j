@@ -450,9 +450,9 @@ public class SemanticNetworkAccessTest {
 		ctx.setReadContexts(ctx1, ctx2, ctx3, convCtx1, convCtx2);
 		
 		associate(car1, Aras.HAS_BRAND_NAME, new SNText("BMW"), ctx1);
-		ctx.setWriteContext(convCtx1);
+		ctx.setPrimaryContext(convCtx1);
 		associate(car1, RDFS.SUB_CLASS_OF, vehicle, ctx1, ctx2);
-		ctx.setWriteContext(convCtx2);
+		ctx.setPrimaryContext(convCtx2);
 		associate(car1, Aras.HAS_PROPER_NAME, new SNText("Knut"), ctx1, ctx2, ctx3);
 		
 		// detach 

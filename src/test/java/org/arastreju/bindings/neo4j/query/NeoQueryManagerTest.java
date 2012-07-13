@@ -178,19 +178,18 @@ public class NeoQueryManagerTest {
 	
 	@Test
 	public void testFindByQuery(){
-		final Context ctx = null;
 		final ResourceNode car = new SNResource(qnCar);
-		SNOPS.associate(car, RDF.TYPE, RDFS.CLASS, ctx);
+		SNOPS.associate(car, RDF.TYPE, RDFS.CLASS);
 		sna.attach(car);
 		
 		final ResourceNode bike = new SNResource(qnBike);
-		SNOPS.associate(bike, RDF.TYPE, RDFS.CLASS, ctx);
+		SNOPS.associate(bike, RDF.TYPE, RDFS.CLASS);
 		sna.attach(bike);
 		
-		final SNEntity aCar = car.asClass().createInstance(ctx);
+		final SNEntity aCar = car.asClass().createInstance();
 		sna.attach(aCar);
 		
-		final SNEntity aBike = bike.asClass().createInstance(ctx);
+		final SNEntity aBike = bike.asClass().createInstance();
 		sna.attach(aBike);
 		
 		Query query = new NeoQueryBuilder(new ResourceIndex(connection, convCtx));

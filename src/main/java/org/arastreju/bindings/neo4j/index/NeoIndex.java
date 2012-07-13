@@ -54,6 +54,10 @@ import org.slf4j.LoggerFactory;
  */
 public class NeoIndex implements NeoConstants {
 
+    public static final Logger LOGGER = LoggerFactory.getLogger(NeoIndex.class);
+
+    // ----------------------------------------------------
+
     /**
      * Index key representing a resource'id.
      */
@@ -71,16 +75,15 @@ public class NeoIndex implements NeoConstants {
 
     // ----------------------------------------------------
 
-
     /**
-	 * Index for all resources in this graph data store.
+	 * Index for all resources by their qualified name.
 	 */
 	private static final String INDEX_RESOURCES = "resources";
-	
-	/**
-	 * Index for all resources in this graph data store.
-	 */
-	private static final String CONTEXT_INDEX_PREFIX = "ctx-statements:";
+
+    /**
+     * Index for public statements.
+     */
+    private static final String INDEX_PUBLIC = "public";
 	
 	// -----------------------------------------------------
 	
@@ -111,35 +114,7 @@ public class NeoIndex implements NeoConstants {
 	 * Find in Index by key and value.
 	 */
 	public Node lookup(final QualifiedName qn) {
-		return manager.forNodes(INDEX_RESOURCES).get(INDEX_KEY_RESOURCE_URI, normalize(qn.toURI())).getSingle();
-	}
-	
-	/**
-	 * Find in Index by key and value.
-	 */
-	public IndexHits<Node> lookup(final ResourceID predicate, final ResourceID value) {
-		return lookup(uri(predicate), uri(value));
-	}
-	
-	/**
-	 * Find in Index by key and value.
-	 */
-	public List<Node> lookupNodes(final ResourceID predicate, final ResourceID value) {
-		return lookupNodes(uri(predicate), uri(value));
-	}
-	
-	/**
-	 * Find in Index by key and value.
-	 */
-	public IndexHits<Node> lookup(final ResourceID predicate, final String value) {
-		return lookup(uri(predicate), value);
-	}
-	
-	/**
-	 * Find in Index by key and value.
-	 */
-	public List<Node> lookupNodes(final ResourceID predicate, final String value) {
-		return lookupNodes(uri(predicate), value);
+		return resourceIndex().get(INDEX_KEY_RESOURCE_URI, normalize(qn.toURI())).getSingle();
 	}
 	
 	/**
@@ -148,33 +123,13 @@ public class NeoIndex implements NeoConstants {
 	public IndexHits<Node> lookup(final String key, final String value) {
 		return tx().doTransacted(new TxResultAction<IndexHits<Node>>() {
 			public IndexHits<Node> execute() {
-				return readIndex().get(key, normalize(value));
+				return contextIndex().get(key, normalize(value));
 			}
 		});
 	}
-	
-	/**
-	 * Find in Index by key and value.
-	 */
-	public List<Node> lookupNodes(final String key, final String value) {
-		final List<Node> result = new ArrayList<Node>();
-		tx().doTransacted(new TxAction() {
-			public void execute() {
-				toList(result, readIndex().get(key, normalize(value)));
-			}
-		});
-		return result;
-	}
-	
+
 	// -- SEARCH ------------------------------------------
-	
-	/**
-	 * Search in value index by serach term.
-	 */
-	public List<Node> searchByValue(final String searchTerm) {
-		return search(INDEX_KEY_RESOURCE_VALUE, searchTerm);
-	}
-	
+
 	/**
 	 * Execute the query.
 	 * @param query The query.
@@ -183,7 +138,7 @@ public class NeoIndex implements NeoConstants {
 	public IndexHits<Node> search(final String query) {
 		return tx().doTransacted(new TxResultAction<IndexHits<Node>>() {
 			public IndexHits<Node> execute() {
-				return readIndex().query(query);
+				return contextIndex().query(query);
 			}
 		});
 	}
@@ -196,7 +151,7 @@ public class NeoIndex implements NeoConstants {
 	public IndexHits<Node> search(final QueryContext query) {
 		return tx().doTransacted(new TxResultAction<IndexHits<Node>>() {
 			public IndexHits<Node> execute() {
-				return readIndex().query(query);
+				return contextIndex().query(query);
 			}
 		});
 	}
@@ -208,7 +163,7 @@ public class NeoIndex implements NeoConstants {
 		final List<Node> result = new ArrayList<Node>();
 		tx().doTransacted(new TxAction() {
 			public void execute() {
-				toList(result, readIndex().query(key, normalize(value)));
+				toList(result, contextIndex().query(key, normalize(value)));
 			}
 		});
 		return result;
@@ -227,13 +182,14 @@ public class NeoIndex implements NeoConstants {
 	}
 	
 	public void index(Node subject, QualifiedName qn) {
+        resourceIndex().add(subject, INDEX_KEY_RESOURCE_URI, normalize(qn.toURI()));
 		indexResource(subject, INDEX_KEY_RESOURCE_URI, qn.toURI());
 	}
 	
 	// --REMOVE FROM INDEX --------------------------------
 	
 	public void remove(final Node node) {
-	    writeIndex().remove(node);
+	    contextIndex().remove(node);
 	}
 
 	/**
@@ -243,7 +199,7 @@ public class NeoIndex implements NeoConstants {
 	 */
 	public void remove(final Relationship rel) {
 		final String value = (String) rel.getProperty(PREDICATE_URI);
-		writeIndex().remove(rel.getStartNode(), normalize(value));
+		contextIndex().remove(rel.getStartNode(), normalize(value));
 	}
 	
 
@@ -251,19 +207,15 @@ public class NeoIndex implements NeoConstants {
 	 * Remove relationship from index.
 	 */
 	public void remove(Node subject, String key, String value) {
-	    writeIndex().remove(subject, key, normalize(value));
+	    contextIndex().remove(subject, key, normalize(value));
 	}
 	
 	// -----------------------------------------------------
 	
 	private void indexResource(Node subject, String key, String value) {
-	    writeIndex().add(subject, key, normalize(value));
+	    contextIndex().add(subject, key, normalize(value));
 	}
 	
-	/**
-	 * @param result
-	 * @param nodes
-	 */
 	private void toList(List<Node> result, IndexHits<Node> nodes) {
 		for (Node node : nodes) {
 			if (node.hasProperty(PROPERTY_URI)) {
@@ -281,29 +233,22 @@ public class NeoIndex implements NeoConstants {
 	private TxProvider tx() {
 		return connection.getTxProvider();
 	}
+
+    // ----------------------------------------------------
 	
-	private Index<Node> readIndex() {
-        final Context writeContext = conversationContext.getWriteContext();
-        if (writeContext != null) {
-            //TODO: enable
-            //return manager.forNodes(writeContext.toURI());
-            return manager.forNodes(INDEX_RESOURCES);
-        } else {
-            return manager.forNodes(INDEX_RESOURCES);
-        }
-	}
-	
-	private Index<Node> writeIndex() {
-	    final Context writeContext = conversationContext.getWriteContext();
-	    if (writeContext != null) {
-            //TODO: enable
-            //return manager.forNodes(writeContext.toURI());
-            return manager.forNodes(INDEX_RESOURCES);
+	private Index<Node> contextIndex() {
+	    final Context context = conversationContext.getPrimaryContext();
+	    if (context != null) {
+            return manager.forNodes(context.toURI());
 	    } else {
-	        return manager.forNodes(INDEX_RESOURCES);
+            return manager.forNodes(INDEX_PUBLIC);
 	    }
     }
-	
+
+    private Index<Node> resourceIndex() {
+        return manager.forNodes(INDEX_RESOURCES);
+    }
+
 	// ----------------------------------------------------
 	
 	private String normalize(final String s) {

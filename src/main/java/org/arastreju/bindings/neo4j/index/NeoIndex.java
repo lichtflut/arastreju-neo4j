@@ -81,9 +81,19 @@ public class NeoIndex implements NeoConstants {
 	private static final String INDEX_RESOURCES = "resources";
 
     /**
-     * Index for public statements.
+     * Index for statements in this domain: "local public"
+     */
+    private static final String INDEX_LOCAL = "local";
+
+    /**
+     * Mirror index for public statements: "global public"
      */
     private static final String INDEX_PUBLIC = "public";
+
+    /**
+     * Index prefix for context specific statements
+     */
+    private static final String INDEX_CONTEXT_PREFIX = "context:";
 	
 	// -----------------------------------------------------
 	
@@ -239,9 +249,9 @@ public class NeoIndex implements NeoConstants {
 	private Index<Node> contextIndex() {
 	    final Context context = conversationContext.getPrimaryContext();
 	    if (context != null) {
-            return manager.forNodes(context.toURI());
+            return manager.forNodes(INDEX_CONTEXT_PREFIX + context.toURI());
 	    } else {
-            return manager.forNodes(INDEX_PUBLIC);
+            return manager.forNodes(INDEX_LOCAL);
 	    }
     }
 

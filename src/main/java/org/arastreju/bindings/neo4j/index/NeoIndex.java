@@ -57,8 +57,6 @@ import org.slf4j.LoggerFactory;
 public class NeoIndex implements NeoConstants {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(NeoIndex.class);
-    
-    private static final String CHAR_SET = "UTF-8";
 
     // ----------------------------------------------------
 
@@ -136,7 +134,6 @@ public class NeoIndex implements NeoConstants {
 	 */
 	public IndexHits<Node> lookup(final String key, final String value) {
 		return tx().doTransacted(new TxResultAction<IndexHits<Node>>() {
-			@Override
 			public IndexHits<Node> execute() {
 				return contextIndex().get(key, normalize(value));
 			}
@@ -152,7 +149,6 @@ public class NeoIndex implements NeoConstants {
 	 */
 	public IndexHits<Node> search(final String query) {
 		return tx().doTransacted(new TxResultAction<IndexHits<Node>>() {
-			@Override
 			public IndexHits<Node> execute() {
 				return contextIndex().query(query);
 			}
@@ -166,7 +162,6 @@ public class NeoIndex implements NeoConstants {
 	 */
 	public IndexHits<Node> search(final QueryContext query) {
 		return tx().doTransacted(new TxResultAction<IndexHits<Node>>() {
-			@Override
 			public IndexHits<Node> execute() {
 				return contextIndex().query(query);
 			}
@@ -179,7 +174,6 @@ public class NeoIndex implements NeoConstants {
 	public List<Node> search(final String key, final String value) {
 		final List<Node> result = new ArrayList<Node>();
 		tx().doTransacted(new TxAction() {
-			@Override
 			public void execute() {
 				toList(result, contextIndex().query(key, normalize(value)));
 			}
@@ -257,7 +251,7 @@ public class NeoIndex implements NeoConstants {
 	private Index<Node> contextIndex() {
 	    final Context context = conversationContext.getPrimaryContext();
 	    if (context != null) {
-            return manager.forNodes(INDEX_CONTEXT_PREFIX + context.toURI());
+            return manager.forNodes(indexForContext(context));
 	    } else {
             return manager.forNodes(INDEX_LOCAL);
 	    }
@@ -270,14 +264,20 @@ public class NeoIndex implements NeoConstants {
 	// ----------------------------------------------------
 	
 	private String normalize(final String s) {
-		String value = s.trim().toLowerCase();
-		try {
-			byte[] bytes =  Base64.encodeBase64(value.getBytes(CHAR_SET));
-			value = new String(bytes, CHAR_SET);
-		} catch (UnsupportedEncodingException e) {
-			logger.error("Could not encode string: " + value + " to Base64.");
-		}
-		return value;
+		return s.trim().toLowerCase();
 	}
+
+    private String indexForContext(Context ctx) {
+        String value = null;
+        try {
+            byte[] bytes =  Base64.encodeBase64(ctx.toURI().getBytes("UTF-8"));
+            value = new String(bytes, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            logger.error("Could not encode string: " + value + " to Base64.");
+            throw new RuntimeException(e);
+        }
+        return INDEX_CONTEXT_PREFIX + value;
+    }
+
 
 }

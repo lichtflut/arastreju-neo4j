@@ -18,9 +18,11 @@ package org.arastreju.bindings.neo4j.index;
 
 import static org.arastreju.sge.SNOPS.uri;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.codec.binary.Base64;
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.tx.TxProvider;
@@ -55,6 +57,8 @@ import org.slf4j.LoggerFactory;
 public class NeoIndex implements NeoConstants {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(NeoIndex.class);
+    
+    private static final String CHAR_SET = "UTF-8";
 
     // ----------------------------------------------------
 
@@ -132,6 +136,7 @@ public class NeoIndex implements NeoConstants {
 	 */
 	public IndexHits<Node> lookup(final String key, final String value) {
 		return tx().doTransacted(new TxResultAction<IndexHits<Node>>() {
+			@Override
 			public IndexHits<Node> execute() {
 				return contextIndex().get(key, normalize(value));
 			}
@@ -147,6 +152,7 @@ public class NeoIndex implements NeoConstants {
 	 */
 	public IndexHits<Node> search(final String query) {
 		return tx().doTransacted(new TxResultAction<IndexHits<Node>>() {
+			@Override
 			public IndexHits<Node> execute() {
 				return contextIndex().query(query);
 			}
@@ -160,6 +166,7 @@ public class NeoIndex implements NeoConstants {
 	 */
 	public IndexHits<Node> search(final QueryContext query) {
 		return tx().doTransacted(new TxResultAction<IndexHits<Node>>() {
+			@Override
 			public IndexHits<Node> execute() {
 				return contextIndex().query(query);
 			}
@@ -172,6 +179,7 @@ public class NeoIndex implements NeoConstants {
 	public List<Node> search(final String key, final String value) {
 		final List<Node> result = new ArrayList<Node>();
 		tx().doTransacted(new TxAction() {
+			@Override
 			public void execute() {
 				toList(result, contextIndex().query(key, normalize(value)));
 			}
@@ -262,7 +270,14 @@ public class NeoIndex implements NeoConstants {
 	// ----------------------------------------------------
 	
 	private String normalize(final String s) {
-		return s.trim().toLowerCase();
+		String value = s.trim().toLowerCase();
+		try {
+			byte[] bytes =  Base64.encodeBase64(value.getBytes(CHAR_SET));
+			value = new String(bytes, CHAR_SET);
+		} catch (UnsupportedEncodingException e) {
+			logger.error("Could not encode string: " + value + " to Base64.");
+		}
+		return value;
 	}
 
 }

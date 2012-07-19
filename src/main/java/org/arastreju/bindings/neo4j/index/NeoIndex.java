@@ -95,7 +95,7 @@ public class NeoIndex implements NeoConstants {
     /**
      * Index prefix for context specific statements
      */
-    private static final String INDEX_CONTEXT_PREFIX = "context:";
+    private static final String INDEX_CONTEXT_PREFIX = "context-";
 	
 	// -----------------------------------------------------
 	
@@ -134,6 +134,7 @@ public class NeoIndex implements NeoConstants {
 	 */
 	public IndexHits<Node> lookup(final String key, final String value) {
 		return tx().doTransacted(new TxResultAction<IndexHits<Node>>() {
+			@Override
 			public IndexHits<Node> execute() {
 				return contextIndex().get(key, normalize(value));
 			}
@@ -149,6 +150,7 @@ public class NeoIndex implements NeoConstants {
 	 */
 	public IndexHits<Node> search(final String query) {
 		return tx().doTransacted(new TxResultAction<IndexHits<Node>>() {
+			@Override
 			public IndexHits<Node> execute() {
 				return contextIndex().query(query);
 			}
@@ -162,6 +164,7 @@ public class NeoIndex implements NeoConstants {
 	 */
 	public IndexHits<Node> search(final QueryContext query) {
 		return tx().doTransacted(new TxResultAction<IndexHits<Node>>() {
+			@Override
 			public IndexHits<Node> execute() {
 				return contextIndex().query(query);
 			}
@@ -174,6 +177,7 @@ public class NeoIndex implements NeoConstants {
 	public List<Node> search(final String key, final String value) {
 		final List<Node> result = new ArrayList<Node>();
 		tx().doTransacted(new TxAction() {
+			@Override
 			public void execute() {
 				toList(result, contextIndex().query(key, normalize(value)));
 			}

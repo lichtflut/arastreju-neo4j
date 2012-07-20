@@ -16,14 +16,10 @@
  */
 package org.arastreju.bindings.neo4j.impl;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
-import org.arastreju.bindings.neo4j.extensions.NeoResourceResolver;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
-import org.arastreju.bindings.neo4j.tx.TxProvider;
+import org.arastreju.bindings.neo4j.tx.NeoTxProvider;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.eh.ArastrejuRuntimeException;
 import org.arastreju.sge.eh.ErrorCodes;
@@ -35,6 +31,9 @@ import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.persistence.TxAction;
 import org.neo4j.graphdb.Node;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * <p>
@@ -57,9 +56,7 @@ public class SemanticNetworkAccess implements NeoConstants {
 	private final GraphDataConnection connection;
 	private final NeoConversationContext conversationContext;
 	private final ResourceIndex index;
-	private final NeoResourceResolver resourceResolver;
-	
-	
+
 	// -----------------------------------------------------
 
 	/**
@@ -71,7 +68,6 @@ public class SemanticNetworkAccess implements NeoConstants {
 		this.connection = connection;
 		this.conversationContext = conversationContext;
 		this.index = new ResourceIndex(connection, conversationContext);
-		this.resourceResolver = new NeoResourceResolverImpl(connection, conversationContext);
 	}
 
 	// -----------------------------------------------------
@@ -139,14 +135,13 @@ public class SemanticNetworkAccess implements NeoConstants {
 	 * @param id The ID.
 	 */
 	public void remove(final ResourceID id) {
-		final ResourceNode node = resourceResolver.resolve(id);
-		NeoAssocKeeperAccess.getAssociationKeeper(node).getAssociations().clear();
+        final NeoAssociationKeeper registered = conversationContext.getAssociationKeeper(id.getQualifiedName());
+		registered.getAssociations().clear();
 		tx().doTransacted(new TxAction() {
 			public void execute() {
-				new NodeRemover(connection, conversationContext).remove(node, false);
+				new NodeRemover(connection, conversationContext).remove(registered.getNeoNode(), false);
 			}
 		});
-		detach(node);
 	}
 	
 	// -----------------------------------------------------
@@ -222,8 +217,8 @@ public class SemanticNetworkAccess implements NeoConstants {
 	
 	// ----------------------------------------------------
 	
-	private TxProvider tx() {
-		return connection.getTxProvider();
+	private NeoTxProvider tx() {
+		return conversationContext.getTxProvider();
 	}
 	
 }

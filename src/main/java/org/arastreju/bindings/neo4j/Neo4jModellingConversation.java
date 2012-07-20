@@ -16,10 +16,9 @@
  */
 package org.arastreju.bindings.neo4j;
 
-import org.arastreju.bindings.neo4j.extensions.NeoResourceResolver;
 import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
-import org.arastreju.bindings.neo4j.impl.NeoResourceResolverImpl;
+import org.arastreju.bindings.neo4j.impl.NeoResourceResolver;
 import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.bindings.neo4j.query.NeoQueryBuilder;
@@ -32,6 +31,7 @@ import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.model.nodes.SemanticNode;
 import org.arastreju.sge.naming.QualifiedName;
+import org.arastreju.sge.persistence.ResourceResolver;
 import org.arastreju.sge.persistence.TransactionControl;
 import org.arastreju.sge.persistence.TxResultAction;
 import org.arastreju.sge.query.Query;
@@ -60,7 +60,7 @@ public class Neo4jModellingConversation extends AbstractModelingConversation imp
 	
 	private final SemanticNetworkAccess sna;
 	
-	private final NeoResourceResolver resolver;
+	private final ResourceResolver resolver;
 	
 	// -----------------------------------------------------
 
@@ -78,7 +78,7 @@ public class Neo4jModellingConversation extends AbstractModelingConversation imp
         this.connection = connection;
         this.conversationContext = context;
         this.sna = new SemanticNetworkAccess(connection, context);
-        this.resolver = new NeoResourceResolverImpl(connection, context);
+        this.resolver = new NeoResourceResolver(connection, context);
     }
 	
     // ----------------------------------------------------
@@ -88,7 +88,7 @@ public class Neo4jModellingConversation extends AbstractModelingConversation imp
 	 */
 	public Query createQuery() {
 		assertActive();
-		return new NeoQueryBuilder(new ResourceIndex(connection, conversationContext));
+		return new NeoQueryBuilder(new ResourceIndex(conversationContext));
 	}
 	
 	// ----------------------------------------------------

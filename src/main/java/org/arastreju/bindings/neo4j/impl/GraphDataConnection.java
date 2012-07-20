@@ -3,7 +3,8 @@
  */
 package org.arastreju.bindings.neo4j.impl;
 
-import org.arastreju.bindings.neo4j.tx.TxProvider;
+import org.arastreju.bindings.neo4j.tx.NeoTxProvider;
+import org.neo4j.graphdb.index.IndexManager;
 
 /**
  * <p>
@@ -20,7 +21,7 @@ public class GraphDataConnection {
 	
 	private final GraphDataStore store;
 	
-	private final TxProvider txProvider;
+	private final NeoTxProvider txProvider;
 	
 	// ----------------------------------------------------
 
@@ -30,7 +31,7 @@ public class GraphDataConnection {
 	 */
 	public GraphDataConnection(GraphDataStore store) {
 		this.store = store;
-		this.txProvider = new TxProvider(store.getGdbService());
+		this.txProvider = new NeoTxProvider(store.getGdbService());
 	}
 	
 	// ----------------------------------------------------
@@ -45,9 +46,13 @@ public class GraphDataConnection {
 	/**
 	 * @return the txProvider
 	 */
-	public TxProvider getTxProvider() {
+	public NeoTxProvider getTxProvider() {
 		return txProvider;
 	}
+
+    public IndexManager getIndexManager() {
+        return store.getIndexManager();
+    }
 	
 	// ----------------------------------------------------
 	

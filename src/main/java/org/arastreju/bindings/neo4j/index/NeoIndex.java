@@ -16,16 +16,8 @@
  */
 package org.arastreju.bindings.neo4j.index;
 
-import static org.arastreju.sge.SNOPS.uri;
-
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.codec.binary.Base64;
 import org.arastreju.bindings.neo4j.NeoConstants;
-import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
-import org.arastreju.bindings.neo4j.tx.TxProvider;
 import org.arastreju.sge.ConversationContext;
 import org.arastreju.sge.context.Context;
 import org.arastreju.sge.model.ResourceID;
@@ -33,6 +25,7 @@ import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.model.nodes.ValueNode;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.persistence.TxAction;
+import org.arastreju.sge.persistence.TxProvider;
 import org.arastreju.sge.persistence.TxResultAction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -42,6 +35,12 @@ import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.index.lucene.QueryContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.arastreju.sge.SNOPS.uri;
 
 /**
  * <p>
@@ -98,27 +97,21 @@ public class NeoIndex implements NeoConstants {
     private static final String INDEX_CONTEXT_PREFIX = "context-";
 	
 	// -----------------------------------------------------
-	
 
-	private final GraphDataConnection connection;
+    private final ConversationContext conversationContext;
+	
 	private final IndexManager manager;
-	
-	private final Logger logger = LoggerFactory.getLogger(NeoIndex.class);
 
-	private final ConversationContext conversationContext;
-
-	// -----------------------------------------------------
+    // -----------------------------------------------------
 	
-	/**
-	 * Constructor.
-	 * @param connection The connection to the graph database.
-	 * @param ctx The current conversation context.
-	 */
-	public NeoIndex(GraphDataConnection connection, ConversationContext ctx) {
-		this.connection = connection;
-		this.conversationContext = ctx;
-		this.manager = connection.getStore().getIndexManager();
-	}
+    /**
+     * Constructor.
+     * @param ctx The current conversation context.
+     */
+    public NeoIndex(ConversationContext ctx, IndexManager idxManager) {
+        this.conversationContext = ctx;
+        this.manager = idxManager;
+    }
 	
 	// -- LOOKUP ------------------------------------------
 	
@@ -134,11 +127,11 @@ public class NeoIndex implements NeoConstants {
 	 */
 	public IndexHits<Node> lookup(final String key, final String value) {
 		return tx().doTransacted(new TxResultAction<IndexHits<Node>>() {
-			@Override
-			public IndexHits<Node> execute() {
-				return contextIndex().get(key, normalize(value));
-			}
-		});
+            @Override
+            public IndexHits<Node> execute() {
+                return contextIndex().get(key, normalize(value));
+            }
+        });
 	}
 
 	// -- SEARCH ------------------------------------------
@@ -150,13 +143,13 @@ public class NeoIndex implements NeoConstants {
 	 */
 	public IndexHits<Node> search(final String query) {
 		return tx().doTransacted(new TxResultAction<IndexHits<Node>>() {
-			@Override
-			public IndexHits<Node> execute() {
-				return contextIndex().query(query);
-			}
-		});
+            @Override
+            public IndexHits<Node> execute() {
+                return contextIndex().query(query);
+            }
+        });
 	}
-	
+
 	/**
 	 * Execute the query.
 	 * @param query The query.
@@ -164,24 +157,24 @@ public class NeoIndex implements NeoConstants {
 	 */
 	public IndexHits<Node> search(final QueryContext query) {
 		return tx().doTransacted(new TxResultAction<IndexHits<Node>>() {
-			@Override
-			public IndexHits<Node> execute() {
-				return contextIndex().query(query);
-			}
-		});
+            @Override
+            public IndexHits<Node> execute() {
+                return contextIndex().query(query);
+            }
+        });
 	}
-	
+
 	/**
 	 * Find in Index by key and value.
 	 */
 	public List<Node> search(final String key, final String value) {
 		final List<Node> result = new ArrayList<Node>();
 		tx().doTransacted(new TxAction() {
-			@Override
-			public void execute() {
-				toList(result, contextIndex().query(key, normalize(value)));
-			}
-		});
+            @Override
+            public void execute() {
+                toList(result, contextIndex().query(key, normalize(value)));
+            }
+        });
 		return result;
 	}
 	
@@ -237,7 +230,7 @@ public class NeoIndex implements NeoConstants {
 			if (node.hasProperty(PROPERTY_URI)) {
 				result.add(node);
 			} else {
-				logger.error("Invalid node in index, will be removed: " + node);
+				LOGGER.error("Invalid node in index, will be removed: " + node);
 				remove(node);
 				for(Relationship rel : node.getRelationships()) {
 					remove(rel);
@@ -245,9 +238,9 @@ public class NeoIndex implements NeoConstants {
 			}
 		}
 	}
-	
+
 	private TxProvider tx() {
-		return connection.getTxProvider();
+		return conversationContext.getTxProvider();
 	}
 
     // ----------------------------------------------------
@@ -277,7 +270,7 @@ public class NeoIndex implements NeoConstants {
             byte[] bytes =  Base64.encodeBase64(ctx.toURI().getBytes("UTF-8"));
             value = new String(bytes, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            logger.error("Could not encode string: " + value + " to Base64.");
+            LOGGER.error("Could not encode string: " + value + " to Base64.");
             throw new RuntimeException(e);
         }
         return INDEX_CONTEXT_PREFIX + value;

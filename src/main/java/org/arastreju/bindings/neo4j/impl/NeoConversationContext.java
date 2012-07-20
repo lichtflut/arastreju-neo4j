@@ -16,18 +16,15 @@
  */
 package org.arastreju.bindings.neo4j.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
-import org.arastreju.sge.ConversationContext;
-import org.arastreju.sge.context.Context;
+import org.arastreju.bindings.neo4j.tx.NeoTxProvider;
 import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.spi.abstracts.AbstractConversationContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <p>
@@ -45,15 +42,18 @@ public class NeoConversationContext extends AbstractConversationContext implemen
 	private final Map<QualifiedName, NeoAssociationKeeper> register = new HashMap<QualifiedName, NeoAssociationKeeper>();
 	
 	private final AssociationHandler handler;
-	
-	// ----------------------------------------------------
+
+    private final GraphDataConnection connection;
+
+    // ----------------------------------------------------
 	
 	/**
 	 * Creates a new Working Context.
 	 * @param connection The connection.
 	 */
 	public NeoConversationContext(GraphDataConnection connection) {
-		this.handler = new AssociationHandler(connection, this);
+        this.connection = connection;
+        this.handler = new AssociationHandler(connection, this);
 	}
 
 	// ----------------------------------------------------
@@ -121,8 +121,18 @@ public class NeoConversationContext extends AbstractConversationContext implemen
 		assertActive();
 		return handler.removeAssociation(keeper, assoc);
 	}
-	
-	// ----------------------------------------------------
+
+    // ----------------------------------------------------
+
+    public NeoTxProvider getTxProvider() {
+        return connection.getTxProvider();
+    }
+
+    public GraphDataConnection getConnection() {
+        return connection;
+    }
+
+    // ----------------------------------------------------
 
     @Override
     protected void clearCaches() {

@@ -17,14 +17,13 @@
 package org.arastreju.bindings.neo4j.impl;
 
 import org.arastreju.bindings.neo4j.NeoConstants;
-import org.arastreju.bindings.neo4j.extensions.NeoResourceResolver;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.context.Context;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.model.nodes.views.SNContext;
+import org.arastreju.sge.persistence.ResourceResolver;
 import org.neo4j.graphdb.Relationship;
-
 import scala.actors.threadpool.Arrays;
 
 /**
@@ -42,7 +41,7 @@ public class ContextAccess implements NeoConstants {
 	
 	public static final Context[] NO_CTX = new Context[0];
 	
-	private final NeoResourceResolver resolver;
+	private final ResourceResolver resolver;
 	
 	// -----------------------------------------------------
 	
@@ -50,7 +49,7 @@ public class ContextAccess implements NeoConstants {
 	 * Constructor.
 	 * @param resolver The resource resolver.
 	 */
-	public ContextAccess(final NeoResourceResolver resolver) {
+	public ContextAccess(final ResourceResolver resolver) {
 		this.resolver = resolver;
 	}
 	

@@ -16,16 +16,15 @@
  */
 package org.arastreju.bindings.neo4j.impl;
 
+import org.arastreju.bindings.neo4j.index.ResourceIndex;
+import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import org.arastreju.bindings.neo4j.index.ResourceIndex;
-import org.arastreju.sge.model.nodes.ResourceNode;
-import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
 
 /**
  * <p>
@@ -63,30 +62,20 @@ public class NodeRemover {
 	
 	// -----------------------------------------------------
 
-	/**
-	 * Remove the given node.
-	 * @param node The node.
-	 * @param cascade Flag if removing shall be cascaded.
-	 * @return The set of removed nodes.
-	 */
-	public Set<Node> remove(final ResourceNode node, final boolean cascade) {
-		return remove(NeoAssocKeeperAccess.getNeoNode(node), cascade);
-	}
-	
+    /**
+     * Remove the given node.
+     * @param neoNode The node.
+     * @param cascade Flag if removing shall be cascaded.
+     * @return The set of removed nodes.
+     */
+    public Set<Node> remove(final Node neoNode, final boolean cascade) {
+        final Set<Node> deleted = new HashSet<Node>();
+        remove(neoNode, deleted, cascade);
+        return deleted;
+    }
+
 	// -----------------------------------------------------
-	
-	/**
-	 * Remove the given node.
-	 * @param node The node.
-	 * @param cascade Flag if removing shall be cascaded.
-	 * @return The set of removed nodes.
-	 */
-	private Set<Node> remove(final Node neoNode, final boolean cascade) {
-		final Set<Node> deleted = new HashSet<Node>();
-		remove(neoNode, deleted, cascade);
-		return deleted;
-	}
-	
+
 	private void remove(final Node neoNode, final Set<Node> deleted, final boolean cascade) {
 		// 2nd: delete relations
 		final List<Node> cascading = new ArrayList<Node>();

@@ -16,16 +16,9 @@
  */
 package org.arastreju.bindings.neo4j;
 
-import static org.arastreju.sge.SNOPS.assure;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import org.arastreju.bindings.neo4j.extensions.NeoResourceResolver;
 import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
-import org.arastreju.bindings.neo4j.impl.NeoResourceResolverImpl;
+import org.arastreju.bindings.neo4j.impl.NeoResourceResolver;
 import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.bindings.neo4j.query.NeoQueryBuilder;
@@ -38,9 +31,16 @@ import org.arastreju.sge.model.nodes.views.SNText;
 import org.arastreju.sge.naming.Namespace;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.naming.SimpleNamespace;
+import org.arastreju.sge.persistence.ResourceResolver;
 import org.arastreju.sge.query.Query;
 import org.arastreju.sge.query.QueryResult;
 import org.arastreju.sge.spi.abstracts.AbstractOrganizer;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import static org.arastreju.sge.SNOPS.assure;
 
 /**
  * <p>
@@ -55,7 +55,7 @@ import org.arastreju.sge.spi.abstracts.AbstractOrganizer;
  */
 public class NeoOrganizer extends AbstractOrganizer {
 
-	private final NeoResourceResolver resolver;
+	private final ResourceResolver resolver;
 	private final SemanticNetworkAccess sna;
 	private final ResourceIndex index;
 	
@@ -66,9 +66,9 @@ public class NeoOrganizer extends AbstractOrganizer {
 	 * @param connection The connection.
 	 */
 	public NeoOrganizer(final GraphDataConnection connection, final NeoConversationContext convContext) {
-		this.resolver = new NeoResourceResolverImpl(connection, convContext);
+		this.resolver = new NeoResourceResolver(connection, convContext);
 		this.sna = new SemanticNetworkAccess(connection, convContext);
-		this.index = new ResourceIndex(connection, convContext);
+		this.index = new ResourceIndex(convContext);
 	}
 	
 	// -----------------------------------------------------

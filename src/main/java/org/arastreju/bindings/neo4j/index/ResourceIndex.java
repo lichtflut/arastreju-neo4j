@@ -16,15 +16,10 @@
  */
 package org.arastreju.bindings.neo4j.index;
 
-import static org.arastreju.sge.SNOPS.uri;
-
-import java.util.Collection;
-
 import org.arastreju.bindings.neo4j.NeoConstants;
-import org.arastreju.bindings.neo4j.extensions.NeoResourceResolver;
 import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
-import org.arastreju.bindings.neo4j.impl.NeoResourceResolverImpl;
+import org.arastreju.bindings.neo4j.impl.NeoNodeResolver;
 import org.arastreju.bindings.neo4j.query.NeoQueryResult;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.Statement;
@@ -36,9 +31,13 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.index.lucene.QueryContext;
 
+import java.util.Collection;
+
+import static org.arastreju.sge.SNOPS.uri;
+
 /**
  * <p>
- *  Wrapper around the Neo {@link IndexService} with convenience methods and a registry for caching.
+ *  Wrapper around the Neo index service with convenience methods and a registry for caching.
  * </p>
  *
  * <p>
@@ -51,7 +50,7 @@ public class ResourceIndex implements NeoConstants {
 	
 	private final NeoIndex neoIndex;
 	
-	private final NeoResourceResolver resolver;
+	private final NeoNodeResolver resolver;
 	
 	// -----------------------------------------------------
 	
@@ -61,9 +60,18 @@ public class ResourceIndex implements NeoConstants {
 	 * @param ctx The current conversation context.
 	 */
 	public ResourceIndex(GraphDataConnection connection, NeoConversationContext ctx) {
-		this.resolver = new NeoResourceResolverImpl(connection, ctx);
-		this.neoIndex = new NeoIndex(connection, ctx);
+		this.resolver = new NeoNodeResolver(ctx);
+		this.neoIndex = new NeoIndex(ctx, connection.getIndexManager());
 	}
+
+    /**
+     * Constructor.
+     * @param ctx The current conversation context.
+     */
+    public ResourceIndex(NeoConversationContext ctx) {
+        this.resolver = new NeoNodeResolver(ctx);
+        this.neoIndex = new NeoIndex(ctx, ctx.getConnection().getIndexManager());
+    }
 	
 	// -----------------------------------------------------
 	
@@ -135,7 +143,8 @@ public class ResourceIndex implements NeoConstants {
 
 	/**
 	 * Remove relationship from index.
-	 * @param rel The relationship to be removed.
+	 * @param neoNode The node beeing subject in the statement.
+     * @param stmt The statement to be removed.
 	 */
 	public void removeFromIndex(final Node neoNode, final Statement stmt) {
 		final String key = stmt.getPredicate().getQualifiedName().toURI();

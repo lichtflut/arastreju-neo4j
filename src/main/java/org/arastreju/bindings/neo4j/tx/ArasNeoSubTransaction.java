@@ -50,7 +50,7 @@ class ArasNeoSubTransaction implements TransactionControl {
 	 */
 	public void success() {
 		superTx.success();
-	};
+	}
 	
 	/** 
 	 * {@inheritDoc}
@@ -86,5 +86,12 @@ class ArasNeoSubTransaction implements TransactionControl {
 	public void flush() {
 		superTx.flush();
 	}
-	
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isActive() {
+        return superTx.isActive();
+    }
 }

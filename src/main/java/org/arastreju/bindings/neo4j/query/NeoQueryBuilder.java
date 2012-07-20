@@ -53,7 +53,8 @@ public class NeoQueryBuilder extends QueryBuilder {
 	// -----------------------------------------------------
 	
 	/**
-	 * @param index
+     * Constructor.
+	 * @param index The index.
 	 */
 	public NeoQueryBuilder(final ResourceIndex index) {
 		this.index = index;
@@ -115,7 +116,7 @@ public class NeoQueryBuilder extends QueryBuilder {
 			appendLeaf(exp.getQueryParam(), sb);
 		} else {
 			if (QueryOperator.NOT.equals(exp.getOperator())) {
-				sb.append(" " + exp.getOperator().name() + " ");
+				sb.append(" ").append(exp.getOperator().name()).append(" ");
 			}
 			sb.append("(");
 			boolean first = true;
@@ -123,7 +124,7 @@ public class NeoQueryBuilder extends QueryBuilder {
 				if (first) {
 					first = false;
 				} else if (!QueryOperator.NOT.equals(exp.getOperator())) { 
-					sb.append(" " + exp.getOperator().name() + " ");
+					sb.append(" ").append(exp.getOperator().name()).append(" ");
 				}
 				append(child, sb);
 			}
@@ -138,7 +139,7 @@ public class NeoQueryBuilder extends QueryBuilder {
 		}
 		switch(param.getOperator()) {
 		case EQUALS:
-			sb.append(normalizeKey(param.getName()) + ":");
+			sb.append(normalizeKey(param.getName())).append(":");
 			break;
 		case HAS_URI:
 			sb.append(NeoIndex.INDEX_KEY_RESOURCE_URI + ":");
@@ -168,7 +169,7 @@ public class NeoQueryBuilder extends QueryBuilder {
 			return null;
 		}
 		String normalized = value.toString().trim().toLowerCase();
-		if (normalized.indexOf(" ") > -1) {
+		if (normalized.contains(" ")) {
 			normalized = "\"" + normalized + "\"";
 		}
 		return normalized.replaceAll(":", "\\\\:");

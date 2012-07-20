@@ -16,20 +16,6 @@
  */
 package org.arastreju.bindings.neo4j.impl;
 
-import static org.arastreju.sge.SNOPS.associate;
-import static org.arastreju.sge.SNOPS.id;
-import static org.arastreju.sge.SNOPS.qualify;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-
-import org.arastreju.bindings.neo4j.extensions.NeoResourceResolver;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.apriori.Aras;
@@ -47,12 +33,26 @@ import org.arastreju.sge.model.nodes.views.SNClass;
 import org.arastreju.sge.model.nodes.views.SNEntity;
 import org.arastreju.sge.model.nodes.views.SNText;
 import org.arastreju.sge.naming.QualifiedName;
+import org.arastreju.sge.persistence.ResourceResolver;
 import org.arastreju.sge.query.QueryResult;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
+
+import java.io.IOException;
+
+import static org.arastreju.sge.SNOPS.associate;
+import static org.arastreju.sge.SNOPS.id;
+import static org.arastreju.sge.SNOPS.qualify;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * <p>
@@ -78,7 +78,7 @@ public class SemanticNetworkAccessTest {
 	private SemanticNetworkAccess sna;
 	private GraphDataStore store;
 	private GraphDataConnection connection;
-	private NeoResourceResolver resolver;
+	private ResourceResolver resolver;
 	private ResourceIndex index;
 	private NeoConversationContext ctx;
 	
@@ -94,7 +94,7 @@ public class SemanticNetworkAccessTest {
 		ctx = new NeoConversationContext(connection);
 		index = new ResourceIndex(connection, ctx);
 		sna = new SemanticNetworkAccess(connection, ctx);
-		resolver = new NeoResourceResolverImpl(connection, ctx);
+		resolver = new NeoResourceResolver(connection, ctx);
 		
 	}
 

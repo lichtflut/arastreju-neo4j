@@ -5,7 +5,6 @@ package org.arastreju.bindings.neo4j.impl;
 
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
-import org.arastreju.bindings.neo4j.extensions.NeoResourceResolver;
 import org.arastreju.bindings.neo4j.extensions.SNResourceNeo;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.sge.SNOPS;
@@ -13,11 +12,12 @@ import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.associations.AssociationKeeper;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.naming.QualifiedName;
+import org.arastreju.sge.persistence.ResourceResolver;
 import org.neo4j.graphdb.Node;
 
 /**
  * <p>
- *  Simple implementation of {@link NeoResourceResolver}.
+ *  Simple implementation of a resource resolver.
  * </p>
  *
  * <p>
@@ -26,7 +26,7 @@ import org.neo4j.graphdb.Node;
  *
  * @author Oliver Tigges
  */
-public class NeoResourceResolverImpl implements NeoResourceResolver {
+public class NeoResourceResolver implements ResourceResolver {
 	
 	private final GraphDataConnection connection;
 	private final NeoConversationContext conversationContext;
@@ -37,7 +37,7 @@ public class NeoResourceResolverImpl implements NeoResourceResolver {
 	 * Constructor.
 	 * @param connection The connection.
 	 */
-	public NeoResourceResolverImpl(GraphDataConnection connection, NeoConversationContext conversationContext) {
+	public NeoResourceResolver(GraphDataConnection connection, NeoConversationContext conversationContext) {
 		this.connection = connection;
 		this.conversationContext = conversationContext;
 	}
@@ -98,7 +98,7 @@ public class NeoResourceResolverImpl implements NeoResourceResolver {
 		if (registered != null) {
 			return registered;
 		}
-		final Node neoNode = new ResourceIndex(connection, conversationContext).findNeoNode(qn);
+		final Node neoNode = new ResourceIndex(conversationContext).findNeoNode(qn);
 		if (neoNode != null) {
 			return createKeeper(qn, neoNode);
 		} else {

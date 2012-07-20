@@ -17,10 +17,7 @@
 package org.arastreju.bindings.neo4j.query;
 
 
-import java.util.List;
-
 import junit.framework.Assert;
-
 import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.GraphDataStore;
 import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
@@ -30,7 +27,6 @@ import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.apriori.Aras;
 import org.arastreju.sge.apriori.RDF;
 import org.arastreju.sge.apriori.RDFS;
-import org.arastreju.sge.context.Context;
 import org.arastreju.sge.model.SimpleResourceID;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.model.nodes.SNResource;
@@ -46,6 +42,8 @@ import org.arastreju.sge.query.ValueParam;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.List;
 
 /**
  * <p>

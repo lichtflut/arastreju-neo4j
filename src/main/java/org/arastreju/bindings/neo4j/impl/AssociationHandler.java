@@ -112,7 +112,7 @@ public class AssociationHandler implements NeoConstants {
 			}
 			SemanticNode object = null;
 			if (rel.isType(ArasRelTypes.REFERENCE)){
-				object = neoNodeResolver.resolveOrCreate(rel.getEndNode());
+				object = neoNodeResolver.resolve(rel.getEndNode());
 			} else if (rel.isType(ArasRelTypes.VALUE)){
 				object = new SNValueNeo(rel.getEndNode());
 			}

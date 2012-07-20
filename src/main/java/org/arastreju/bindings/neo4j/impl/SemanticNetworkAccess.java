@@ -142,6 +142,7 @@ public class SemanticNetworkAccess implements NeoConstants {
 				new NodeRemover(connection, conversationContext).remove(registered.getNeoNode(), false);
 			}
 		});
+        conversationContext.detach(id.getQualifiedName());
 	}
 	
 	// -----------------------------------------------------

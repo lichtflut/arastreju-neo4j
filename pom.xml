@@ -3,20 +3,29 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.arastreju</groupId>
-	<artifactId>arastreju.neo4j</artifactId>
-	<name>Arastreju Neo4J Binding</name>
+	<artifactId>arastreju-neo4j-parent</artifactId>
+	<name>Arastreju Neo4J Parent</name>
+	<packaging>pom</packaging>
 	<version>0.7.3-SNAPSHOT</version>
-	<description>Binding for Arastreju to Neo4J Graph Database</description>
+	<description>Binding for Arastreju to Neo4J Graph Database - Parent</description>
+	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<neo4j.version>1.7.1</neo4j.version>
 	</properties>
+	
+	<modules>
+		<module>neo-binding</module>
+		<module>integration-tests</module>
+	</modules>
+	
 	<licenses>
 		<license>
 			<name>GPL 3</name>
 			<url>http://www.gnu.org/copyleft/gpl.html</url>
 		</license>
 	</licenses>
+	
 	<organization>
 		<name>lichtflut Forschungs- und Entwicklungsgesellschaft mbH</name>
 		<url>http://www.lichtflut.de</url>
@@ -51,6 +60,7 @@
 			<version>1.2</version>
 		</dependency>
 	</dependencies>
+		
 	<build>
 		<plugins>
 			<plugin>

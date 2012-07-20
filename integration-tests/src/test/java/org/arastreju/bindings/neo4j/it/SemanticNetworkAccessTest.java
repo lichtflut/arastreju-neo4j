@@ -14,8 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.arastreju.bindings.neo4j.impl;
+package org.arastreju.bindings.neo4j.it;
 
+import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
+import org.arastreju.bindings.neo4j.impl.GraphDataStore;
+import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
+import org.arastreju.bindings.neo4j.impl.NeoResourceResolver;
+import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.apriori.Aras;
@@ -56,7 +61,7 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * <p>
- *  Test cases for {@link SemanticNetworkAccess}.
+ *  Test cases for {@link org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess}.
  * </p>
  *
  * <p>

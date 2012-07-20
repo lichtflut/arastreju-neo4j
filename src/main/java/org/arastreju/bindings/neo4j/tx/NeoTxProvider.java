@@ -16,6 +16,7 @@
  */
 package org.arastreju.bindings.neo4j.tx;
 
+import org.arastreju.sge.persistence.SubTransaction;
 import org.arastreju.sge.persistence.TransactionControl;
 import org.arastreju.sge.persistence.TxProvider;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -54,6 +55,6 @@ public class NeoTxProvider extends TxProvider {
 
     @Override
     protected TransactionControl newSubTx(TransactionControl tx) {
-        return new ArasNeoSubTransaction(tx);
+        return new SubTransaction(tx);
     }
 }

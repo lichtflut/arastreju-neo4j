@@ -5,13 +5,13 @@
 	<parent>
 		<groupId>org.arastreju</groupId>
 		<artifactId>arastreju-neo4j-parent</artifactId>
-		<version>0.7.3</version>
+		<version>0.7.4-SNAPSHOT</version>
 	</parent>	
 	
 	<groupId>org.arastreju</groupId>
 	<artifactId>arastreju-neo4j-integration-tests</artifactId>
 	<name>Arastreju Neo4J Integration Tests</name>
-	<version>0.7.3</version>
+	<version>0.7.4-SNAPSHOT</version>
 	<description>Integration tests for Neo4J Binding</description>
 
     <properties>

@@ -5,7 +5,7 @@
 	<artifactId>arastreju-neo4j-parent</artifactId>
 	<name>Arastreju Neo4J Parent</name>
 	<packaging>pom</packaging>
-	<version>0.7.3</version>
+	<version>0.7.4-SNAPSHOT</version>
 	<description>Binding for Arastreju to Neo4J Graph Database - Parent</description>
 	
 	<properties>
@@ -33,7 +33,7 @@
 		<dependency>
 			<groupId>org.arastreju</groupId>
 			<artifactId>arastreju.sge</artifactId>
-			<version>0.7.3</version>
+			<version>0.7.4-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.neo4j</groupId>

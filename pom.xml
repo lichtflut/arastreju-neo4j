@@ -11,6 +11,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<neo4j.version>1.7.1</neo4j.version>
+		<arastreju.sge.version>${project.version}</arastreju.sge.version>
 	</properties>
 	
 	<modules>
@@ -33,7 +34,7 @@
 		<dependency>
 			<groupId>org.arastreju</groupId>
 			<artifactId>arastreju.sge</artifactId>
-			<version>0.7.4-SNAPSHOT</version>
+			<version>${arastreju.sge.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.neo4j</groupId>

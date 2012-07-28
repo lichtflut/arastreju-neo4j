@@ -70,7 +70,7 @@ public class Neo4jGate extends AbstractArastrejuGate {
 	 */
     @Override
 	public Organizer getOrganizer() {
-		return new NeoOrganizer(connection, newConversationContext());
+		return new NeoOrganizer(connection, this);
 	}
 	
 	/**
@@ -84,7 +84,7 @@ public class Neo4jGate extends AbstractArastrejuGate {
 
     // ----------------------------------------------------
 
-    private NeoConversationContext newConversationContext() {
+    public NeoConversationContext newConversationContext() {
         NeoConversationContext cc = new NeoConversationContext(connection);
         super.initContext(cc);
         return cc;

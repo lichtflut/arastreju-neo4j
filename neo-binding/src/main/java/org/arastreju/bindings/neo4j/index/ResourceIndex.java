@@ -81,6 +81,13 @@ public class ResourceIndex implements NeoConstants {
 	public Node findNeoNode(final QualifiedName qn) {
 		return neoIndex.lookup(qn);
 	}
+
+    /**
+     * Retrieve all resources stored in the datastore.
+     */
+    public QueryResult getAllResources() {
+         return new NeoQueryResult(neoIndex.allNodes(), resolver);
+    }
 	
 	// -----------------------------------------------------
 	
@@ -141,22 +148,6 @@ public class ResourceIndex implements NeoConstants {
 		neoIndex.remove(node);
 	}
 
-	/**
-	 * Remove relationship from index.
-	 * @param neoNode The node beeing subject in the statement.
-     * @param stmt The statement to be removed.
-	 */
-	public void removeFromIndex(final Node neoNode, final Statement stmt) {
-		final String key = stmt.getPredicate().getQualifiedName().toURI();
-		if (stmt.getObject().isValueNode()) {
-			final ValueNode value = stmt.getObject().asValue();
-			// TODO: Remove general value without predicate.
-			neoIndex.remove(neoNode, key, value.getStringValue());
-		} else {
-			neoIndex.remove(neoNode, key, stmt.getObject().asResource().getQualifiedName().toURI());
-		}
-	}
-	
 	// -----------------------------------------------------
 	
 	/**

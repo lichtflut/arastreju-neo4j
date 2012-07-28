@@ -18,29 +18,25 @@ package org.arastreju.bindings.neo4j;
 
 import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
-import org.arastreju.bindings.neo4j.impl.NeoResourceResolver;
-import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
-import org.arastreju.bindings.neo4j.query.NeoQueryBuilder;
+import org.arastreju.sge.ModelingConversation;
 import org.arastreju.sge.apriori.Aras;
 import org.arastreju.sge.apriori.RDF;
 import org.arastreju.sge.context.Context;
-import org.arastreju.sge.context.SimpleContextID;
+import org.arastreju.sge.io.StatementContainer;
+import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.model.nodes.ResourceNode;
-import org.arastreju.sge.model.nodes.views.SNText;
 import org.arastreju.sge.naming.Namespace;
-import org.arastreju.sge.naming.QualifiedName;
-import org.arastreju.sge.naming.SimpleNamespace;
-import org.arastreju.sge.persistence.ResourceResolver;
 import org.arastreju.sge.query.Query;
 import org.arastreju.sge.query.QueryResult;
 import org.arastreju.sge.spi.abstracts.AbstractOrganizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
-
-import static org.arastreju.sge.SNOPS.assure;
 
 /**
  * <p>
@@ -55,56 +51,37 @@ import static org.arastreju.sge.SNOPS.assure;
  */
 public class NeoOrganizer extends AbstractOrganizer {
 
-	private final ResourceResolver resolver;
-	private final SemanticNetworkAccess sna;
-	private final ResourceIndex index;
-	
-	// -----------------------------------------------------
+    private static final Logger LOGGER = LoggerFactory.getLogger(NeoOrganizer.class);
+
+    private final GraphDataConnection connection;
+    private final Neo4jGate gate;
+
+    // -----------------------------------------------------
 	
 	/**
 	 * Constructor.
 	 * @param connection The connection.
 	 */
-	public NeoOrganizer(final GraphDataConnection connection, final NeoConversationContext convContext) {
-		this.resolver = new NeoResourceResolver(connection, convContext);
-		this.sna = new SemanticNetworkAccess(connection, convContext);
-		this.index = new ResourceIndex(convContext);
-	}
-	
-	// -----------------------------------------------------
+    public NeoOrganizer(GraphDataConnection connection, Neo4jGate gate) {
+        this.connection = connection;
+        this.gate = gate;
+    }
+
+    // -----------------------------------------------------
 	
 	/** 
 	 * {@inheritDoc}
 	 */
 	public Collection<Namespace> getNamespaces() {
 		final List<Namespace> result = new ArrayList<Namespace>();
-		final List<ResourceNode> nodes = index.lookup(RDF.TYPE, Aras.NAMESPACE).toList();
+		final List<ResourceNode> nodes = index().lookup(RDF.TYPE, Aras.NAMESPACE).toList();
 		for (ResourceNode node : nodes) {
 			result.add(createNamespace(node));
 		}
 		return result;
 	}
 	
-	/** 
-	 * {@inheritDoc}
-	 */
-	public Namespace registerNamespace(final String uri, final String prefix) {
-		final Query query = query()
-				.addField(RDF.TYPE, Aras.NAMESPACE)
-				.and()
-				.addField(Aras.HAS_URI, uri);
-		final QueryResult result = query.getResult();
-		if (!result.isEmpty()) {
-			final ResourceNode node = resolver.resolve(result.iterator().next());
-			assure(node,  Aras.HAS_PREFIX, new SNText(prefix));
-			return new SimpleNamespace(uri, prefix);
-		} else {
-			final Namespace ns = new SimpleNamespace(uri, prefix);
-			final ResourceNode node = createNamespaceNode(ns);
-			sna.attach(node);
-			return ns;
-		}
-	}
+
 	
 	// -----------------------------------------------------
 
@@ -113,26 +90,93 @@ public class NeoOrganizer extends AbstractOrganizer {
 	 */
 	public Collection<Context> getContexts() {
 		final List<Context> result = new ArrayList<Context>();
-		final List<ResourceNode> nodes = index.lookup(RDF.TYPE, Aras.CONTEXT).toList();
+		final List<ResourceNode> nodes = index().lookup(RDF.TYPE, Aras.CONTEXT).toList();
 		for (ResourceNode node : nodes) {
 			result.add(createContext(node));
 		}
 		return result;
 	}
 
-	/** 
-	 * {@inheritDoc}
-	 */
-	public Context registerContext(final QualifiedName qn) {
-		final ResourceNode node = createContextNode(qn);
-		sna.attach(node);
-		return new SimpleContextID(qn);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public StatementContainer getStatements(final Context ctx) {
+        final NeoConversationContext conversationContext = new NeoConversationContext(connection);
+        conversationContext.setReadContexts(ctx);
+        conversationContext.setPrimaryContext(ctx);
+        return new StatementContainer() {
+            @Override
+            public Collection<Namespace> getNamespaces() {
+                return NeoOrganizer.this.getNamespaces();
+            }
+
+            @Override
+            public Iterator<Statement> iterator() {
+                final ResourceIndex index = new ResourceIndex(connection, conversationContext);
+                final QueryResult queryResult = index.getAllResources();
+                LOGGER.info("Resources found: {}.", queryResult.size());
+                final Iterator<ResourceNode> nodeIterator = queryResult.iterator();
+                return new Iterator<Statement>() {
+
+                    private Iterator<Statement> stmtIterator;
+
+                    @Override
+                    public boolean hasNext() {
+                        if (stmtIterator == null) {
+                            nextNode();
+                        }
+                        while (stmtIterator != null) {
+                            if (stmtIterator.hasNext()) {
+                                return true;
+                            } else {
+                                nextNode();
+                            }
+
+                        }
+                        return false;
+                    }
+
+                    @Override
+                    public Statement next() {
+                        Statement stmt = stmtIterator.next();
+                        LOGGER.info("Next statement: {}.", stmt);
+                        return stmt;
+                    }
+
+                    @Override
+                    public void remove() {
+                        throw new UnsupportedOperationException();
+                    }
+
+                    private void nextNode() {
+                        if (nodeIterator.hasNext()) {
+                            ResourceNode node = nodeIterator.next();
+                            LOGGER.info("Next resource: {}.", node);
+                            stmtIterator = node.getAssociations().iterator();
+                        } else {
+                            LOGGER.info("Iteration over nodes done.");
+                            stmtIterator = null;
+                        }
+                    }
+                };
+            }
+        } ;
+    }
+
+    // ----------------------------------------------------
+
+    @Override
+    protected ModelingConversation conversation() {
+        return gate.startConversation();
+    }
+
+    protected Query query() {
+		return conversation().createQuery();
 	}
-	
-	// ----------------------------------------------------
-	
-	private Query query() {
-		return new NeoQueryBuilder(index);
-	}
+
+    protected ResourceIndex index() {
+        return new ResourceIndex(connection, gate.newConversationContext());
+    }
 	
 }

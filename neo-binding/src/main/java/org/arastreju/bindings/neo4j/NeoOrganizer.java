@@ -51,8 +51,6 @@ import java.util.List;
  */
 public class NeoOrganizer extends AbstractOrganizer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NeoOrganizer.class);
-
     private final GraphDataConnection connection;
     private final Neo4jGate gate;
 
@@ -101,10 +99,9 @@ public class NeoOrganizer extends AbstractOrganizer {
      * {@inheritDoc}
      */
     @Override
-    public StatementContainer getStatements(final Context ctx) {
+    public StatementContainer getStatements(final Context... ctx) {
         final NeoConversationContext conversationContext = new NeoConversationContext(connection);
         conversationContext.setReadContexts(ctx);
-        conversationContext.setPrimaryContext(ctx);
         return new StatementContainer() {
             @Override
             public Collection<Namespace> getNamespaces() {
@@ -115,7 +112,6 @@ public class NeoOrganizer extends AbstractOrganizer {
             public Iterator<Statement> iterator() {
                 final ResourceIndex index = new ResourceIndex(connection, conversationContext);
                 final QueryResult queryResult = index.getAllResources();
-                LOGGER.info("Resources found: {}.", queryResult.size());
                 final Iterator<ResourceNode> nodeIterator = queryResult.iterator();
                 return new Iterator<Statement>() {
 
@@ -139,9 +135,7 @@ public class NeoOrganizer extends AbstractOrganizer {
 
                     @Override
                     public Statement next() {
-                        Statement stmt = stmtIterator.next();
-                        LOGGER.info("Next statement: {}.", stmt);
-                        return stmt;
+                        return stmtIterator.next();
                     }
 
                     @Override
@@ -152,10 +146,8 @@ public class NeoOrganizer extends AbstractOrganizer {
                     private void nextNode() {
                         if (nodeIterator.hasNext()) {
                             ResourceNode node = nodeIterator.next();
-                            LOGGER.info("Next resource: {}.", node);
                             stmtIterator = node.getAssociations().iterator();
                         } else {
-                            LOGGER.info("Iteration over nodes done.");
                             stmtIterator = null;
                         }
                     }

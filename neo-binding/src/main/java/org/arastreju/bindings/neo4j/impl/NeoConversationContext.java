@@ -19,12 +19,16 @@ package org.arastreju.bindings.neo4j.impl;
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
 import org.arastreju.bindings.neo4j.tx.NeoTxProvider;
+import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.Statement;
+import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.spi.abstracts.AbstractConversationContext;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * <p>
@@ -94,10 +98,24 @@ public class NeoConversationContext extends AbstractConversationContext implemen
 	 * Resolve the associations of given association keeper.
 	 * @param keeper The association keeper to be resolved.
 	 */
-	public void resolveAssociations(final NeoAssociationKeeper keeper) {
+	public void resolveAssociations(NeoAssociationKeeper keeper) {
 		assertActive();
 		handler.resolveAssociations(keeper);
 	}
+
+    /**
+     * Get the incoming statements of the given node.
+     * @param object The node which is the object of the searched statements.
+     * @return The statments.
+     */
+    public Set<Statement> getIncomingStatements(ResourceID object) {
+        assertActive();
+        NeoAssociationKeeper keeper = register.get(object.getQualifiedName());
+        if (keeper == null) {
+            return Collections.emptySet();
+        }
+        return handler.getIncomingStatements(keeper);
+    }
 	
 	// ----------------------------------------------------
 	

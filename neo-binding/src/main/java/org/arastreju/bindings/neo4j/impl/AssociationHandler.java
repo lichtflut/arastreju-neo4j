@@ -104,7 +104,7 @@ public class AssociationHandler implements NeoConstants {
 	 * Resolve the associations of given association keeper.
 	 * @param keeper The association keeper to be resolved.
 	 */
-	public void resolveAssociations(final NeoAssociationKeeper keeper) {
+	public void resolveAssociations(NeoAssociationKeeper keeper) {
 		for(Relationship rel : keeper.getNeoNode().getRelationships(Direction.OUTGOING)){
 			final Context[] ctx = ctxAccess.getContextInfo(rel);
 			if (!regardContext(ctx)) {
@@ -121,6 +121,21 @@ public class AssociationHandler implements NeoConstants {
 			keeper.addAssociationDirectly(new DetachedStatement(keeper.getID(), predicate, object, mi));
 		}
 	}
+
+    public Set<Statement> getIncomingStatements(NeoAssociationKeeper keeper) {
+        final Set<Statement> result = new HashSet<Statement>();
+        for(Relationship rel : keeper.getNeoNode().getRelationships(Direction.INCOMING)){
+            final Context[] ctx = ctxAccess.getContextInfo(rel);
+            if (!regardContext(ctx)) {
+                continue;
+            }
+            final ResourceNode subject = neoNodeResolver.resolve(rel.getStartNode());
+            final ResourceNode predicate = resourceResolver.resolve(new SimpleResourceID(rel.getProperty(PREDICATE_URI).toString()));
+            final StatementMetaInfo mi = new StatementMetaInfo(ctx, new Date((Long)rel.getProperty(TIMESTAMP, 0L)));
+           result.add(new DetachedStatement(subject, predicate, keeper.getID(), mi));
+        }
+        return result;
+    }
 	
 	// ----------------------------------------------------
 	

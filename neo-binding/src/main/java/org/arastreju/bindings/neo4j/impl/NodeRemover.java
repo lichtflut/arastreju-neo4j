@@ -41,23 +41,17 @@ import java.util.Set;
 public class NodeRemover {
 
 	private final ResourceIndex index;
-	
-	// -----------------------------------------------------
+    private final NeoConversationContext context;
+
+    // -----------------------------------------------------
 
 	/**
 	 * Constructor.
-	 * @param index The resource index.
+	 * @param context The context.
 	 */
-	public NodeRemover(final ResourceIndex index) {
-		this.index = index;
-	}
-	
-	/**
-	 * Constructor.
-	 * @param connection The connection.
-	 */
-	public NodeRemover(GraphDataConnection connection, NeoConversationContext context) {
-		this(new ResourceIndex(connection, context));
+	public NodeRemover(NeoConversationContext context) {
+        this.context = context;
+        this.index = new ResourceIndex(context.getConnection(), context);
 	}
 	
 	// -----------------------------------------------------

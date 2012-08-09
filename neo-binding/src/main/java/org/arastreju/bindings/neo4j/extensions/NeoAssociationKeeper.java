@@ -73,9 +73,6 @@ public class NeoAssociationKeeper extends AbstractAssociationKeeper implements N
 	
 	// -----------------------------------------------------
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void addAssociation(final Statement assoc) {
 		if (getAssociations().contains(assoc)) {
@@ -88,9 +85,6 @@ public class NeoAssociationKeeper extends AbstractAssociationKeeper implements N
 		}
 	}
 	
-	/** 
-	 * {@inheritDoc}
-	 */
 	@Override
 	public boolean removeAssociation(final Statement assoc) {
 		if (isAttached()) {
@@ -103,9 +97,7 @@ public class NeoAssociationKeeper extends AbstractAssociationKeeper implements N
 	
 	// ----------------------------------------------------
 	
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public boolean isAttached() {
 		return context != null && context.isActive();
 	}
@@ -139,9 +131,6 @@ public class NeoAssociationKeeper extends AbstractAssociationKeeper implements N
 	
 	// ----------------------------------------------------
 	
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void resolveAssociations() {
 		if (isAttached()) {

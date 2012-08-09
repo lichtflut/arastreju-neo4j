@@ -263,12 +263,16 @@ public class AssociationHandler implements NeoConstants {
 	
 	private void createRelationShip(final Node subject, final Node object, final Statement stmt) {
 		final RelationshipType type = stmt.getObject().isResourceNode() ? ArasRelTypes.REFERENCE : ArasRelTypes.VALUE;
-		final Relationship relationship = subject.createRelationshipTo(object, type);
-		relationship.setProperty(PREDICATE_URI, stmt.getPredicate().toURI());
-		relationship.setProperty(PREDICATE_URI, stmt.getPredicate().toURI());
-		relationship.setProperty(TIMESTAMP, new Date().getTime());
-		ctxAccess.assignContext(relationship, getCurrentContexts(stmt));
-		LOGGER.debug("added relationship--> " + relationship + " to node " + subject);
+        try {
+		    final Relationship relationship = subject.createRelationshipTo(object, type);
+            relationship.setProperty(PREDICATE_URI, stmt.getPredicate().toURI());
+            relationship.setProperty(PREDICATE_URI, stmt.getPredicate().toURI());
+            relationship.setProperty(TIMESTAMP, new Date().getTime());
+            ctxAccess.assignContext(relationship, getCurrentContexts(stmt));
+            LOGGER.debug("added relationship--> " + relationship + " to node " + subject);
+        } catch (Exception e) {
+            LOGGER.error("Failed to add relationship--> " + stmt + " to node " + subject, e);
+        }
 	}
 	
 	private Relationship findCorresponding(final Node neoNode, final Statement stmt) {

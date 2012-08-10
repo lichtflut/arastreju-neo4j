@@ -21,9 +21,10 @@ import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
 import org.arastreju.bindings.neo4j.tx.NeoTxProvider;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.Statement;
-import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.spi.abstracts.AbstractConversationContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -42,6 +43,8 @@ import java.util.Set;
  * @author Oliver Tigges
  */
 public class NeoConversationContext extends AbstractConversationContext implements NeoConstants {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NeoConversationContext.class);
 
 	private final Map<QualifiedName, NeoAssociationKeeper> register = new HashMap<QualifiedName, NeoAssociationKeeper>();
 	
@@ -68,7 +71,11 @@ public class NeoConversationContext extends AbstractConversationContext implemen
 	 */
 	public NeoAssociationKeeper getAssociationKeeper(QualifiedName qn) {
 		assertActive();
-		return register.get(qn);
+        NeoAssociationKeeper registered = register.get(qn);
+        if (registered != null && !registered.isAttached()) {
+            LOGGER.warn("There is a detached NeoAssociationKeeper in the conversation register: {}.", qn);
+        }
+        return registered;
 	}
 	
 	/**

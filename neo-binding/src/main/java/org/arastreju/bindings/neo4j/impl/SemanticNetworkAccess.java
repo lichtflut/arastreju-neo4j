@@ -135,14 +135,14 @@ public class SemanticNetworkAccess implements NeoConstants {
 	 * @param id The ID.
 	 */
 	public void remove(final ResourceID id) {
-        final NeoAssociationKeeper registered = conversationContext.getAssociationKeeper(id.getQualifiedName());
+        final NeoAssociationKeeper registered = findAssociationKeeper(id.getQualifiedName());
 		registered.getAssociations().clear();
+        conversationContext.detach(id.getQualifiedName());
 		tx().doTransacted(new TxAction() {
 			public void execute() {
 				new NodeRemover(conversationContext).remove(registered.getNeoNode(), false);
 			}
 		});
-        conversationContext.detach(id.getQualifiedName());
 	}
 	
 	// -----------------------------------------------------
@@ -152,8 +152,8 @@ public class SemanticNetworkAccess implements NeoConstants {
 	 * @param qn The qualified name.
 	 * @return The keeper or null.
 	 */
-	protected AssociationKeeper findAssociationKeeper(final QualifiedName qn) {
-		final AssociationKeeper registered = conversationContext.getAssociationKeeper(qn);
+	protected NeoAssociationKeeper findAssociationKeeper(final QualifiedName qn) {
+		final NeoAssociationKeeper registered = conversationContext.getAssociationKeeper(qn);
 		if (registered != null) {
 			return registered;
 		}

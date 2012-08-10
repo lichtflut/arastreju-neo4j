@@ -79,7 +79,7 @@ public class NeoResourceResolver implements ResourceResolver {
 	 */
 	protected AssociationKeeper findAssociationKeeper(final QualifiedName qn) {
 		final AssociationKeeper registered = conversationContext.getAssociationKeeper(qn);
-		if (registered != null) {
+		if (registered != null && registered.isAttached()) {
 			return registered;
 		}
 		final Node neoNode = new ResourceIndex(conversationContext).findNeoNode(qn);

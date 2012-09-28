@@ -85,7 +85,7 @@ public class NeoConversationContext extends AbstractConversationContext implemen
 	public void attach(QualifiedName qn, NeoAssociationKeeper keeper) {
 		assertActive();
 		register.put(qn, keeper);
-		keeper.setWorkingContext(this);
+		keeper.setConversationContext(this);
 	}
 	
 	/**
@@ -166,4 +166,5 @@ public class NeoConversationContext extends AbstractConversationContext implemen
         }
         register.clear();
     }
+
 }

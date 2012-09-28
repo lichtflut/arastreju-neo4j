@@ -112,14 +112,22 @@ public class NeoAssociationKeeper extends AbstractAssociationKeeper implements N
 	}
 	
 	/**
-	 * Set the working context.
+	 * Set the conversation context.
 	 * @param context the context to set
 	 */
-	public void setWorkingContext(NeoConversationContext context) {
+	public void setConversationContext(NeoConversationContext context) {
 		this.context = context;
 	}
-	
-	// ----------------------------------------------------
+
+    /**
+     * Get the current conversation context.
+     * @return The context.
+     */
+    public NeoConversationContext getConversationContext() {
+        return context;
+    }
+
+    // ----------------------------------------------------
 
 	/**
 	 * Add an association directly to the set, without resolving.

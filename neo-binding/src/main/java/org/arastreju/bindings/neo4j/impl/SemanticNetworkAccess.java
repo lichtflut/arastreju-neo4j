@@ -141,6 +141,10 @@ public class SemanticNetworkAccess implements NeoConstants {
 	 */
 	public void remove(final ResourceID id) {
         final NeoAssociationKeeper registered = findAssociationKeeper(id.getQualifiedName());
+        if (registered == null) {
+            // Resource with given ID does not exist (any more).
+            return;
+        }
 		registered.getAssociations().clear();
         conversationContext.detach(id.getQualifiedName());
 		tx().doTransacted(new TxAction() {

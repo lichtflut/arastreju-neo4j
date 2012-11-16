@@ -158,6 +158,7 @@ public class AssociationHandler implements NeoConstants {
                 addHardInferences(stmtList);
                 addSoftInferences(keeper, stmtList);
 
+                tx().getRepl().queueRelOp(true, stmt);
             }
         });
 		
@@ -180,6 +181,8 @@ public class AssociationHandler implements NeoConstants {
                     removeHardInferences(Collections.singleton(assoc));
                     index.reindex(keeper.getNeoNode(), keeper.getQualifiedName(), keeper.getAssociations());
                     addSoftInferences(keeper, keeper.getAssociations());
+                    
+                    tx().getRepl().queueRelOp(false, assoc);
                 }
             });
 			return true;

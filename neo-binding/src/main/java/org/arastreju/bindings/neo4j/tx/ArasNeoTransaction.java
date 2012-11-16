@@ -30,7 +30,7 @@ import org.neo4j.graphdb.Transaction;
  *
  * @author Oliver Tigges
  */
-class ArasNeoTransaction implements TransactionControl {
+class ArasNeoTransaction extends TransactionControl {
 
 	private Transaction tx;
 	
@@ -40,7 +40,8 @@ class ArasNeoTransaction implements TransactionControl {
 	 * Constructor.
 	 * @param tx The transaction.
 	 */
-	public ArasNeoTransaction(final Transaction tx) {
+	public ArasNeoTransaction(final Transaction tx, NeoTxProvider txProv) {
+		super(txProv);
 		this.tx = tx;
 	}
 	
@@ -58,7 +59,7 @@ class ArasNeoTransaction implements TransactionControl {
 	/** 
 	 * {@inheritDoc}
 	 */
-	public void success() {
+	public void onSuccess() {
 		assertTxActive();
 		tx.success();
 	}
@@ -74,7 +75,7 @@ class ArasNeoTransaction implements TransactionControl {
 	/**
 	 * {@inheritDoc}
 	 */
-	public void finish() {
+	public void onFinish() {
 		assertTxActive();
 		tx.finish();
 		tx = null;

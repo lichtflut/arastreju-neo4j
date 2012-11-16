@@ -50,7 +50,7 @@ public class NeoTxProvider extends TxProvider {
 
     @Override
     protected TransactionControl newTx() {
-        return new ArasNeoTransaction(gdbService.beginTx());
+        return new ArasNeoTransaction(gdbService.beginTx(), this);
     }
 
     @Override

@@ -80,6 +80,8 @@ public class SemanticNetworkAccess implements NeoConstants {
 		tx().doTransacted(new TxAction() {
 			public void execute() {
 				persist(resource);
+				
+				tx().getRepl().queueNodeOp(true, resource);
 			}
 		});
 	}
@@ -102,7 +104,7 @@ public class SemanticNetworkAccess implements NeoConstants {
 					merge(attachedKeeper, resource);
 				} else {
 					// 3rd: if resource is really new, create a new Neo node.
-					persist(resource);
+					create(resource); //XXX was persist()
 				}
 			}
 		});
@@ -150,6 +152,8 @@ public class SemanticNetworkAccess implements NeoConstants {
 		tx().doTransacted(new TxAction() {
 			public void execute() {
 				new NodeRemover(conversationContext).remove(registered.getNeoNode(), false);
+				
+				tx().getRepl().queueNodeOp(false, id);
 			}
 		});
 	}

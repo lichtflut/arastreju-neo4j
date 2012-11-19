@@ -57,30 +57,18 @@ public class NeoQueryResult implements QueryResult {
 	
 	// -----------------------------------------------------
 	
-	/** 
-	 * {@inheritDoc}
-	 */
 	public Iterator<ResourceNode> iterator() {
 		return new ResolvingIterator();
 	}
 
-	/** 
-	 * {@inheritDoc}
-	 */
 	public void close() {
 		hits.close();
 	}
 
-	/** 
-	 * {@inheritDoc}
-	 */
 	public int size() {
 		return hits.size();
 	}
 
-	/** 
-	 * {@inheritDoc}
-	 */
 	public List<ResourceNode> toList() {
 		final List<ResourceNode> result = new ArrayList<ResourceNode>(size());
 		for (Node node : hits) {
@@ -89,9 +77,6 @@ public class NeoQueryResult implements QueryResult {
 		return result;
 	}
 	
-	/** 
-	* {@inheritDoc}
-	*/
 	public List<ResourceNode> toList(int max) {
 		int absMax = Math.min(hits.size(), max);
 		final List<ResourceNode> result = new ArrayList<ResourceNode>(absMax);
@@ -102,9 +87,6 @@ public class NeoQueryResult implements QueryResult {
 		return result;
 	}
 	
-	/** 
-	 * {@inheritDoc}
-	 */
 	public List<ResourceNode> toList(int offset, int max) {
 		int absMax = Math.min(hits.size(), offset + max);
 		if (offset >= absMax) {
@@ -122,22 +104,16 @@ public class NeoQueryResult implements QueryResult {
 		return result;
 	}
 
-	/** 
-	 * {@inheritDoc}
-	 */
 	public boolean isEmpty() {
 		return hits.size() <= 0;
 	}
 	
-	/** 
-	* {@inheritDoc}
-	*/
 	public ResourceNode getSingleNode() {
 		try {
 			if (isEmpty()) {
 				return null;
 			} else if (size() > 1) {
-				throw new IllegalStateException("More than one result found.");
+				throw new IllegalStateException("More than one result found for query.");
 			} else {
 				return toList().get(0);
 			}
@@ -155,26 +131,18 @@ public class NeoQueryResult implements QueryResult {
 	
 	class ResolvingIterator implements Iterator<ResourceNode> {
 
-		/** 
-		 * {@inheritDoc}
-		 */
 		public boolean hasNext() {
 			return hits.hasNext();
 		}
 
-		/** 
-		 * {@inheritDoc}
-		 */
 		public ResourceNode next() {
 			return resolver.resolve(hits.next());
 		}
 
-		/** 
-		 * {@inheritDoc}
-		 */
 		public void remove() {
 			throw new UnsupportedOperationException();
 		}
+
 	}
 
 }

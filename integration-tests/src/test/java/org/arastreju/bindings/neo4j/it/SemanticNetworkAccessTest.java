@@ -49,6 +49,7 @@ import org.neo4j.graphdb.Transaction;
 import java.io.IOException;
 
 import static org.arastreju.sge.SNOPS.associate;
+import static org.arastreju.sge.SNOPS.associations;
 import static org.arastreju.sge.SNOPS.id;
 import static org.arastreju.sge.SNOPS.qualify;
 import static org.junit.Assert.assertArrayEquals;
@@ -252,8 +253,8 @@ public class SemanticNetworkAccessTest {
 		assertFalse(vehicleLoaded.getAssociations().isEmpty());
 		assertFalse(carLoaded.getAssociations().isEmpty());
 		
-		assertFalse(vehicleLoaded.getAssociations(pred1).isEmpty());
-		assertFalse(carLoaded.getAssociations(pred2).isEmpty());
+		assertFalse(associations(vehicleLoaded, pred1).isEmpty());
+		assertFalse(associations(carLoaded, pred2).isEmpty());
 	}
 	
 	@Test
@@ -271,14 +272,14 @@ public class SemanticNetworkAccessTest {
 		assertEquals(association.hashCode(), stored.hashCode());
 		
 		assertEquals(3, car1.getAssociations().size());
-		assertFalse(car1.getAssociations(Aras.HAS_BRAND_NAME).isEmpty());
+		assertFalse(associations(car1, Aras.HAS_BRAND_NAME).isEmpty());
 		assertTrue("Association not present", car1.getAssociations().contains(association));
 		
 		final boolean removedFlag = car1.removeAssociation(association);
 		assertTrue(removedFlag);
 		
 		assertEquals(2, car1.getAssociations().size());
-		assertTrue(car1.getAssociations( Aras.HAS_BRAND_NAME).isEmpty());
+		assertTrue(associations(car1, Aras.HAS_BRAND_NAME).isEmpty());
 		
 	}
 	
@@ -297,7 +298,7 @@ public class SemanticNetworkAccessTest {
 		sna.detach(car1);
 		
 		assertEquals(3, car1.getAssociations().size());
-		assertFalse(car1.getAssociations(Aras.HAS_BRAND_NAME).isEmpty());
+		assertFalse(associations(car1, Aras.HAS_BRAND_NAME).isEmpty());
 		assertTrue("Association not present", car1.getAssociations().contains(association));
 		
 		final boolean removedFlag = car1.removeAssociation(association);
@@ -309,7 +310,7 @@ public class SemanticNetworkAccessTest {
 		assertNotSame(car1, car2);
 		
 		assertEquals(2, car2.getAssociations().size());
-		assertTrue(car2.getAssociations( Aras.HAS_BRAND_NAME).isEmpty());
+		assertTrue(associations(car2, Aras.HAS_BRAND_NAME).isEmpty());
 		
 	}
 	

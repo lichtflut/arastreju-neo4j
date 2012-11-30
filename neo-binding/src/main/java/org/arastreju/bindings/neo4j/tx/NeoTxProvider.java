@@ -62,6 +62,6 @@ public class NeoTxProvider extends TxProvider {
 
 	@Override
 	protected ArasLiveReplicator createReplicator() {
-		return new NeoLiveReplicator();
+		return new NeoLiveReplicator(gdbService);
 	}
 }

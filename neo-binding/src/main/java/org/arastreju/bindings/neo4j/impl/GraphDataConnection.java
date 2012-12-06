@@ -32,6 +32,7 @@ public class GraphDataConnection {
 	public GraphDataConnection(GraphDataStore store) {
 		this.store = store;
 		this.txProvider = new NeoTxProvider(store.getGdbService());
+		this.txProvider.initRepl();
 	}
 	
 	// ----------------------------------------------------

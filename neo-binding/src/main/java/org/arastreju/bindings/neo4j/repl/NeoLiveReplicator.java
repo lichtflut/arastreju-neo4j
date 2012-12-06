@@ -13,6 +13,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,11 +33,16 @@ public class NeoLiveReplicator extends ArasLiveReplicator implements NeoConstant
 	private final Logger logger = LoggerFactory.getLogger(NeoLiveReplicator.class);
 
 	private final GraphDatabaseService gdbService;
+	
+	private int CurrentTxSeq = -1;
+	private Transaction CurTx = null;
 
 	// ----------------------------------------------------
 	
 	public NeoLiveReplicator(GraphDatabaseService gdbService) {
+		super();
 		this.gdbService = gdbService;
+		logger.debug("gdbservice is "+gdbService);
 	}
 
 	
@@ -44,25 +50,29 @@ public class NeoLiveReplicator extends ArasLiveReplicator implements NeoConstant
 
 	
 	@Override
-	protected void onNodeOp(boolean added, ResourceID node) {
+	protected void onNodeOp(int txSeq, boolean added, ResourceID node) {
 		logger.debug("onNodeOp(added=" + added + ", node=" + node);
+		ensureTx(txSeq);
 		if (added) {
 			final Node neoNode = gdbService.createNode();
 			neoNode.setProperty(PROPERTY_URI, node.getQualifiedName().toURI());
-			// XXX index
+			gdbService.index().forNodes("resources").add(neoNode, NeoIndex.INDEX_KEY_RESOURCE_URI, node.toURI().trim().toLowerCase());
+			// XXX: context-aware indexing is missing still
 		} else {
 			/* XXX */
 			Node neoNode = gdbService.index().forNodes("resources")
 					.get(NeoIndex.INDEX_KEY_RESOURCE_URI, node.toURI().trim().toLowerCase())
 					.getSingle();
-
+			gdbService.index().forNodes("resources").remove(neoNode);
+			
 			neoNode.delete();
 		}
 	}
 
 	@Override
-	protected void onRelOp(boolean added, Statement stmt) {
+	protected void onRelOp(int txSeq, boolean added, Statement stmt) {
 		logger.debug("onRelOp(added="+added+", stmt="+stmt);
+		ensureTx(txSeq);
 		boolean valObj = stmt.getObject().isValueNode();
 		RelationshipType type = valObj ? ArasRelTypes.VALUE : ArasRelTypes.REFERENCE;
 
@@ -100,6 +110,34 @@ public class NeoLiveReplicator extends ArasLiveReplicator implements NeoConstant
 		}
 	}
 
+	@Override
+	protected void onEndOfTx(int txSeq) {
+		if (CurrentTxSeq != txSeq) {
+			logger.warn("spurious EOT (expected: "+CurrentTxSeq+", got: "+txSeq+") - ignoring");
+			return;
+		}
+		
+		if (CurTx != null) {
+			CurTx.success();
+			CurTx.finish();
+			CurTx = null;
+		} else {
+			logger.warn("no current transaction ("+txSeq+")");
+		}
+	}
+
+	
+	// ----------------------------------------------------
+	
+	private void ensureTx(int txSeq) {
+		if (txSeq > CurrentTxSeq) {
+			if (CurTx != null) {
+				logger.warn("transaction "+txSeq+" not finished!");
+			}
+			CurTx = gdbService.beginTx();
+			CurrentTxSeq = txSeq;
+		}
+	}
 	
 	// ----------------------------------------------------
 

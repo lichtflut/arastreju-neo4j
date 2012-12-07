@@ -11,7 +11,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<neo4j.version>1.8</neo4j.version>
-		<arastreju.sge.version>0.8.0</arastreju.sge.version>
+		<arastreju.sge.version>${project.version}</arastreju.sge.version>
 	</properties>
 
 	<modules>

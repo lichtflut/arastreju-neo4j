@@ -111,14 +111,18 @@ public class NeoLiveReplicator extends ArasLiveReplicator implements NeoConstant
 	}
 
 	@Override
-	protected void onEndOfTx(int txSeq) {
+	protected void onEndOfTx(int txSeq, boolean success) {
 		if (CurrentTxSeq != txSeq) {
 			logger.warn("spurious EOT (expected: "+CurrentTxSeq+", got: "+txSeq+") - ignoring");
 			return;
 		}
 		
 		if (CurTx != null) {
-			CurTx.success();
+			if (success) {
+				CurTx.success();
+			} else {
+				CurTx.failure();
+			}
 			CurTx.finish();
 			CurTx = null;
 		} else {

@@ -40,8 +40,8 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.actors.threadpool.Arrays;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -104,10 +104,10 @@ public class AssociationHandler implements NeoConstants {
 	 * Resolve the associations of given association keeper.
 	 * @param keeper The association keeper to be resolved.
 	 */
-	public void resolveAssociations(final NeoAssociationKeeper keeper) {
+	public void resolveAssociations(NeoAssociationKeeper keeper) {
 		for(Relationship rel : keeper.getNeoNode().getRelationships(Direction.OUTGOING)){
 			final Context[] ctx = ctxAccess.getContextInfo(rel);
-			if (!regardContext(ctx)) {
+			if (!regardContext(ctx, rel)) {
 				continue;
 			}
 			SemanticNode object = null;
@@ -121,6 +121,21 @@ public class AssociationHandler implements NeoConstants {
 			keeper.addAssociationDirectly(new DetachedStatement(keeper.getID(), predicate, object, mi));
 		}
 	}
+
+    public Set<Statement> getIncomingStatements(NeoAssociationKeeper keeper) {
+        final Set<Statement> result = new HashSet<Statement>();
+        for(Relationship rel : keeper.getNeoNode().getRelationships(Direction.INCOMING)){
+            final Context[] ctx = ctxAccess.getContextInfo(rel);
+            if (!regardContext(ctx, rel)) {
+                continue;
+            }
+            final ResourceNode subject = neoNodeResolver.resolve(rel.getStartNode());
+            final ResourceNode predicate = resourceResolver.resolve(new SimpleResourceID(rel.getProperty(PREDICATE_URI).toString()));
+            final StatementMetaInfo mi = new StatementMetaInfo(ctx, new Date((Long)rel.getProperty(TIMESTAMP, 0L)));
+           result.add(new DetachedStatement(subject, predicate, keeper.getID(), mi));
+        }
+        return result;
+    }
 	
 	// ----------------------------------------------------
 	
@@ -231,6 +246,7 @@ public class AssociationHandler implements NeoConstants {
 	}
 	
 	private void createRelationships(Node subject, Statement stmt) {
+        LOGGER.debug("Created statement {}. ", stmt);
 		if (stmt.getObject().isResourceNode()){
 			final ResourceNode arasClient = resourceResolver.resolve(stmt.getObject().asResource());
 			final Node neoClient = NeoAssocKeeperAccess.getNeoNode(arasClient);
@@ -248,12 +264,16 @@ public class AssociationHandler implements NeoConstants {
 	
 	private void createRelationShip(final Node subject, final Node object, final Statement stmt) {
 		final RelationshipType type = stmt.getObject().isResourceNode() ? ArasRelTypes.REFERENCE : ArasRelTypes.VALUE;
-		final Relationship relationship = subject.createRelationshipTo(object, type);
-		relationship.setProperty(PREDICATE_URI, stmt.getPredicate().toURI());
-		relationship.setProperty(PREDICATE_URI, stmt.getPredicate().toURI());
-		relationship.setProperty(TIMESTAMP, new Date().getTime());
-		ctxAccess.assignContext(relationship, getCurrentContexts(stmt));
-		LOGGER.debug("added relationship--> " + relationship + " to node " + subject);
+        try {
+		    final Relationship relationship = subject.createRelationshipTo(object, type);
+            relationship.setProperty(PREDICATE_URI, stmt.getPredicate().toURI());
+            relationship.setProperty(PREDICATE_URI, stmt.getPredicate().toURI());
+            relationship.setProperty(TIMESTAMP, new Date().getTime());
+            ctxAccess.assignContext(relationship, getCurrentContexts(stmt));
+            LOGGER.debug("added relationship--> " + relationship + " to node " + subject);
+        } catch (Exception e) {
+            LOGGER.error("Failed to add relationship--> " + stmt + " to node " + subject, e);
+        }
 	}
 	
 	private Relationship findCorresponding(final Node neoNode, final Statement stmt) {
@@ -315,7 +335,7 @@ public class AssociationHandler implements NeoConstants {
 		}
 	}
 	
-	private boolean regardContext(Context[] stmtContexts) {
+	private boolean regardContext(Context[] stmtContexts, Relationship rel) {
 		if (stmtContexts.length == 0) {
 			LOGGER.debug("Statement has no context.");
 			return true;
@@ -328,9 +348,30 @@ public class AssociationHandler implements NeoConstants {
                 }
             }
         }
-		LOGGER.debug("Contexts " + Arrays.toString(stmtContexts) + " not in read contexts." + Arrays.toString(readContexts));
+        if (LOGGER.isDebugEnabled()) {
+            final StringBuilder sb = new StringBuilder("Contexts of Statement ");
+            sb.append(neoNodeResolver.resolve(rel.getStartNode()));
+            sb.append(" --> ");
+            sb.append(rel.getProperty(PREDICATE_URI));
+            sb.append(" --> ");
+            sb.append(convert(rel, rel.getEndNode()));
+            sb.append(" {} ");
+            sb.append("not in read contexts");
+            sb.append(" {}.");
+            LOGGER.debug(sb.toString(), Arrays.toString(stmtContexts), Arrays.toString(readContexts));
+        }
 		return false;
 	}
+
+    private SemanticNode convert(Relationship rel, Node node) {
+        if (rel.isType(ArasRelTypes.REFERENCE)){
+            return neoNodeResolver.resolve(node);
+        } else if (rel.isType(ArasRelTypes.VALUE)){
+            return new SNValueNeo(node);
+        } else {
+            return null;
+        }
+    }
 
     private NeoTxProvider tx() {
         return convContext.getTxProvider();

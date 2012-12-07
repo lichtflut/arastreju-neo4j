@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.arastreju.bindings.neo4j;
+package org.arastreju.bindings.neo4j.it;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import org.arastreju.bindings.neo4j.Neo4jModellingConversation;
 import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.GraphDataStore;
 import org.arastreju.sge.SNOPS;
@@ -48,7 +49,7 @@ import org.junit.Test;
 
 /**
  * <p>
- *  Test case for the {@link Neo4jModellingConversation}.
+ *  Test case for the {@link org.arastreju.bindings.neo4j.Neo4jModellingConversation}.
  * </p>
  *
  * <p>

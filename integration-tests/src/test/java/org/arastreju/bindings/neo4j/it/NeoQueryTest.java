@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.arastreju.bindings.neo4j.query;
+package org.arastreju.bindings.neo4j.it;
 
 
 import junit.framework.Assert;
@@ -23,6 +23,7 @@ import org.arastreju.bindings.neo4j.impl.GraphDataStore;
 import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
+import org.arastreju.bindings.neo4j.query.NeoQueryBuilder;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.apriori.Aras;
 import org.arastreju.sge.apriori.RDF;
@@ -35,7 +36,6 @@ import org.arastreju.sge.model.nodes.views.SNText;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.query.FieldParam;
 import org.arastreju.sge.query.Query;
-import org.arastreju.sge.query.QueryExpression;
 import org.arastreju.sge.query.QueryResult;
 import org.arastreju.sge.query.UriParam;
 import org.arastreju.sge.query.ValueParam;
@@ -56,20 +56,20 @@ import java.util.List;
  *
  * @author Oliver Tigges
  */
-public class NeoQueryManagerTest {
-	
+public class NeoQueryTest {
+
 	private final QualifiedName qnCar = new QualifiedName("http://q#", "Car");
 	private final QualifiedName qnBike = new QualifiedName("http://q#", "Bike");
-	
+
 	private GraphDataStore store;
 	private GraphDataConnection connection;
 	private SemanticNetworkAccess sna;
 	private NeoConversationContext convCtx;
-	
+
 	// -----------------------------------------------------
 
 	/**
-	 * @throws java.lang.Exception
+	 * @throws Exception
 	 */
 	@Before
 	public void setUp() throws Exception {
@@ -80,7 +80,7 @@ public class NeoQueryManagerTest {
 	}
 
 	/**
-	 * @throws java.lang.Exception
+	 * @throws Exception
 	 */
 	@After
 	public void tearDown() throws Exception {
@@ -90,28 +90,6 @@ public class NeoQueryManagerTest {
 	}
 	
 	// -----------------------------------------------------
-	
-	@Test
-	public void testQueryBuilder() {
-		final NeoQueryBuilder query = new NeoQueryBuilder(new ResourceIndex(connection, convCtx));
-
-		query.beginAnd()
-				.add(new FieldParam("a", 1))
-				.add(new FieldParam("b", 2))
-				.add(new FieldParam("c", 3))
-				.beginOr()
-					.add(new FieldParam("d1", 1))
-					.add(new FieldParam("d2", 2))
-					.add(new FieldParam("d3", 3))
-				.end();
-		
-
-		final QueryExpression root = query.getRoot();
-		Assert.assertTrue(root != null);
-		Assert.assertEquals(4, root.getChildren().size());
-		Assert.assertEquals(3, root.getChildren().get(3).getChildren().size());
-		
-	}
 	
 	@Test
 	public void testFindByTag(){

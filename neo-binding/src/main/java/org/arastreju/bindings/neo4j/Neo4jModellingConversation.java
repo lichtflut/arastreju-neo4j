@@ -16,24 +16,20 @@
  */
 package org.arastreju.bindings.neo4j;
 
+import java.util.Set;
+
 import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.bindings.neo4j.impl.NeoResourceResolver;
 import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.bindings.neo4j.query.NeoQueryBuilder;
-import org.arastreju.sge.ConversationContext;
 import org.arastreju.sge.ModelingConversation;
-import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.model.ResourceID;
-import org.arastreju.sge.model.SemanticGraph;
 import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.model.nodes.ResourceNode;
-import org.arastreju.sge.model.nodes.SemanticNode;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.persistence.ResourceResolver;
-import org.arastreju.sge.persistence.TransactionControl;
-import org.arastreju.sge.persistence.TxResultAction;
 import org.arastreju.sge.query.Query;
 import org.arastreju.sge.spi.abstracts.AbstractModelingConversation;
 import org.slf4j.Logger;
@@ -52,9 +48,9 @@ import org.slf4j.LoggerFactory;
  */
 public class Neo4jModellingConversation extends AbstractModelingConversation implements ModelingConversation {
 	
-	private static final Logger logger = LoggerFactory.getLogger(Neo4jModellingConversation.class);
-	
-	private final GraphDataConnection connection;
+	private static final Logger LOGGER = LoggerFactory.getLogger(Neo4jModellingConversation.class);
+
+    // ----------------------------------------------------
 	
 	private final NeoConversationContext conversationContext;
 	
@@ -75,7 +71,7 @@ public class Neo4jModellingConversation extends AbstractModelingConversation imp
      * Create a new Modelling Conversation instance using a given data store.
      */
     public Neo4jModellingConversation(final GraphDataConnection connection, final NeoConversationContext context) {
-        this.connection = connection;
+        super(context);
         this.conversationContext = context;
         this.sna = new SemanticNetworkAccess(connection, context);
         this.resolver = new NeoResourceResolver(connection, context);
@@ -83,118 +79,56 @@ public class Neo4jModellingConversation extends AbstractModelingConversation imp
 	
     // ----------------------------------------------------
 	
-	/** 
-	 * {@inheritDoc}
-	 */
+	@Override
 	public Query createQuery() {
 		assertActive();
 		return new NeoQueryBuilder(new ResourceIndex(conversationContext));
 	}
-	
-	// ----------------------------------------------------
 
-	/**
-	 * {@inheritDoc}
-	 */
+    @Override
+    public Set<Statement> findIncomingStatements(ResourceID object) {
+        assertActive();
+        return conversationContext.getIncomingStatements(object);
+    }
+
+    // ----------------------------------------------------
+
+    @Override
 	public ResourceNode findResource(final QualifiedName qn) {
 		assertActive();
 		return resolver.findResource(qn);
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
     public ResourceNode resolve(final ResourceID resource) {
 		assertActive();
 		return resolver.resolve(resource);
 	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
+
+    // ----------------------------------------------------
+
+    @Override
 	public void attach(final ResourceNode node) {
 		assertActive();
 		sna.attach(node);
 	}
-	
-	/** 
-	 * {@inheritDoc}
-	 */
+
+    @Override
 	public void reset(final ResourceNode node) {
 		assertActive();
 		sna.reset(node);
 	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
+
+    @Override
 	public void detach(final ResourceNode node) {
 		assertActive();
 		sna.detach(node);
 	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
+
+    @Override
 	public void remove(final ResourceID id) {
 		assertActive();
 		sna.remove(id);
-	}
-	
-	// -----------------------------------------------------
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void attach(final SemanticGraph graph) {
-		assertActive();
-		connection.getTxProvider().doTransacted(new TxResultAction<SemanticGraph>() {
-			public SemanticGraph execute() {
-				for(Statement stmt : graph.getStatements()) {
-					final ResourceNode subject = resolve(stmt.getSubject());
-					SNOPS.associate(subject, stmt.getPredicate(), stmt.getObject(), stmt.getContexts());
-				}
-				return graph;
-			}
-		});
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void detach(final SemanticGraph graph) {
-		assertActive();
-		for(SemanticNode node : graph.getNodes()){
-			if (node.isResourceNode() && node.asResource().isAttached()){
-				sna.detach(node.asResource());
-			}
-		}
-	}
-	
-	// -----------------------------------------------------
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public ConversationContext getConversationContext() {
-		assertActive();
-		return conversationContext;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public TransactionControl beginTransaction() {
-		assertActive();
-		return connection.getTxProvider().begin();
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public void close() {
-		conversationContext.close();
 	}
 	
 	// ----------------------------------------------------
@@ -202,7 +136,7 @@ public class Neo4jModellingConversation extends AbstractModelingConversation imp
 	@Override
     protected void assertActive() {
 		if (!conversationContext.isActive()) {
-			logger.warn("Conversation already closed.");
+			LOGGER.warn("Conversation already closed.");
 			//throw new IllegalStateException("Conversation already closed.");
 		}
 	}

@@ -43,10 +43,8 @@ public class NeoResourceResolver implements ResourceResolver {
 	}
 	
 	// ----------------------------------------------------
-	
-	/**
-	 * {@inheritDoc}
-	 */
+
+    @Override
 	public ResourceNode findResource(final QualifiedName qn) {
 		final AssociationKeeper keeper = findAssociationKeeper(qn);
 		if (keeper != null) {
@@ -56,9 +54,7 @@ public class NeoResourceResolver implements ResourceResolver {
 		}
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public ResourceNode resolve(final ResourceID resource) {
 		final ResourceNode node = resource.asResource();
 		if (node.isAttached()){
@@ -73,19 +69,7 @@ public class NeoResourceResolver implements ResourceResolver {
 			}
 		}
 	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public ResourceNode resolve(final Node neoNode) {
-		final QualifiedName qn = QualifiedName.create(neoNode.getProperty(NeoConstants.PROPERTY_URI).toString());
-		NeoAssociationKeeper keeper = conversationContext.getAssociationKeeper(qn);
-		if (keeper == null){
-			keeper = createKeeper(qn, neoNode);
-		}
-		return new SNResourceNeo(qn, keeper);	
-	}
-	
+
 	// ----------------------------------------------------
 	
 	/**
@@ -95,7 +79,7 @@ public class NeoResourceResolver implements ResourceResolver {
 	 */
 	protected AssociationKeeper findAssociationKeeper(final QualifiedName qn) {
 		final AssociationKeeper registered = conversationContext.getAssociationKeeper(qn);
-		if (registered != null) {
+		if (registered != null && registered.isAttached()) {
 			return registered;
 		}
 		final Node neoNode = new ResourceIndex(conversationContext).findNeoNode(qn);

@@ -24,7 +24,8 @@ import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.model.nodes.views.SNContext;
 import org.arastreju.sge.persistence.ResourceResolver;
 import org.neo4j.graphdb.Relationship;
-import scala.actors.threadpool.Arrays;
+
+import java.util.Arrays;
 
 /**
  * <p>

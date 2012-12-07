@@ -5,13 +5,12 @@
 	<parent>
 		<groupId>org.arastreju</groupId>
 		<artifactId>arastreju-neo4j-parent</artifactId>
-		<version>0.7.4-SNAPSHOT</version>
+		<version>0.8.0</version>
 	</parent>
 	
 	<groupId>org.arastreju</groupId>
 	<artifactId>arastreju-neo4j</artifactId>
 	<name>Arastreju Neo4J Binding</name>
-	<version>0.7.4-SNAPSHOT</version>
 	<description>Binding for Arastreju to Neo4J Graph Database</description>
 	
 	<licenses>

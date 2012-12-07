@@ -134,6 +134,18 @@ public class NeoIndex implements NeoConstants {
         });
 	}
 
+    /**
+     * Find in Index by key and value.
+     */
+    public IndexHits<Node>  allNodes() {
+        return tx().doTransacted(new TxResultAction<IndexHits<Node>>() {
+            @Override
+            public IndexHits<Node> execute() {
+                return resourceIndex().query(INDEX_KEY_RESOURCE_URI, "*");
+            }
+        });
+    }
+
 	// -- SEARCH ------------------------------------------
 
 	/**

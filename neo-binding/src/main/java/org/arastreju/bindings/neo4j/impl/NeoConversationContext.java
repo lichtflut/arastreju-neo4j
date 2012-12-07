@@ -19,12 +19,17 @@ package org.arastreju.bindings.neo4j.impl;
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
 import org.arastreju.bindings.neo4j.tx.NeoTxProvider;
+import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.spi.abstracts.AbstractConversationContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * <p>
@@ -38,6 +43,8 @@ import java.util.Map;
  * @author Oliver Tigges
  */
 public class NeoConversationContext extends AbstractConversationContext implements NeoConstants {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NeoConversationContext.class);
 
 	private final Map<QualifiedName, NeoAssociationKeeper> register = new HashMap<QualifiedName, NeoAssociationKeeper>();
 	
@@ -64,7 +71,11 @@ public class NeoConversationContext extends AbstractConversationContext implemen
 	 */
 	public NeoAssociationKeeper getAssociationKeeper(QualifiedName qn) {
 		assertActive();
-		return register.get(qn);
+        NeoAssociationKeeper registered = register.get(qn);
+        if (registered != null && !registered.isAttached()) {
+            LOGGER.warn("There is a detached NeoAssociationKeeper in the conversation register: {}.", qn);
+        }
+        return registered;
 	}
 	
 	/**
@@ -74,7 +85,7 @@ public class NeoConversationContext extends AbstractConversationContext implemen
 	public void attach(QualifiedName qn, NeoAssociationKeeper keeper) {
 		assertActive();
 		register.put(qn, keeper);
-		keeper.setWorkingContext(this);
+		keeper.setConversationContext(this);
 	}
 	
 	/**
@@ -94,10 +105,24 @@ public class NeoConversationContext extends AbstractConversationContext implemen
 	 * Resolve the associations of given association keeper.
 	 * @param keeper The association keeper to be resolved.
 	 */
-	public void resolveAssociations(final NeoAssociationKeeper keeper) {
+	public void resolveAssociations(NeoAssociationKeeper keeper) {
 		assertActive();
 		handler.resolveAssociations(keeper);
 	}
+
+    /**
+     * Get the incoming statements of the given node.
+     * @param object The node which is the object of the searched statements.
+     * @return The statments.
+     */
+    public Set<Statement> getIncomingStatements(ResourceID object) {
+        assertActive();
+        NeoAssociationKeeper keeper = register.get(object.getQualifiedName());
+        if (keeper == null) {
+            return Collections.emptySet();
+        }
+        return handler.getIncomingStatements(keeper);
+    }
 	
 	// ----------------------------------------------------
 	
@@ -141,4 +166,5 @@ public class NeoConversationContext extends AbstractConversationContext implemen
         }
         register.clear();
     }
+
 }

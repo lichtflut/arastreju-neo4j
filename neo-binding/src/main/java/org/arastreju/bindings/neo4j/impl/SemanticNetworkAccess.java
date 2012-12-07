@@ -31,6 +31,8 @@ import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.persistence.TxAction;
 import org.neo4j.graphdb.Node;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -52,6 +54,8 @@ import java.util.Set;
  * @author Oliver Tigges
  */
 public class SemanticNetworkAccess implements NeoConstants {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SemanticNetworkAccess.class);
 	
 	private final GraphDataConnection connection;
 	private final NeoConversationContext conversationContext;
@@ -87,6 +91,7 @@ public class SemanticNetworkAccess implements NeoConstants {
 	public void attach(final ResourceNode resource) {
 		// 1st: check if node is already attached.
 		if (resource.isAttached()){
+            verifySameContext(resource);
 			return;
 		}
 		tx().doTransacted(new TxAction() {
@@ -102,8 +107,8 @@ public class SemanticNetworkAccess implements NeoConstants {
 			}
 		});
 	}
-	
-	/**
+
+    /**
 	 * Unregister the node from the registry and detach the {@link AssociationKeeper}
 	 * @param node The node to detach.
 	 */
@@ -135,14 +140,18 @@ public class SemanticNetworkAccess implements NeoConstants {
 	 * @param id The ID.
 	 */
 	public void remove(final ResourceID id) {
-        final NeoAssociationKeeper registered = conversationContext.getAssociationKeeper(id.getQualifiedName());
+        final NeoAssociationKeeper registered = findAssociationKeeper(id.getQualifiedName());
+        if (registered == null) {
+            // Resource with given ID does not exist (any more).
+            return;
+        }
 		registered.getAssociations().clear();
+        conversationContext.detach(id.getQualifiedName());
 		tx().doTransacted(new TxAction() {
 			public void execute() {
-				new NodeRemover(connection, conversationContext).remove(registered.getNeoNode(), false);
+				new NodeRemover(conversationContext).remove(registered.getNeoNode(), false);
 			}
 		});
-        conversationContext.detach(id.getQualifiedName());
 	}
 	
 	// -----------------------------------------------------
@@ -152,8 +161,8 @@ public class SemanticNetworkAccess implements NeoConstants {
 	 * @param qn The qualified name.
 	 * @return The keeper or null.
 	 */
-	protected AssociationKeeper findAssociationKeeper(final QualifiedName qn) {
-		final AssociationKeeper registered = conversationContext.getAssociationKeeper(qn);
+	protected NeoAssociationKeeper findAssociationKeeper(final QualifiedName qn) {
+		final NeoAssociationKeeper registered = conversationContext.getAssociationKeeper(qn);
 		if (registered != null) {
 			return registered;
 		}
@@ -217,6 +226,13 @@ public class SemanticNetworkAccess implements NeoConstants {
 	}
 	
 	// ----------------------------------------------------
+
+    private void verifySameContext(ResourceNode resource) {
+        NeoAssociationKeeper given = NeoAssocKeeperAccess.getNeoAssociationKeeper(resource);
+        if (!given.getConversationContext().equals(conversationContext)) {
+            LOGGER.warn("Resource {} is not in current conversation context {}: ", resource, conversationContext);
+        }
+    }
 	
 	private NeoTxProvider tx() {
 		return conversationContext.getTxProvider();

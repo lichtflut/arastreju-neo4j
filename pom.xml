@@ -5,27 +5,27 @@
 	<artifactId>arastreju-neo4j-parent</artifactId>
 	<name>Arastreju Neo4J Parent</name>
 	<packaging>pom</packaging>
-	<version>0.7.4-SNAPSHOT</version>
+	<version>0.8.0</version>
 	<description>Binding for Arastreju to Neo4J Graph Database - Parent</description>
-	
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<neo4j.version>1.7.1</neo4j.version>
-		<arastreju.sge.version>${project.version}</arastreju.sge.version>
+		<neo4j.version>1.8</neo4j.version>
+		<arastreju.sge.version>0.8.0</arastreju.sge.version>
 	</properties>
-	
+
 	<modules>
 		<module>neo-binding</module>
 		<module>integration-tests</module>
 	</modules>
-	
+
 	<licenses>
 		<license>
 			<name>GPL 3</name>
 			<url>http://www.gnu.org/copyleft/gpl.html</url>
 		</license>
 	</licenses>
-	
+
 	<organization>
 		<name>lichtflut Forschungs- und Entwicklungsgesellschaft mbH</name>
 		<url>http://www.lichtflut.de</url>
@@ -40,6 +40,18 @@
 			<groupId>org.neo4j</groupId>
 			<artifactId>neo4j</artifactId>
 			<version>${neo4j.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.neo4j</groupId>
+					<artifactId>neo4j-cypher</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.neo4j</groupId>
+			<artifactId>neo4j-kernel</artifactId>
+			<version>${neo4j.version}</version>
+			<type>test-jar</type>
 		</dependency>
 		<dependency>
 			<groupId>org.neo4j</groupId>
@@ -60,7 +72,7 @@
 			<version>1.2</version>
 		</dependency>
 	</dependencies>
-		
+
 	<build>
 		<plugins>
 			<plugin>

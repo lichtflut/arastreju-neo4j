@@ -14,12 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.arastreju.bindings.neo4j;
+package org.arastreju.bindings.neo4j.it;
 
 import java.io.File;
 
 import junit.framework.Assert;
 
+import org.arastreju.bindings.neo4j.Neo4jGateFactory;
 import org.arastreju.sge.Arastreju;
 import org.arastreju.sge.ArastrejuGate;
 import org.arastreju.sge.ArastrejuProfile;

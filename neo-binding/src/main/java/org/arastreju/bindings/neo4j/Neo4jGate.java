@@ -21,6 +21,7 @@ import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.sge.ArastrejuGate;
 import org.arastreju.sge.ModelingConversation;
 import org.arastreju.sge.Organizer;
+import org.arastreju.sge.context.Context;
 import org.arastreju.sge.context.DomainIdentifier;
 import org.arastreju.sge.spi.GateInitializationException;
 import org.arastreju.sge.spi.abstracts.AbstractArastrejuGate;
@@ -57,25 +58,24 @@ public class Neo4jGate extends AbstractArastrejuGate {
 	
 	// -----------------------------------------------------
 
-	/**
-	 * {@inheritDoc}
-	 */
     @Override
 	public ModelingConversation startConversation() {
         return new Neo4jModellingConversation(connection, newConversationContext());
 	}
 
-    /**
-	 * {@inheritDoc}
-	 */
+    @Override
+    public ModelingConversation startConversation(Context primary, Context... readContexts) {
+        NeoConversationContext cc = new NeoConversationContext(connection);
+        cc.setPrimaryContext(primary);
+        cc.setReadContexts(readContexts);
+        return new Neo4jModellingConversation(connection, cc);
+    }
+
     @Override
 	public Organizer getOrganizer() {
-		return new NeoOrganizer(connection, newConversationContext());
+		return new NeoOrganizer(connection, this);
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
     @Override
 	public void close() {
 		connection.close();
@@ -84,7 +84,7 @@ public class Neo4jGate extends AbstractArastrejuGate {
 
     // ----------------------------------------------------
 
-    private NeoConversationContext newConversationContext() {
+    public NeoConversationContext newConversationContext() {
         NeoConversationContext cc = new NeoConversationContext(connection);
         super.initContext(cc);
         return cc;

@@ -49,7 +49,6 @@ public class NeoTxProvider extends TxProvider {
 	 */
 	public NeoTxProvider(final GraphDatabaseService gdbService) {
 		this.gdbService = gdbService;
-		logger.debug("constructed from "+gdbService);
 	}
 	
 	// -----------------------------------------------------

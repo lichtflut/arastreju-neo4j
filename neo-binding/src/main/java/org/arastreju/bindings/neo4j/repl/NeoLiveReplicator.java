@@ -42,7 +42,6 @@ public class NeoLiveReplicator extends ArasLiveReplicator implements NeoConstant
 	public NeoLiveReplicator(GraphDatabaseService gdbService) {
 		super();
 		this.gdbService = gdbService;
-		logger.debug("gdbservice is "+gdbService);
 	}
 
 	
@@ -51,7 +50,7 @@ public class NeoLiveReplicator extends ArasLiveReplicator implements NeoConstant
 	
 	@Override
 	protected void onNodeOp(int txSeq, boolean added, ResourceID node) {
-		logger.debug("onNodeOp(added=" + added + ", node=" + node);
+		logger.debug("onNodeOp(added=" + added + ", node=" + node + ")");
 		ensureTx(txSeq);
 		if (added) {
 			final Node neoNode = gdbService.createNode();
@@ -71,7 +70,7 @@ public class NeoLiveReplicator extends ArasLiveReplicator implements NeoConstant
 
 	@Override
 	protected void onRelOp(int txSeq, boolean added, Statement stmt) {
-		logger.debug("onRelOp(added="+added+", stmt="+stmt);
+		logger.debug("onRelOp(added="+added+", stmt="+stmt + ")");
 		ensureTx(txSeq);
 		boolean valObj = stmt.getObject().isValueNode();
 		RelationshipType type = valObj ? ArasRelTypes.VALUE : ArasRelTypes.REFERENCE;

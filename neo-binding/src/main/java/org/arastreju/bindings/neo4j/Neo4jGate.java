@@ -23,6 +23,7 @@ import org.arastreju.sge.ModelingConversation;
 import org.arastreju.sge.Organizer;
 import org.arastreju.sge.context.Context;
 import org.arastreju.sge.context.DomainIdentifier;
+import org.arastreju.sge.persistence.TxProvider;
 import org.arastreju.sge.spi.GateInitializationException;
 import org.arastreju.sge.spi.abstracts.AbstractArastrejuGate;
 
@@ -88,6 +89,11 @@ public class Neo4jGate extends AbstractArastrejuGate {
         NeoConversationContext cc = new NeoConversationContext(connection);
         super.initContext(cc);
         return cc;
+    }
+
+	@Override
+    public TxProvider getTxProvider() {
+	    return connection.getTxProvider();
     }
 
 }

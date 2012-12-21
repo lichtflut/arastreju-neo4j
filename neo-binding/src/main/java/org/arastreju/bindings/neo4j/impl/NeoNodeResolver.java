@@ -41,7 +41,11 @@ public class NeoNodeResolver {
 	// ----------------------------------------------------
 
 	public ResourceNode resolve(final Node neoNode) {
-		final QualifiedName qn = QualifiedName.create(neoNode.getProperty(NeoConstants.PROPERTY_URI).toString());
+        final Object uriProperty = neoNode.getProperty(NeoConstants.PROPERTY_URI, null);
+        if (uriProperty == null) {
+            return null;
+        }
+        final QualifiedName qn = QualifiedName.create(uriProperty.toString());
 		NeoAssociationKeeper keeper = conversationContext.getAssociationKeeper(qn);
 		if (keeper == null){
             keeper = new NeoAssociationKeeper(SNOPS.id(qn), neoNode);

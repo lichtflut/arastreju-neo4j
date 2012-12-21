@@ -30,8 +30,6 @@ import org.arastreju.sge.naming.Namespace;
 import org.arastreju.sge.query.Query;
 import org.arastreju.sge.query.QueryResult;
 import org.arastreju.sge.spi.abstracts.AbstractOrganizer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -113,45 +111,7 @@ public class NeoOrganizer extends AbstractOrganizer {
                 final ResourceIndex index = new ResourceIndex(connection, conversationContext);
                 final QueryResult queryResult = index.getAllResources();
                 final Iterator<ResourceNode> nodeIterator = queryResult.iterator();
-                return new Iterator<Statement>() {
-
-                    private Iterator<Statement> stmtIterator;
-
-                    @Override
-                    public boolean hasNext() {
-                        if (stmtIterator == null) {
-                            nextNode();
-                        }
-                        while (stmtIterator != null) {
-                            if (stmtIterator.hasNext()) {
-                                return true;
-                            } else {
-                                nextNode();
-                            }
-
-                        }
-                        return false;
-                    }
-
-                    @Override
-                    public Statement next() {
-                        return stmtIterator.next();
-                    }
-
-                    @Override
-                    public void remove() {
-                        throw new UnsupportedOperationException();
-                    }
-
-                    private void nextNode() {
-                        if (nodeIterator.hasNext()) {
-                            ResourceNode node = nodeIterator.next();
-                            stmtIterator = node.getAssociations().iterator();
-                        } else {
-                            stmtIterator = null;
-                        }
-                    }
-                };
+                return new StatementIterator(nodeIterator);
             }
         } ;
     }
@@ -170,5 +130,52 @@ public class NeoOrganizer extends AbstractOrganizer {
     protected ResourceIndex index() {
         return new ResourceIndex(connection, gate.newConversationContext());
     }
-	
+
+    private static class StatementIterator implements Iterator<Statement> {
+
+        private Iterator<Statement> stmtIterator;
+        private final Iterator<ResourceNode> nodeIterator;
+
+        public StatementIterator(Iterator<ResourceNode> nodeIterator) {
+            this.nodeIterator = nodeIterator;
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (stmtIterator == null) {
+                forwardToNextResourceNode();
+            }
+            while (stmtIterator != null) {
+                if (stmtIterator.hasNext()) {
+                    return true;
+                } else {
+                    forwardToNextResourceNode();
+                }
+
+            }
+            return false;
+        }
+
+        @Override
+        public Statement next() {
+            return stmtIterator.next();
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+
+        private void forwardToNextResourceNode() {
+            while (nodeIterator.hasNext()) {
+                ResourceNode node = nodeIterator.next();
+                if (node != null) {
+                    stmtIterator = node.getAssociations().iterator();
+                    return;
+                }
+            }
+
+            stmtIterator = null;
+        }
+    }
 }

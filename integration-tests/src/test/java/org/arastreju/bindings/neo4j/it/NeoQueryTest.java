@@ -31,6 +31,7 @@ import org.arastreju.sge.apriori.RDFS;
 import org.arastreju.sge.model.SimpleResourceID;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.model.nodes.SNResource;
+import org.arastreju.sge.model.nodes.views.SNClass;
 import org.arastreju.sge.model.nodes.views.SNEntity;
 import org.arastreju.sge.model.nodes.views.SNText;
 import org.arastreju.sge.naming.QualifiedName;
@@ -162,10 +163,10 @@ public class NeoQueryTest {
 		SNOPS.associate(bike, RDF.TYPE, RDFS.CLASS);
 		sna.attach(bike);
 		
-		final SNEntity aCar = car.asClass().createInstance();
+		final SNEntity aCar = SNClass.from(car).createInstance();
 		sna.attach(aCar);
 		
-		final SNEntity aBike = bike.asClass().createInstance();
+		final SNEntity aBike = SNClass.from(bike).createInstance();
 		sna.attach(aBike);
 		
 		Query query = new NeoQueryBuilder(new ResourceIndex(connection, convCtx));

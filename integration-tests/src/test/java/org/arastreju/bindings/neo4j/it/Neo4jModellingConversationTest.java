@@ -40,6 +40,7 @@ import org.arastreju.sge.model.SemanticGraph;
 import org.arastreju.sge.model.SimpleResourceID;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.model.nodes.SNResource;
+import org.arastreju.sge.model.nodes.views.SNClass;
 import org.arastreju.sge.naming.QualifiedName;
 import org.junit.After;
 import org.junit.Assert;
@@ -136,7 +137,7 @@ public class Neo4jModellingConversationTest {
 		car = mc.findResource(qnCar);
 		vehicle = mc.findResource(qnVehicle);
 		
-		Assert.assertTrue(car.asClass().isSpecializationOf(vehicle));
+		Assert.assertTrue(SNClass.from(car).isSpecializationOf(vehicle));
 	}
 	
 	@Test

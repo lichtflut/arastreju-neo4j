@@ -29,9 +29,10 @@ public class GraphDataConnection {
 	 * Constructor.
 	 * @param store The store.
 	 */
-	public GraphDataConnection(GraphDataStore store) {
+	public GraphDataConnection(GraphDataStore store, NeoTxProvider txProv) {
 		this.store = store;
-		this.txProvider = new NeoTxProvider(store.getGdbService());
+		txProv.init(store.getGdbService());
+		this.txProvider = txProv;
 	}
 	
 	// ----------------------------------------------------

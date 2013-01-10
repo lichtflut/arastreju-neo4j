@@ -24,6 +24,7 @@ import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.bindings.neo4j.query.NeoQueryBuilder;
+import org.arastreju.bindings.neo4j.tx.NeoTxProvider;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.apriori.Aras;
 import org.arastreju.sge.apriori.RDF;
@@ -75,7 +76,7 @@ public class NeoQueryTest {
 	@Before
 	public void setUp() throws Exception {
 		store = new GraphDataStore();
-		connection = new GraphDataConnection(store);
+		connection = new GraphDataConnection(store, new NeoTxProvider());
 		convCtx = new NeoConversationContext(connection);
 		sna = new SemanticNetworkAccess(connection, convCtx);
 	}

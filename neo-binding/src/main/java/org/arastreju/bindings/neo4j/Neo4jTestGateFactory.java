@@ -18,6 +18,7 @@ package org.arastreju.bindings.neo4j;
 
 import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.TestGraphDataStore;
+import org.arastreju.bindings.neo4j.tx.NeoTxProvider;
 import org.arastreju.sge.ArastrejuGate;
 import org.arastreju.sge.ArastrejuProfile;
 import org.arastreju.sge.context.DomainIdentifier;
@@ -42,7 +43,7 @@ public class Neo4jTestGateFactory extends ArastrejuGateFactory {
     public Neo4jTestGateFactory(ArastrejuProfile profile) {
         super(profile);
         try {
-            conn = new GraphDataConnection(new TestGraphDataStore());
+            conn = new GraphDataConnection(new TestGraphDataStore(), createTxProvider());
         }
         catch (Exception any) {
             throw new RuntimeException(any);
@@ -54,6 +55,11 @@ public class Neo4jTestGateFactory extends ArastrejuGateFactory {
         final Neo4jGate gate = new Neo4jGate(identifier, conn);
         getProfile().onOpen(gate);
         return gate;
+    }
+
+	@Override
+    public NeoTxProvider createTxProvider() {
+	    return new NeoTxProvider();
     }
 
 }

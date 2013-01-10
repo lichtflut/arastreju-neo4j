@@ -18,6 +18,7 @@ package org.arastreju.bindings.neo4j;
 
 import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.GraphDataStore;
+import org.arastreju.bindings.neo4j.tx.NeoTxProvider;
 import org.arastreju.sge.ArastrejuGate;
 import org.arastreju.sge.ArastrejuProfile;
 import org.arastreju.sge.context.DomainIdentifier;
@@ -77,7 +78,7 @@ public class Neo4jGateFactory extends ArastrejuGateFactory {
      */
     private GraphDataConnection openConnection(DomainIdentifier ctx) throws IOException {
         final GraphDataStore store = getOrCreateStore(ctx);
-        return new GraphDataConnection(store);
+        return new GraphDataConnection(store, createTxProvider());
     }
 
     private GraphDataStore getOrCreateStore(DomainIdentifier domainIdentifier) throws IOException {
@@ -127,5 +128,10 @@ public class Neo4jGateFactory extends ArastrejuGateFactory {
 	private boolean isStoreDirDefined(final ArastrejuProfile profile) {
 		return profile.isPropertyDefined(ArastrejuProfile.ARAS_STORE_DIRECTORY);
 	}
+
+	@Override
+    public NeoTxProvider createTxProvider() {
+		return new NeoTxProvider();
+    }
 
 }

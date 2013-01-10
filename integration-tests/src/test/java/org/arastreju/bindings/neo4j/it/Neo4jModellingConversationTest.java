@@ -30,6 +30,7 @@ import java.io.ObjectOutputStream;
 import org.arastreju.bindings.neo4j.Neo4jModellingConversation;
 import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.GraphDataStore;
+import org.arastreju.bindings.neo4j.tx.NeoTxProvider;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.apriori.Aras;
 import org.arastreju.sge.apriori.RDFS;
@@ -73,7 +74,7 @@ public class Neo4jModellingConversationTest {
 	@Before
 	public void setUp() throws Exception {
 		store = new GraphDataStore();
-		connection = new GraphDataConnection(store);
+		connection = new GraphDataConnection(store, new NeoTxProvider());
 		mc = new Neo4jModellingConversation(connection);
 	}
 

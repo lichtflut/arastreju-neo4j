@@ -27,6 +27,7 @@ import org.arastreju.bindings.neo4j.NeoOrganizer;
 import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.GraphDataStore;
 import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
+import org.arastreju.bindings.neo4j.tx.NeoTxProvider;
 import org.arastreju.sge.ModelingConversation;
 import org.arastreju.sge.Organizer;
 import org.arastreju.sge.SNOPS;
@@ -80,7 +81,7 @@ public class NeoOrganizerTest {
 	@Before
 	public void setUp() throws Exception {
 		store = new GraphDataStore();
-		connection = new GraphDataConnection(store);
+		connection = new GraphDataConnection(store, new NeoTxProvider());
         gate = new Neo4jGate(new PhysicalDomain("test"), connection);
         organizer = new NeoOrganizer(connection, gate);
 	}

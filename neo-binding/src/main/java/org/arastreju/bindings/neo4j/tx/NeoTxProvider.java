@@ -22,8 +22,6 @@ import org.arastreju.sge.persistence.TransactionControl;
 import org.arastreju.sge.persistence.TxProvider;
 import org.arastreju.sge.repl.ArasLiveReplicator;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * <p>
@@ -37,17 +35,13 @@ import org.slf4j.LoggerFactory;
  * @author Oliver Tigges
  */
 public class NeoTxProvider extends TxProvider {
-	private final Logger logger = LoggerFactory.getLogger(NeoTxProvider.class);
+	private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(NeoTxProvider.class);
 	
-	private final GraphDatabaseService gdbService;
+	private GraphDatabaseService gdbService;
 	
 	// -----------------------------------------------------
 	
-	/**
-	 * Constructor.
-	 * @param gdbService The service for this TX Control.
-	 */
-	public NeoTxProvider(final GraphDatabaseService gdbService) {
+	public void init(GraphDatabaseService gdbService) {
 		this.gdbService = gdbService;
 	}
 	
@@ -55,6 +49,10 @@ public class NeoTxProvider extends TxProvider {
 
     @Override
     protected TransactionControl newTx() {
+	if (gdbService == null) {
+		logger.warn("not initialized");
+		return null;
+	}
         return new ArasNeoTransaction(gdbService.beginTx(), this);
     }
 

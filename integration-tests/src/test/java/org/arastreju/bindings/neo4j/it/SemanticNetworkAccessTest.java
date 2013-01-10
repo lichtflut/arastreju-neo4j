@@ -316,9 +316,9 @@ public class SemanticNetworkAccessTest {
 	
 	@Test
 	public void testRemove() {
-		final SNClass vehicle = new SNResource(qnVehicle).asClass();
-		final SNClass car = new SNResource(qnCar).asClass();
-		final SNClass bike = new SNResource(qnBike).asClass();
+		final SNClass vehicle = SNClass.from(new SNResource(qnVehicle));
+		final SNClass car = SNClass.from(new SNResource(qnCar));
+		final SNClass bike = SNClass.from(new SNResource(qnBike));
 		
 		final ResourceNode car1 = car.createInstance();
 		
@@ -419,8 +419,8 @@ public class SemanticNetworkAccessTest {
 	
 	@Test
 	public void testInferencingSubClasses() {
-		final SNClass vehicleClass = new SNResource(qnVehicle).asClass();
-		final SNClass carClass = new SNResource(qnCar).asClass();
+		final SNClass vehicleClass = SNClass.from(new SNResource(qnVehicle));
+		final SNClass carClass = SNClass.from(new SNResource(qnCar));
 		SNOPS.associate(carClass, RDFS.SUB_CLASS_OF, vehicleClass);
 		
 		final SNEntity car = carClass.createInstance();

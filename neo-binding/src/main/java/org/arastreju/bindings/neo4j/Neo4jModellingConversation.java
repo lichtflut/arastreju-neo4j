@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * <p>
- *  Implementation of {@link ModelingConversation} for Neo4j.
+ *  Implementation of {@link org.arastreju.sge.Conversation} for Neo4j.
  * </p>
  *
  * <p>

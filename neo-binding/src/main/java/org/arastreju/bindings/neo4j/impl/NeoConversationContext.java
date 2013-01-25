@@ -161,6 +161,12 @@ public class NeoConversationContext extends AbstractConversationContext implemen
 
     // ----------------------------------------------------
 
+
+    @Override
+    protected void onClose() {
+        connection.unregister(this);
+    }
+
     @Override
     protected void clearCaches() {
         for (NeoAssociationKeeper keeper : register.values()) {

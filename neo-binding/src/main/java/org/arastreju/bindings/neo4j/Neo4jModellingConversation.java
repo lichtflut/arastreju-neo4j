@@ -60,13 +60,6 @@ public class Neo4jModellingConversation extends AbstractModelingConversation imp
 	
 	// -----------------------------------------------------
 
-	/**
-	 * Create a new Modelling Conversation instance using a given data store.
-	 */
-	public Neo4jModellingConversation(final GraphDataConnection connection) {
-		this(connection, new NeoConversationContext(connection));
-	}
-
     /**
      * Create a new Modelling Conversation instance using a given data store.
      */

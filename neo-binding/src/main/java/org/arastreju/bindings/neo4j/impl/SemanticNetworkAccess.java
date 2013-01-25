@@ -19,7 +19,6 @@ package org.arastreju.bindings.neo4j.impl;
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
-import org.arastreju.bindings.neo4j.tx.NeoTxProvider;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.eh.ArastrejuRuntimeException;
 import org.arastreju.sge.eh.ErrorCodes;
@@ -30,6 +29,8 @@ import org.arastreju.sge.model.associations.DetachedAssociationKeeper;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.persistence.TxAction;
+import org.arastreju.sge.persistence.TxProvider;
+import org.arastreju.sge.spi.AssocKeeperAccess;
 import org.neo4j.graphdb.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -207,7 +208,7 @@ public class SemanticNetworkAccess implements NeoConstants {
 	 */
 	protected void merge(final AssociationKeeper attached, final ResourceNode changed) {
 		final Set<Statement> currentAssocs = new HashSet<Statement>(attached.getAssociations());
-		final AssociationKeeper detached = NeoAssocKeeperAccess.getAssociationKeeper(changed);
+		final AssociationKeeper detached = AssocKeeperAccess.getInstance().getAssociationKeeper(changed);
 		for (Statement toBeRemoved : detached.getAssociationsForRemoval()) {
 			attached.removeAssociation(toBeRemoved);
 		}
@@ -216,7 +217,7 @@ public class SemanticNetworkAccess implements NeoConstants {
 				attached.addAssociation(assoc);
 			}
 		}
-		NeoAssocKeeperAccess.setAssociationKeeper(changed, attached);
+        AssocKeeperAccess.getInstance().setAssociationKeeper(changed, attached);
 	}
 	
 	protected NeoAssociationKeeper createKeeper(QualifiedName qn, Node neoNode) {
@@ -228,13 +229,13 @@ public class SemanticNetworkAccess implements NeoConstants {
 	// ----------------------------------------------------
 
     private void verifySameContext(ResourceNode resource) {
-        NeoAssociationKeeper given = NeoAssocKeeperAccess.getNeoAssociationKeeper(resource);
+        AssociationKeeper given = AssocKeeperAccess.getInstance().getAssociationKeeper(resource);
         if (!given.getConversationContext().equals(conversationContext)) {
             LOGGER.warn("Resource {} is not in current conversation context {}: ", resource, conversationContext);
         }
     }
 	
-	private NeoTxProvider tx() {
+	private TxProvider tx() {
 		return conversationContext.getTxProvider();
 	}
 	

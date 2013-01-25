@@ -61,6 +61,7 @@ public class NeoConversationContext extends AbstractConversationContext implemen
 	public NeoConversationContext(GraphDataConnection connection) {
         this.connection = connection;
         this.handler = new AssociationHandler(connection, this);
+        connection.register(this);
 	}
 
 	// ----------------------------------------------------
@@ -159,8 +160,20 @@ public class NeoConversationContext extends AbstractConversationContext implemen
         return connection;
     }
 
-    // ----------------------------------------------------
+    /**
+     * Called when a resource has been modified by another conversation context with same graph data connection.
+     * @param qualifiedName The qualified name of the modified resource.
+     * @param context The other context, where the modification occurred.
+     */
+    public void onModification(QualifiedName qualifiedName, NeoConversationContext context) {
+        NeoAssociationKeeper existing = register.get(qualifiedName);
+        if (existing != null) {
+            LOGGER.info("Concurrent change on node {} in other context {}.", qualifiedName, context);
+            existing.notifyChanged();
+        }
+    }
 
+    // ----------------------------------------------------
 
     @Override
     protected void onClose() {

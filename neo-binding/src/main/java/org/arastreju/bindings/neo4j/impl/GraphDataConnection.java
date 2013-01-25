@@ -4,10 +4,12 @@
 package org.arastreju.bindings.neo4j.impl;
 
 import org.arastreju.bindings.neo4j.tx.NeoTxProvider;
-import org.arastreju.sge.Conversation;
+import org.arastreju.sge.naming.QualifiedName;
 import org.neo4j.graphdb.index.IndexManager;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -68,6 +70,21 @@ public class GraphDataConnection {
     public void unregister(NeoConversationContext conversationContext) {
         openConversations.remove(conversationContext);
     }
+
+    // ----------------------------------------------------
+
+    /**
+     * Called when a resource has been modified by conversation context belonging to this graph data connection.
+     * @param qn The qualified name of the modified resource.
+     * @param context The context, where the modification occurred.
+     */
+    public void notifyModification(QualifiedName qn, NeoConversationContext context) {
+        for (NeoConversationContext conversation : openConversations) {
+            if (!conversation.equals(context)) {
+                conversation.onModification(qn, context);
+            }
+        }
+    }
 	
 	// ----------------------------------------------------
 	
@@ -81,7 +98,9 @@ public class GraphDataConnection {
 	 * Close the connection and free all resources.
 	 */
 	public void close() {
-        for (NeoConversationContext cc : openConversations) {
+        List<NeoConversationContext> copy = new ArrayList<NeoConversationContext>(openConversations);
+        // iterating over copy because original will be remove itself while closing.
+        for (NeoConversationContext cc : copy) {
             cc.close();
         }
 	}

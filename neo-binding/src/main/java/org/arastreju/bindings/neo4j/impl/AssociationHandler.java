@@ -66,6 +66,10 @@ public class AssociationHandler implements NeoConstants {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AssociationHandler.class);
 
     // ----------------------------------------------------
+
+    private final GraphDataConnection connection;
+
+    private final NeoConversationContext convContext;
 	
 	private final Inferencer hardInferencer;
 	
@@ -79,8 +83,6 @@ public class AssociationHandler implements NeoConstants {
 
 	private final ContextAccess ctxAccess;
 
-	private final NeoConversationContext convContext;
-	
 	// ----------------------------------------------------
 	
 	/**
@@ -89,7 +91,8 @@ public class AssociationHandler implements NeoConstants {
 	 * @param conversationContext The current working context.
 	 */
 	public AssociationHandler(GraphDataConnection connection, NeoConversationContext conversationContext) {
-		this.convContext = conversationContext;
+        this.connection = connection;
+        this.convContext = conversationContext;
 		this.resourceResolver = new NeoResourceResolver(connection, conversationContext);
         this.neoNodeResolver = new NeoNodeResolver(conversationContext);
 		this.index = new ResourceIndex(conversationContext);
@@ -157,6 +160,7 @@ public class AssociationHandler implements NeoConstants {
                 final List<Statement> stmtList = Collections.singletonList(stmt);
                 addHardInferences(stmtList);
                 addSoftInferences(keeper, stmtList);
+                connection.notifyModification(keeper.getQualifiedName(), convContext);
 
             }
         });
@@ -180,6 +184,7 @@ public class AssociationHandler implements NeoConstants {
                     removeHardInferences(Collections.singleton(assoc));
                     index.reindex(keeper.getNeoNode(), keeper.getQualifiedName(), keeper.getAssociations());
                     addSoftInferences(keeper, keeper.getAssociations());
+                    connection.notifyModification(keeper.getQualifiedName(), convContext);
                 }
             });
 			return true;

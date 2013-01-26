@@ -4,7 +4,11 @@
 package org.arastreju.bindings.neo4j.impl;
 
 import org.arastreju.bindings.neo4j.tx.NeoTxProvider;
+import org.arastreju.sge.Conversation;
 import org.neo4j.graphdb.index.IndexManager;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * <p>
@@ -18,11 +22,13 @@ import org.neo4j.graphdb.index.IndexManager;
  * @author Oliver Tigges
  */
 public class GraphDataConnection {
+
+    private final Set<NeoConversationContext> openConversations = new HashSet<NeoConversationContext>();
 	
 	private final GraphDataStore store;
 	
 	private final NeoTxProvider txProvider;
-	
+
 	// ----------------------------------------------------
 
 	/**
@@ -54,6 +60,15 @@ public class GraphDataConnection {
     public IndexManager getIndexManager() {
         return store.getIndexManager();
     }
+
+    public void register(NeoConversationContext conversationContext) {
+        openConversations.add(conversationContext);
+    }
+
+
+    public void unregister(NeoConversationContext conversationContext) {
+        openConversations.remove(conversationContext);
+    }
 	
 	// ----------------------------------------------------
 	
@@ -67,6 +82,9 @@ public class GraphDataConnection {
 	 * Close the connection and free all resources.
 	 */
 	public void close() {
+        for (NeoConversationContext cc : openConversations) {
+            cc.close();
+        }
 	}
 
 }

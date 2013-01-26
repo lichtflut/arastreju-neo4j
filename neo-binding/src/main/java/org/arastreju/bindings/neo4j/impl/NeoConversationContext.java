@@ -74,6 +74,8 @@ public class NeoConversationContext extends AbstractConversationContext implemen
         NeoAssociationKeeper registered = register.get(qn);
         if (registered != null && !registered.isAttached()) {
             LOGGER.warn("There is a detached NeoAssociationKeeper in the conversation register: {}.", qn);
+        } else if (false) {
+            registered.notifyChanged();
         }
         return registered;
 	}
@@ -158,6 +160,12 @@ public class NeoConversationContext extends AbstractConversationContext implemen
     }
 
     // ----------------------------------------------------
+
+
+    @Override
+    protected void onClose() {
+        connection.unregister(this);
+    }
 
     @Override
     protected void clearCaches() {

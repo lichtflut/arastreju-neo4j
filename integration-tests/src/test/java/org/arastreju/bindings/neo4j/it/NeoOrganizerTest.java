@@ -16,12 +16,7 @@
  */
 package org.arastreju.bindings.neo4j.it;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import junit.framework.Assert;
-
 import org.arastreju.bindings.neo4j.Neo4jGate;
 import org.arastreju.bindings.neo4j.NeoOrganizer;
 import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
@@ -29,8 +24,8 @@ import org.arastreju.bindings.neo4j.impl.GraphDataStore;
 import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.bindings.neo4j.tx.NeoTxProvider;
 import org.arastreju.sge.ModelingConversation;
+import org.arastreju.sge.Conversation;
 import org.arastreju.sge.Organizer;
-import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.context.Context;
 import org.arastreju.sge.context.PhysicalDomain;
 import org.arastreju.sge.io.StatementContainer;
@@ -44,6 +39,10 @@ import org.arastreju.sge.naming.QualifiedName;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * <p>
@@ -129,7 +128,7 @@ public class NeoOrganizerTest {
         Context c2 = organizer.registerContext(ctx2);
         Context c3 = organizer.registerContext(ctx3);
 
-        ModelingConversation conv = gate.startConversation();
+        Conversation conv = gate.startConversation();
 
         ResourceNode mike = new SNResource(new QualifiedName(ns1, "Mike"));
 

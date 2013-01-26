@@ -19,7 +19,7 @@ package org.arastreju.bindings.neo4j;
 import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
-import org.arastreju.sge.ModelingConversation;
+import org.arastreju.sge.Conversation;
 import org.arastreju.sge.apriori.Aras;
 import org.arastreju.sge.apriori.RDF;
 import org.arastreju.sge.context.Context;
@@ -64,10 +64,8 @@ public class NeoOrganizer extends AbstractOrganizer {
     }
 
     // -----------------------------------------------------
-	
-	/** 
-	 * {@inheritDoc}
-	 */
+
+    @Override
 	public Collection<Namespace> getNamespaces() {
 		final List<Namespace> result = new ArrayList<Namespace>();
 		final List<ResourceNode> nodes = index().lookup(RDF.TYPE, Aras.NAMESPACE).toList();
@@ -119,7 +117,7 @@ public class NeoOrganizer extends AbstractOrganizer {
     // ----------------------------------------------------
 
     @Override
-    protected ModelingConversation conversation() {
+    protected Conversation conversation() {
         return gate.startConversation();
     }
 

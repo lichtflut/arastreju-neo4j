@@ -101,7 +101,6 @@ public class NeoAssociationKeeper extends AbstractAssociationKeeper implements N
 	public boolean isAttached() {
 		return context != null && context.isActive();
 	}
-	
 
 	/**
 	 * Detaches this node from the working context.
@@ -125,6 +124,14 @@ public class NeoAssociationKeeper extends AbstractAssociationKeeper implements N
      */
     public NeoConversationContext getConversationContext() {
         return context;
+    }
+
+    /**
+     * Called when the underlying neo node has been changed in another conversation.
+     * The state of this node must be reset to trigger a reload later.
+     */
+    public void notifyChanged() {
+        reset();
     }
 
     // ----------------------------------------------------

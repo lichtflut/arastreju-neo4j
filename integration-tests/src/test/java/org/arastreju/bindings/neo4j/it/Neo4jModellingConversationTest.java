@@ -31,6 +31,7 @@ import org.arastreju.bindings.neo4j.Neo4jModellingConversation;
 import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.GraphDataStore;
 import org.arastreju.bindings.neo4j.tx.NeoTxProvider;
+import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.apriori.Aras;
 import org.arastreju.sge.apriori.RDFS;
@@ -61,11 +62,11 @@ import org.junit.Test;
  * @author Oliver Tigges
  */
 public class Neo4jModellingConversationTest {
-	
+
 	private GraphDataStore store;
 	private Neo4jModellingConversation mc;
 	private GraphDataConnection connection;
-	
+
 	// -----------------------------------------------------
 
 	/**
@@ -75,7 +76,7 @@ public class Neo4jModellingConversationTest {
 	public void setUp() throws Exception {
 		store = new GraphDataStore();
 		connection = new GraphDataConnection(store, new NeoTxProvider());
-		mc = new Neo4jModellingConversation(connection);
+		mc = new Neo4jModellingConversation(connection, new NeoConversationContext(connection));
 	}
 
 	/**
@@ -87,101 +88,101 @@ public class Neo4jModellingConversationTest {
 		connection.close();
 		store.close();
 	}
-	
+
 	// ----------------------------------------------------
-	
+
 	@Test
 	public void testInstantiation() throws IOException{
 		ResourceNode node = new SNResource(new QualifiedName("http://q#", "N1"));
 		mc.attach(node);
 	}
-	
+
 	@Test
 	public void testFind() throws IOException{
 		QualifiedName qn = new QualifiedName("http://q#", "N1");
 		ResourceNode node = new SNResource(qn);
 		mc.attach(node);
-		
+
 		ResourceNode node2 = mc.findResource(qn);
-		
+
 		assertNotNull(node2);
 	}
-	
+
 	@Test
 	public void testMerge() throws IOException{
 		QualifiedName qn = new QualifiedName("http://q#", "N1");
 		ResourceNode node = new SNResource(qn);
 		mc.attach(node);
-		
+
 		mc.attach(node);
-		
+
 		ResourceNode node2 = mc.findResource(qn);
-		
+
 		assertNotNull(node2);
 	}
-	
-	
+
+
 	@Test
 	public void testSNViews() throws IOException {
 		final QualifiedName qnVehicle = new QualifiedName("http://q#", "Verhicle");
 		ResourceNode vehicle = new SNResource(qnVehicle);
 		mc.attach(vehicle);
-		
+
 		final QualifiedName qnCar = new QualifiedName("http://q#", "Car");
 		ResourceNode car = new SNResource(qnCar);
 		mc.attach(car);
-		
+
 		SNOPS.associate(car, RDFS.SUB_CLASS_OF, vehicle);
-		
+
 		mc.getConversationContext().clear();
-		
+
 		car = mc.findResource(qnCar);
 		vehicle = mc.findResource(qnVehicle);
-		
+
 		Assert.assertTrue(SNClass.from(car).isSpecializationOf(vehicle));
 	}
-	
+
 	@Test
 	public void testGraphImport() throws IOException, SemanticIOException{
 		final SemanticGraphIO io = new RdfXmlBinding();
 		final SemanticGraph graph = io.read(getClass().getClassLoader().getResourceAsStream("test-statements.rdf.xml"));
-		
+
 		mc.attach(graph);
-		
+
 		final QualifiedName qn = new QualifiedName("http://test.arastreju.org/common#Person");
 		final ResourceNode node = mc.findResource(qn);
 		assertNotNull(node);
-		
+
 		final ResourceNode hasChild = mc.findResource(SNOPS.qualify("http://test.arastreju.org/common#hasChild"));
 		assertNotNull(hasChild);
 		assertEquals(new SimpleResourceID("http://test.arastreju.org/common#hasParent"), SNOPS.objects(hasChild, Aras.INVERSE_OF).iterator().next());
-		
+
 		final ResourceNode marriedTo = mc.findResource(SNOPS.qualify("http://test.arastreju.org/common#isMarriedTo"));
 		assertNotNull(marriedTo);
 		assertEquals(marriedTo, SNOPS.objects(marriedTo, Aras.INVERSE_OF).iterator().next());
 	}
-	
+
 	@Test
 	public void testSerialization() throws IOException, SemanticIOException, ClassNotFoundException {
 		final SemanticGraphIO io = new RdfXmlBinding();
 		final SemanticGraph graph = io.read(getClass().getClassLoader().getResourceAsStream("test-statements.rdf.xml"));
 		mc.attach(graph);
-		
+
 		final QualifiedName qn = new QualifiedName("http://test.arastreju.org/common#Person");
 		final ResourceNode node = mc.findResource(qn);
-		
+
 		assertTrue(node.isAttached());
-		
+
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();
 		new ObjectOutputStream(out).writeObject(node);
-		
+
 		byte[] bytes = out.toByteArray();
 		out.close();
-		
+
 		final ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes));
-		
+
 		final ResourceNode read = (ResourceNode) in.readObject();
 		assertFalse(read.isAttached());
 	}
-	
+
 }

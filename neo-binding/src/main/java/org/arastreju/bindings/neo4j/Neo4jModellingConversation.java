@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * <p>
- *  Implementation of {@link ModelingConversation} for Neo4j.
+ *  Implementation of {@link org.arastreju.sge.Conversation} for Neo4j.
  * </p>
  *
  * <p>
@@ -59,13 +59,6 @@ public class Neo4jModellingConversation extends AbstractModelingConversation imp
 	private final ResourceResolver resolver;
 	
 	// -----------------------------------------------------
-
-	/**
-	 * Create a new Modelling Conversation instance using a given data store.
-	 */
-	public Neo4jModellingConversation(final GraphDataConnection connection) {
-		this(connection, new NeoConversationContext(connection));
-	}
 
     /**
      * Create a new Modelling Conversation instance using a given data store.

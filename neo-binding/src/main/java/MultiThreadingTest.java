@@ -14,12 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import java.util.List;
 
+import de.lichtflut.infra.logging.StopWatch;
 import org.arastreju.sge.Arastreju;
 import org.arastreju.sge.ArastrejuGate;
-import org.arastreju.sge.ModelingConversation;
-import org.arastreju.sge.SNOPS;
+import org.arastreju.sge.Conversation;
 import org.arastreju.sge.apriori.RDF;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.model.nodes.views.SNClass;
@@ -27,7 +26,7 @@ import org.arastreju.sge.persistence.TransactionControl;
 import org.arastreju.sge.query.FieldParam;
 import org.arastreju.sge.query.Query;
 
-import de.lichtflut.infra.logging.StopWatch;
+import java.util.List;
 
 /**
  * <p>
@@ -72,7 +71,7 @@ public class MultiThreadingTest {
 		
 		public void run() {
 			final StopWatch sw = new StopWatch();
-			final ModelingConversation mc = gate.startConversation();
+			final Conversation mc = gate.startConversation();
 			
 			final TransactionControl txc = mc.beginTransaction();
 			

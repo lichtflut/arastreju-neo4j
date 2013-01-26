@@ -16,15 +16,13 @@
  */
 package org.arastreju.bindings.neo4j;
 
-import java.util.Set;
-
-import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
+import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.NeoResourceResolver;
 import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.bindings.neo4j.query.NeoQueryBuilder;
-import org.arastreju.sge.ModelingConversation;
+import org.arastreju.sge.Conversation;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.model.nodes.ResourceNode;
@@ -34,6 +32,8 @@ import org.arastreju.sge.query.Query;
 import org.arastreju.sge.spi.abstracts.AbstractModelingConversation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Set;
 
 /**
  * <p>
@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Oliver Tigges
  */
-public class Neo4jModellingConversation extends AbstractModelingConversation implements ModelingConversation {
+public class Neo4jModellingConversation extends AbstractModelingConversation implements Conversation {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(Neo4jModellingConversation.class);
 

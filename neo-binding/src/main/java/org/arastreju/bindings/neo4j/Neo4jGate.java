@@ -16,10 +16,10 @@
  */
 package org.arastreju.bindings.neo4j;
 
-import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
+import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
 import org.arastreju.sge.ArastrejuGate;
-import org.arastreju.sge.ModelingConversation;
+import org.arastreju.sge.Conversation;
 import org.arastreju.sge.Organizer;
 import org.arastreju.sge.context.Context;
 import org.arastreju.sge.context.DomainIdentifier;
@@ -59,12 +59,12 @@ public class Neo4jGate extends AbstractArastrejuGate {
 	// -----------------------------------------------------
 
     @Override
-	public ModelingConversation startConversation() {
+	public Conversation startConversation() {
         return new Neo4jModellingConversation(connection, newConversationContext());
 	}
 
     @Override
-    public ModelingConversation startConversation(Context primary, Context... readContexts) {
+    public Conversation startConversation(Context primary, Context... readContexts) {
         NeoConversationContext cc = new NeoConversationContext(connection);
         cc.setPrimaryContext(primary);
         cc.setReadContexts(readContexts);

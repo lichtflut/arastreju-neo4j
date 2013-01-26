@@ -21,7 +21,6 @@ import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
 import org.arastreju.bindings.neo4j.extensions.SNValueNeo;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
-import org.arastreju.bindings.neo4j.tx.NeoTxProvider;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.context.Context;
 import org.arastreju.sge.inferencing.Inferencer;
@@ -34,6 +33,7 @@ import org.arastreju.sge.model.nodes.SemanticNode;
 import org.arastreju.sge.model.nodes.ValueNode;
 import org.arastreju.sge.persistence.ResourceResolver;
 import org.arastreju.sge.persistence.TxAction;
+import org.arastreju.sge.persistence.TxProvider;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -67,7 +67,7 @@ public class AssociationHandler implements NeoConstants {
 
     // ----------------------------------------------------
 
-    private final GraphDataConnection connection;
+    private final NeoGraphDataConnection connection;
 
     private final NeoConversationContext convContext;
 	
@@ -90,7 +90,7 @@ public class AssociationHandler implements NeoConstants {
 	 * @param connection The connection.
 	 * @param conversationContext The current working context.
 	 */
-	public AssociationHandler(GraphDataConnection connection, NeoConversationContext conversationContext) {
+	public AssociationHandler(NeoGraphDataConnection connection, NeoConversationContext conversationContext) {
         this.connection = connection;
         this.convContext = conversationContext;
 		this.resourceResolver = new NeoResourceResolver(connection, conversationContext);
@@ -378,7 +378,7 @@ public class AssociationHandler implements NeoConstants {
         }
     }
 
-    private NeoTxProvider tx() {
+    private TxProvider tx() {
         return convContext.getTxProvider();
     }
 }

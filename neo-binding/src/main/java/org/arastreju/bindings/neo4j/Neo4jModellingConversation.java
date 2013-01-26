@@ -18,7 +18,7 @@ package org.arastreju.bindings.neo4j;
 
 import java.util.Set;
 
-import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
+import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.bindings.neo4j.impl.NeoResourceResolver;
 import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
@@ -63,7 +63,7 @@ public class Neo4jModellingConversation extends AbstractModelingConversation imp
     /**
      * Create a new Modelling Conversation instance using a given data store.
      */
-    public Neo4jModellingConversation(final GraphDataConnection connection, final NeoConversationContext context) {
+    public Neo4jModellingConversation(final NeoGraphDataConnection connection, final NeoConversationContext context) {
         super(context);
         this.conversationContext = context;
         this.sna = new SemanticNetworkAccess(connection, context);

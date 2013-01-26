@@ -16,7 +16,7 @@
  */
 package org.arastreju.bindings.neo4j;
 
-import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
+import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.sge.Conversation;
@@ -49,7 +49,7 @@ import java.util.List;
  */
 public class NeoOrganizer extends AbstractOrganizer {
 
-    private final GraphDataConnection connection;
+    private final NeoGraphDataConnection connection;
     private final Neo4jGate gate;
 
     // -----------------------------------------------------
@@ -58,7 +58,7 @@ public class NeoOrganizer extends AbstractOrganizer {
 	 * Constructor.
 	 * @param connection The connection.
 	 */
-    public NeoOrganizer(GraphDataConnection connection, Neo4jGate gate) {
+    public NeoOrganizer(NeoGraphDataConnection connection, Neo4jGate gate) {
         this.connection = connection;
         this.gate = gate;
     }

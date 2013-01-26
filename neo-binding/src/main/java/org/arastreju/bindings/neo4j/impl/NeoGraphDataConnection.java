@@ -5,6 +5,8 @@ package org.arastreju.bindings.neo4j.impl;
 
 import org.arastreju.bindings.neo4j.tx.NeoTxProvider;
 import org.arastreju.sge.naming.QualifiedName;
+import org.arastreju.sge.persistence.TxProvider;
+import org.arastreju.sge.spi.GraphDataConnection;
 import org.neo4j.graphdb.index.IndexManager;
 
 import java.util.ArrayList;
@@ -23,13 +25,13 @@ import java.util.Set;
  *
  * @author Oliver Tigges
  */
-public class GraphDataConnection {
+public class NeoGraphDataConnection implements GraphDataConnection {
 
     private final Set<NeoConversationContext> openConversations = new HashSet<NeoConversationContext>();
 	
-	private final GraphDataStore store;
+	private final NeoGraphDataStore store;
 	
-	private final NeoTxProvider txProvider;
+	private final TxProvider txProvider;
 
 	// ----------------------------------------------------
 
@@ -37,7 +39,7 @@ public class GraphDataConnection {
 	 * Constructor.
 	 * @param store The store.
 	 */
-	public GraphDataConnection(GraphDataStore store) {
+	public NeoGraphDataConnection(NeoGraphDataStore store) {
 		this.store = store;
 		this.txProvider = new NeoTxProvider(store.getGdbService());
 	}
@@ -47,14 +49,15 @@ public class GraphDataConnection {
 	/**
 	 * @return the store
 	 */
-	public GraphDataStore getStore() {
+    @Override
+	public NeoGraphDataStore getStore() {
 		return store;
 	}
 	
 	/**
 	 * @return the txProvider
 	 */
-	public NeoTxProvider getTxProvider() {
+	public TxProvider getTxProvider() {
 		return txProvider;
 	}
 
@@ -65,7 +68,6 @@ public class GraphDataConnection {
     public void register(NeoConversationContext conversationContext) {
         openConversations.add(conversationContext);
     }
-
 
     public void unregister(NeoConversationContext conversationContext) {
         openConversations.remove(conversationContext);

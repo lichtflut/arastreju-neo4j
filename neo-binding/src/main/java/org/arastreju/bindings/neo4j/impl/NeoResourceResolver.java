@@ -3,7 +3,6 @@
  */
 package org.arastreju.bindings.neo4j.impl;
 
-import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
 import org.arastreju.bindings.neo4j.extensions.SNResourceNeo;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
@@ -28,7 +27,7 @@ import org.neo4j.graphdb.Node;
  */
 public class NeoResourceResolver implements ResourceResolver {
 	
-	private final GraphDataConnection connection;
+	private final NeoGraphDataConnection connection;
 	private final NeoConversationContext conversationContext;
 	
 	// ----------------------------------------------------
@@ -37,7 +36,7 @@ public class NeoResourceResolver implements ResourceResolver {
 	 * Constructor.
 	 * @param connection The connection.
 	 */
-	public NeoResourceResolver(GraphDataConnection connection, NeoConversationContext conversationContext) {
+	public NeoResourceResolver(NeoGraphDataConnection connection, NeoConversationContext conversationContext) {
 		this.connection = connection;
 		this.conversationContext = conversationContext;
 	}

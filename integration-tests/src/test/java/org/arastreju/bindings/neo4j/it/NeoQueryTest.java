@@ -18,8 +18,8 @@ package org.arastreju.bindings.neo4j.it;
 
 
 import junit.framework.Assert;
-import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
-import org.arastreju.bindings.neo4j.impl.GraphDataStore;
+import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
+import org.arastreju.bindings.neo4j.impl.NeoGraphDataStore;
 import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
@@ -62,8 +62,8 @@ public class NeoQueryTest {
 	private final QualifiedName qnCar = new QualifiedName("http://q#", "Car");
 	private final QualifiedName qnBike = new QualifiedName("http://q#", "Bike");
 
-	private GraphDataStore store;
-	private GraphDataConnection connection;
+	private NeoGraphDataStore store;
+	private NeoGraphDataConnection connection;
 	private SemanticNetworkAccess sna;
 	private NeoConversationContext convCtx;
 
@@ -74,8 +74,8 @@ public class NeoQueryTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		store = new GraphDataStore();
-		connection = new GraphDataConnection(store);
+		store = new NeoGraphDataStore();
+		connection = new NeoGraphDataConnection(store);
 		convCtx = new NeoConversationContext(connection);
 		sna = new SemanticNetworkAccess(connection, convCtx);
 	}

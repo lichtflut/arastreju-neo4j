@@ -16,16 +16,11 @@
  */
 package org.arastreju.bindings.neo4j.impl;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.arastreju.sge.ArastrejuProfile;
-import org.arastreju.sge.spi.ProfileCloseListener;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.index.IndexManager;
-import org.neo4j.kernel.EmbeddedGraphDatabase;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
 /**
@@ -39,11 +34,11 @@ import org.neo4j.test.TestGraphDatabaseFactory;
  *
  * @author Oliver Tigges
  */
-public class TestGraphDataStore extends GraphDataStore {
+public class TestNeoGraphDataStore extends NeoGraphDataStore {
 
     GraphDatabaseService gdbService;
     
-    public TestGraphDataStore() throws IOException{
+    public TestNeoGraphDataStore() throws IOException{
         super();
         try{
         gdbService = new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase();

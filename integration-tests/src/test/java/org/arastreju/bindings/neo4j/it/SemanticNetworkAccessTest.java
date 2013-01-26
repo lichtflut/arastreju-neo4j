@@ -16,8 +16,8 @@
  */
 package org.arastreju.bindings.neo4j.it;
 
-import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
-import org.arastreju.bindings.neo4j.impl.GraphDataStore;
+import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
+import org.arastreju.bindings.neo4j.impl.NeoGraphDataStore;
 import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.bindings.neo4j.impl.NeoResourceResolver;
 import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
@@ -82,8 +82,8 @@ public class SemanticNetworkAccessTest {
 	private final QualifiedName qnKnows = new QualifiedName("http://q#", "knows");
 	
 	private SemanticNetworkAccess sna;
-	private GraphDataStore store;
-	private GraphDataConnection connection;
+	private NeoGraphDataStore store;
+	private NeoGraphDataConnection connection;
 	private ResourceResolver resolver;
 	private ResourceIndex index;
 	private NeoConversationContext ctx;
@@ -95,8 +95,8 @@ public class SemanticNetworkAccessTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		store = new GraphDataStore();
-		connection = new GraphDataConnection(store);
+		store = new NeoGraphDataStore();
+		connection = new NeoGraphDataConnection(store);
 		ctx = new NeoConversationContext(connection);
 		index = new ResourceIndex(connection, ctx);
 		sna = new SemanticNetworkAccess(connection, ctx);

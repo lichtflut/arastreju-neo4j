@@ -17,7 +17,7 @@
 package org.arastreju.bindings.neo4j.index;
 
 import org.arastreju.bindings.neo4j.NeoConstants;
-import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
+import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.bindings.neo4j.impl.NeoNodeResolver;
 import org.arastreju.bindings.neo4j.query.NeoQueryResult;
@@ -59,7 +59,7 @@ public class ResourceIndex implements NeoConstants {
 	 * @param connection The connection to the graph database.
 	 * @param ctx The current conversation context.
 	 */
-	public ResourceIndex(GraphDataConnection connection, NeoConversationContext ctx) {
+	public ResourceIndex(NeoGraphDataConnection connection, NeoConversationContext ctx) {
 		this.resolver = new NeoNodeResolver(ctx);
 		this.neoIndex = new NeoIndex(ctx, connection.getIndexManager());
 	}

@@ -58,7 +58,7 @@ public class SemanticNetworkAccess implements NeoConstants {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SemanticNetworkAccess.class);
 	
-	private final GraphDataConnection connection;
+	private final NeoGraphDataConnection connection;
 	private final NeoConversationContext conversationContext;
 	private final ResourceIndex index;
 
@@ -69,7 +69,7 @@ public class SemanticNetworkAccess implements NeoConstants {
 	 * @param connection The connection to the graph database.
 	 * @param conversationContext The conversation context.
 	 */
-	public SemanticNetworkAccess(final GraphDataConnection connection, final NeoConversationContext conversationContext) {
+	public SemanticNetworkAccess(final NeoGraphDataConnection connection, final NeoConversationContext conversationContext) {
 		this.connection = connection;
 		this.conversationContext = conversationContext;
 		this.index = new ResourceIndex(connection, conversationContext);

@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.arastreju.sge.ArastrejuProfile;
+import org.arastreju.sge.spi.GraphDataStore;
 import org.arastreju.sge.spi.ProfileCloseListener;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.index.IndexManager;
@@ -38,9 +39,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Oliver Tigges
  */
-public class GraphDataStore implements ProfileCloseListener {
+public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
 	
-	private final Logger logger = LoggerFactory.getLogger(GraphDataStore.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(NeoGraphDataStore.class);
 	
 	private final GraphDatabaseService gdbService;
 	
@@ -51,7 +52,7 @@ public class GraphDataStore implements ProfileCloseListener {
 	/**
 	 * Default constructor. Will use a <b>temporary</b> datastore!.
 	 */
-	public GraphDataStore() throws IOException {
+	public NeoGraphDataStore() throws IOException {
 		this(prepareTempStore());
 	}
 	
@@ -59,11 +60,11 @@ public class GraphDataStore implements ProfileCloseListener {
 	 * Constructor. Creates a store using given directory.
 	 * @param dir The directory for the store.
 	 */
-	public GraphDataStore(final String dir) {
+	public NeoGraphDataStore(final String dir) {
         if (new File(dir).exists()) {
-            logger.info("Using existing Neo4jDataStore in {}.", dir);
+            LOGGER.info("Using existing Neo4jDataStore in {}.", dir);
         } else {
-            logger.info("New Neo4jDataStore created in {}.", dir);
+            LOGGER.info("New Neo4jDataStore created in {}.", dir);
         }
 		gdbService = new EmbeddedGraphDatabase(dir); 
 		indexManager = gdbService.index();

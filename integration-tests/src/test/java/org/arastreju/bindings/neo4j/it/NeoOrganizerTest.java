@@ -19,8 +19,8 @@ package org.arastreju.bindings.neo4j.it;
 import junit.framework.Assert;
 import org.arastreju.bindings.neo4j.Neo4jGate;
 import org.arastreju.bindings.neo4j.NeoOrganizer;
-import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
-import org.arastreju.bindings.neo4j.impl.GraphDataStore;
+import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
+import org.arastreju.bindings.neo4j.impl.NeoGraphDataStore;
 import org.arastreju.sge.Conversation;
 import org.arastreju.sge.Organizer;
 import org.arastreju.sge.context.Context;
@@ -65,8 +65,8 @@ public class NeoOrganizerTest {
     private final ResourceID knows = new SimpleResourceID("http://q#", "knows");
 	
 	private Organizer organizer;
-	private GraphDataStore store;
-	private GraphDataConnection connection;
+	private NeoGraphDataStore store;
+	private NeoGraphDataConnection connection;
     private Neo4jGate gate;
 
     // -----------------------------------------------------
@@ -76,8 +76,8 @@ public class NeoOrganizerTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		store = new GraphDataStore();
-		connection = new GraphDataConnection(store);
+		store = new NeoGraphDataStore();
+		connection = new NeoGraphDataConnection(store);
         gate = new Neo4jGate(new PhysicalDomain("test"), connection);
         organizer = new NeoOrganizer(connection, gate);
 	}

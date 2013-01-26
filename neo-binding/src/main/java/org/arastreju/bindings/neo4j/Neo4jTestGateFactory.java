@@ -16,8 +16,8 @@
  */
 package org.arastreju.bindings.neo4j;
 
-import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
-import org.arastreju.bindings.neo4j.impl.TestGraphDataStore;
+import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
+import org.arastreju.bindings.neo4j.impl.TestNeoGraphDataStore;
 import org.arastreju.sge.ArastrejuGate;
 import org.arastreju.sge.ArastrejuProfile;
 import org.arastreju.sge.context.DomainIdentifier;
@@ -37,12 +37,12 @@ import org.arastreju.sge.spi.GateInitializationException;
  */
 public class Neo4jTestGateFactory extends ArastrejuGateFactory {
 
-    private GraphDataConnection conn;
+    private NeoGraphDataConnection conn;
 
     public Neo4jTestGateFactory(ArastrejuProfile profile) {
         super(profile);
         try {
-            conn = new GraphDataConnection(new TestGraphDataStore());
+            conn = new NeoGraphDataConnection(new TestNeoGraphDataStore());
         }
         catch (Exception any) {
             throw new RuntimeException(any);

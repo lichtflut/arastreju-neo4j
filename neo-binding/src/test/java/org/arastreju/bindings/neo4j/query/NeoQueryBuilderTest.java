@@ -18,32 +18,9 @@ package org.arastreju.bindings.neo4j.query;
 
 
 import junit.framework.Assert;
-import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
-import org.arastreju.bindings.neo4j.impl.GraphDataStore;
-import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
-import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
-import org.arastreju.bindings.neo4j.index.ResourceIndex;
-import org.arastreju.sge.SNOPS;
-import org.arastreju.sge.apriori.Aras;
-import org.arastreju.sge.apriori.RDF;
-import org.arastreju.sge.apriori.RDFS;
-import org.arastreju.sge.model.SimpleResourceID;
-import org.arastreju.sge.model.nodes.ResourceNode;
-import org.arastreju.sge.model.nodes.SNResource;
-import org.arastreju.sge.model.nodes.views.SNEntity;
-import org.arastreju.sge.model.nodes.views.SNText;
-import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.query.FieldParam;
-import org.arastreju.sge.query.Query;
 import org.arastreju.sge.query.QueryExpression;
-import org.arastreju.sge.query.QueryResult;
-import org.arastreju.sge.query.UriParam;
-import org.arastreju.sge.query.ValueParam;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-
-import java.util.List;
 
 /**
  * <p>

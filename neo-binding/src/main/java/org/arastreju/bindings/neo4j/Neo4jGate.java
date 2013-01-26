@@ -16,7 +16,7 @@
  */
 package org.arastreju.bindings.neo4j;
 
-import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
+import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.sge.ArastrejuGate;
 import org.arastreju.sge.ModelingConversation;
@@ -39,7 +39,7 @@ import org.arastreju.sge.spi.abstracts.AbstractArastrejuGate;
  */
 public class Neo4jGate extends AbstractArastrejuGate {
 
-	private final GraphDataConnection connection;
+	private final NeoGraphDataConnection connection;
 	
 	private boolean open;
 
@@ -50,7 +50,7 @@ public class Neo4jGate extends AbstractArastrejuGate {
 	 * @param domainIdentifier The gate context.
      * @param connection The connection to the graph datastore.
 	 */
-	public Neo4jGate(DomainIdentifier domainIdentifier, GraphDataConnection connection) throws GateInitializationException {
+	public Neo4jGate(DomainIdentifier domainIdentifier, NeoGraphDataConnection connection) throws GateInitializationException {
         super(domainIdentifier);
 		this.connection = connection;
 		this.open = true;

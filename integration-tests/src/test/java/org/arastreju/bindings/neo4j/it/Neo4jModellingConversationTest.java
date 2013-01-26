@@ -28,8 +28,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import org.arastreju.bindings.neo4j.Neo4jModellingConversation;
-import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
-import org.arastreju.bindings.neo4j.impl.GraphDataStore;
+import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
+import org.arastreju.bindings.neo4j.impl.NeoGraphDataStore;
 import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.apriori.Aras;
@@ -62,9 +62,9 @@ import org.junit.Test;
  */
 public class Neo4jModellingConversationTest {
 	
-	private GraphDataStore store;
+	private NeoGraphDataStore store;
 	private Neo4jModellingConversation mc;
-	private GraphDataConnection connection;
+	private NeoGraphDataConnection connection;
 	
 	// -----------------------------------------------------
 
@@ -73,8 +73,8 @@ public class Neo4jModellingConversationTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		store = new GraphDataStore();
-		connection = new GraphDataConnection(store);
+		store = new NeoGraphDataStore();
+		connection = new NeoGraphDataConnection(store);
 		mc = new Neo4jModellingConversation(connection, new NeoConversationContext(connection));
 	}
 

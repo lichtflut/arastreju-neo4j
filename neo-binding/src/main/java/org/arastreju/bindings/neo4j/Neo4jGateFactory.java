@@ -16,8 +16,8 @@
  */
 package org.arastreju.bindings.neo4j;
 
-import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
-import org.arastreju.bindings.neo4j.impl.GraphDataStore;
+import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
+import org.arastreju.bindings.neo4j.impl.NeoGraphDataStore;
 import org.arastreju.sge.ArastrejuGate;
 import org.arastreju.sge.ArastrejuProfile;
 import org.arastreju.sge.context.DomainIdentifier;
@@ -58,7 +58,7 @@ public class Neo4jGateFactory extends ArastrejuGateFactory {
 	@Override
 	public synchronized ArastrejuGate create(final DomainIdentifier domainIdentifier) throws GateInitializationException {
 		try {
-            final GraphDataConnection connection = openConnection(domainIdentifier);
+            final NeoGraphDataConnection connection = openConnection(domainIdentifier);
             final Neo4jGate gate = new Neo4jGate(domainIdentifier, connection);
 			getProfile().onOpen(gate);
 			return gate;
@@ -75,13 +75,13 @@ public class Neo4jGateFactory extends ArastrejuGateFactory {
      * @return The new connection.
      * @throws IOException
      */
-    private GraphDataConnection openConnection(DomainIdentifier ctx) throws IOException {
-        final GraphDataStore store = getOrCreateStore(ctx);
-        return new GraphDataConnection(store);
+    private NeoGraphDataConnection openConnection(DomainIdentifier ctx) throws IOException {
+        final NeoGraphDataStore store = getOrCreateStore(ctx);
+        return new NeoGraphDataConnection(store);
     }
 
-    private GraphDataStore getOrCreateStore(DomainIdentifier domainIdentifier) throws IOException {
-        final GraphDataStore store = getStore(domainIdentifier);
+    private NeoGraphDataStore getOrCreateStore(DomainIdentifier domainIdentifier) throws IOException {
+        final NeoGraphDataStore store = getStore(domainIdentifier);
         if (store != null) {
             return store;
         } else {
@@ -89,21 +89,21 @@ public class Neo4jGateFactory extends ArastrejuGateFactory {
         }
     }
 
-    private GraphDataStore getStore(DomainIdentifier domainIdentifier) {
+    private NeoGraphDataStore getStore(DomainIdentifier domainIdentifier) {
         final String key = KEY_GRAPH_DATA_STORE + ":" + domainIdentifier.getStorage();
-        return (GraphDataStore) getProfile().getProfileObject(key);
+        return (NeoGraphDataStore) getProfile().getProfileObject(key);
     }
 	
     /**
      * Create and initialize the store.
      * @param domainIdentifier The identified of the data store.
-     * @return The {@link GraphDataStore}.
+     * @return The {@link org.arastreju.bindings.neo4j.impl.NeoGraphDataStore}.
      * @throws IOException
      */
-    private GraphDataStore createStore(DomainIdentifier domainIdentifier) throws IOException {
+    private NeoGraphDataStore createStore(DomainIdentifier domainIdentifier) throws IOException {
         final ArastrejuProfile profile = getProfile();
         final String storeName = domainIdentifier.getStorage();
-        final GraphDataStore store = createStore(storeName);
+        final NeoGraphDataStore store = createStore(storeName);
         profile.addListener(store);
         if (isStoreDirDefined(profile)) {
             final String key = KEY_GRAPH_DATA_STORE + ":" + storeName;
@@ -112,13 +112,13 @@ public class Neo4jGateFactory extends ArastrejuGateFactory {
         return store;
     }
 
-    private GraphDataStore createStore(String store) throws IOException {
+    private NeoGraphDataStore createStore(String store) throws IOException {
         final ArastrejuProfile profile = getProfile();
         if (isStoreDirDefined(profile)){
             String basedir = profile.getProperty(ArastrejuProfile.ARAS_STORE_DIRECTORY);
-            return new GraphDataStore(basedir + "/" + store);
+            return new NeoGraphDataStore(basedir + "/" + store);
         } else {
-            return new GraphDataStore(GraphDataStore.prepareTempStore(store));
+            return new NeoGraphDataStore(NeoGraphDataStore.prepareTempStore(store));
         }
     }
 

@@ -18,10 +18,10 @@ package org.arastreju.bindings.neo4j.impl;
 
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
-import org.arastreju.bindings.neo4j.tx.NeoTxProvider;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.naming.QualifiedName;
+import org.arastreju.sge.persistence.TxProvider;
 import org.arastreju.sge.spi.abstracts.AbstractConversationContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +50,7 @@ public class NeoConversationContext extends AbstractConversationContext implemen
 	
 	private final AssociationHandler handler;
 
-    private final GraphDataConnection connection;
+    private final NeoGraphDataConnection connection;
 
     // ----------------------------------------------------
 	
@@ -58,7 +58,7 @@ public class NeoConversationContext extends AbstractConversationContext implemen
 	 * Creates a new Working Context.
 	 * @param connection The connection.
 	 */
-	public NeoConversationContext(GraphDataConnection connection) {
+	public NeoConversationContext(NeoGraphDataConnection connection) {
         this.connection = connection;
         this.handler = new AssociationHandler(connection, this);
         connection.register(this);
@@ -150,11 +150,11 @@ public class NeoConversationContext extends AbstractConversationContext implemen
 
     // ----------------------------------------------------
 
-    public NeoTxProvider getTxProvider() {
+    public TxProvider getTxProvider() {
         return connection.getTxProvider();
     }
 
-    public GraphDataConnection getConnection() {
+    public NeoGraphDataConnection getConnection() {
         return connection;
     }
 

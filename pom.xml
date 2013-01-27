@@ -5,13 +5,13 @@
 	<artifactId>arastreju-neo4j-parent</artifactId>
 	<name>Arastreju Neo4J Parent</name>
 	<packaging>pom</packaging>
-	<version>0.8.1-SNAPSHOT</version>
+	<version>0.8.1</version>
 	<description>Binding for Arastreju to Neo4J Graph Database - Parent</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<neo4j.version>1.8</neo4j.version>
-		<arastreju.sge.version>${project.version}</arastreju.sge.version>
+		<arastreju.sge.version>0.8.1</arastreju.sge.version>
 	</properties>
 
 	<modules>

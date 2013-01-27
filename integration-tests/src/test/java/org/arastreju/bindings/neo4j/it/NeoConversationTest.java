@@ -60,7 +60,7 @@ import org.junit.Test;
  *
  * @author Oliver Tigges
  */
-public class Neo4jModellingConversationTest {
+public class NeoConversationTest {
 	
 	private NeoGraphDataStore store;
 	private NeoConversation mc;

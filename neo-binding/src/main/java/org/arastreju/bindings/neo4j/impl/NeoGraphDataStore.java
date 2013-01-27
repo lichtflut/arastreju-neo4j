@@ -84,7 +84,11 @@ public class NeoGraphDataStore implements GraphDataStore<NeoAssociationKeeper>, 
     public NeoAssociationKeeper find(QualifiedName qn) {
         Index<Node> index = indexManager.forNodes(NeoIndex.INDEX_RESOURCES);
         Node found = index.get(NeoIndex.INDEX_KEY_RESOURCE_URI, NeoIndex.normalize(qn.toURI())).getSingle();
-        return new NeoAssociationKeeper(new SimpleResourceID(qn), found);
+        if (found != null) {
+            return new NeoAssociationKeeper(new SimpleResourceID(qn), found);
+        } else {
+            return null;
+        }
     }
 
     @Override

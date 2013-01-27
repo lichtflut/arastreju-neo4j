@@ -74,14 +74,10 @@ public class NeoOrganizer extends AbstractOrganizer {
 		}
 		return result;
 	}
-	
 
-	
 	// -----------------------------------------------------
 
-	/** 
-	 * {@inheritDoc}
-	 */
+    @Override
 	public Collection<Context> getContexts() {
 		final List<Context> result = new ArrayList<Context>();
 		final List<ResourceNode> nodes = index().lookup(RDF.TYPE, Aras.CONTEXT).toList();
@@ -91,9 +87,6 @@ public class NeoOrganizer extends AbstractOrganizer {
 		return result;
 	}
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public StatementContainer getStatements(final Context... ctx) {
         final NeoConversationContext conversationContext = new NeoConversationContext(connection);

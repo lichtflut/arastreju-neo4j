@@ -16,9 +16,10 @@
  */
 package org.arastreju.bindings.neo4j;
 
+import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
+import org.arastreju.bindings.neo4j.extensions.SNResourceNeo;
 import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
-import org.arastreju.bindings.neo4j.impl.NeoResourceResolver;
 import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.bindings.neo4j.query.NeoQueryBuilder;
@@ -27,7 +28,7 @@ import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.naming.QualifiedName;
-import org.arastreju.sge.persistence.ResourceResolver;
+import org.arastreju.sge.persistence.TxResultAction;
 import org.arastreju.sge.query.Query;
 import org.arastreju.sge.spi.abstracts.AbstractConversation;
 import org.slf4j.Logger;
@@ -56,8 +57,6 @@ public class NeoConversation extends AbstractConversation implements Conversatio
 	
 	private final SemanticNetworkAccess sna;
 	
-	private final ResourceResolver resolver;
-	
 	// -----------------------------------------------------
 
     /**
@@ -67,7 +66,6 @@ public class NeoConversation extends AbstractConversation implements Conversatio
         super(context);
         this.conversationContext = context;
         this.sna = new SemanticNetworkAccess(connection, context);
-        this.resolver = new NeoResourceResolver(connection, context);
     }
 	
     // ----------------------------------------------------
@@ -88,14 +86,21 @@ public class NeoConversation extends AbstractConversation implements Conversatio
 
     @Override
 	public ResourceNode findResource(final QualifiedName qn) {
-		assertActive();
-		return resolver.findResource(qn);
+        NeoAssociationKeeper existing = getConversationContext().find(qn);
+        if (existing != null) {
+            return new SNResourceNeo(qn, existing);
+        }
+        return null;
 	}
 	
 	@Override
     public ResourceNode resolve(final ResourceID resource) {
-		assertActive();
-		return resolver.resolve(resource);
+        NeoAssociationKeeper existing = getConversationContext().find(resource.getQualifiedName());
+        if (existing != null) {
+            return new SNResourceNeo(resource.getQualifiedName(), existing);
+        } else {
+            return create(resource.getQualifiedName());
+        }
 	}
 
     // ----------------------------------------------------
@@ -125,6 +130,24 @@ public class NeoConversation extends AbstractConversation implements Conversatio
 	}
 	
 	// ----------------------------------------------------
+
+    public NeoConversationContext getConversationContext() {
+        return (NeoConversationContext) super.getConversationContext();
+    }
+
+    // ----------------------------------------------------
+
+    protected ResourceNode create(final QualifiedName qn) {
+        return conversationContext.getTxProvider().doTransacted(new TxResultAction<ResourceNode>() {
+            @Override
+            public ResourceNode execute() {
+                NeoAssociationKeeper created = getConversationContext().create(qn);
+                SNResourceNeo createdResource = new SNResourceNeo(qn, created);
+                new ResourceIndex(getConversationContext()).index(created.getNeoNode(), createdResource);
+                return createdResource;
+            }
+        });
+    }
 	
 	@Override
     protected void assertActive() {

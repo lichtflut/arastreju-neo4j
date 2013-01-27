@@ -16,17 +16,25 @@
  */
 package org.arastreju.bindings.neo4j.impl;
 
-import java.io.File;
-import java.io.IOException;
-
+import org.arastreju.bindings.neo4j.NeoConstants;
+import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
+import org.arastreju.bindings.neo4j.index.NeoIndex;
 import org.arastreju.sge.ArastrejuProfile;
+import org.arastreju.sge.SNOPS;
+import org.arastreju.sge.model.SimpleResourceID;
+import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.spi.GraphDataStore;
 import org.arastreju.sge.spi.ProfileCloseListener;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * <p>
@@ -39,7 +47,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Oliver Tigges
  */
-public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
+public class NeoGraphDataStore implements GraphDataStore<NeoAssociationKeeper>, ProfileCloseListener {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(NeoGraphDataStore.class);
 	
@@ -72,6 +80,22 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
 	
 	// -----------------------------------------------------
 
+    @Override
+    public NeoAssociationKeeper find(QualifiedName qn) {
+        Index<Node> index = indexManager.forNodes(NeoIndex.INDEX_RESOURCES);
+        Node found = index.get(NeoIndex.INDEX_KEY_RESOURCE_URI, NeoIndex.normalize(qn.toURI())).getSingle();
+        return new NeoAssociationKeeper(new SimpleResourceID(qn), found);
+    }
+
+    @Override
+    public NeoAssociationKeeper create(QualifiedName qn) {
+        Node node = gdbService.createNode();
+        node.setProperty(NeoConstants.PROPERTY_URI, qn.toURI());
+        return new NeoAssociationKeeper(SNOPS.id(qn), node);
+    }
+
+    // ----------------------------------------------------
+
 	/**
 	 * @return the gdbService
 	 */
@@ -87,14 +111,12 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
 	}
 	
 	// -- ProfileCloseListener ----------------------------
-	
-	/**
-	 * {@inheritDoc}
-	 */
+
+    @Override
 	public void onClosed(final ArastrejuProfile profile) {
 		close();
 	}
-	
+
 	public void close() {
 		gdbService.shutdown();
 	}
@@ -119,5 +141,4 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
 		return prepareTempStore("default");
 	}
 
-	
 }

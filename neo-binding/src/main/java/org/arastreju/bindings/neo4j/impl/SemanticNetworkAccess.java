@@ -35,7 +35,6 @@ import org.neo4j.graphdb.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -114,7 +113,8 @@ public class SemanticNetworkAccess implements NeoConstants {
 	 * @param node The node to detach.
 	 */
 	public void detach(final ResourceNode node){
-		NeoAssocKeeperAccess.setAssociationKeeper(node, new DetachedAssociationKeeper(node.getAssociations()));
+        AssocKeeperAccess.getInstance().setAssociationKeeper(
+                node, new DetachedAssociationKeeper(node.getAssociations()));
 		conversationContext.detach(node.getQualifiedName());
 	}
 	
@@ -129,7 +129,7 @@ public class SemanticNetworkAccess implements NeoConstants {
 		}
 		final AssociationKeeper keeper = findAssociationKeeper(node.getQualifiedName());
 		if (keeper != null) {
-			NeoAssocKeeperAccess.setAssociationKeeper(node, keeper);
+            AssocKeeperAccess.getInstance().setAssociationKeeper(node, keeper);
 		} else {
 			throw new ArastrejuRuntimeException(ErrorCodes.GENERAL_CONSISTENCY_FAILURE, 
 					"Can't find node/keeper for attached node " + node.getQualifiedName());
@@ -181,17 +181,16 @@ public class SemanticNetworkAccess implements NeoConstants {
 	 * @return The persisted ResourceNode.
 	 */
 	protected ResourceNode persist(final ResourceNode node) {
-		// 1st: create a corresponding Neo node.
-		final Node neoNode = connection.getStore().getGdbService().createNode();
-		neoNode.setProperty(PROPERTY_URI, node.getQualifiedName().toURI());
-		
-		// 2nd: retain copy of current associations and attach the Resource with this store.
+		// 1st: create a corresponding Neo node and attach the Resource with the current context.
+        NeoAssociationKeeper keeper = connection.getStore().create(node.getQualifiedName());
+        conversationContext.attach(node.getQualifiedName(), keeper);
+
+		// 2nd: retain copy of current associations
 		final Set<Statement> copy = node.getAssociations();
-		final NeoAssociationKeeper keeper = createKeeper(node.getQualifiedName(), neoNode);
-		NeoAssocKeeperAccess.setAssociationKeeper(node, keeper);
-		
+        AssocKeeperAccess.getInstance().setAssociationKeeper(node, keeper);
+
 		// 3rd: index the Neo node.
-		index.index(neoNode, node);
+		index.index(keeper.getNeoNode(), node);
 		
 		// 4th: store all associations.
 		for (Statement assoc : copy) {
@@ -207,17 +206,10 @@ public class SemanticNetworkAccess implements NeoConstants {
 	 * @param changed An unattached node referencing the same resource.
 	 */
 	protected void merge(final AssociationKeeper attached, final ResourceNode changed) {
-		final Set<Statement> currentAssocs = new HashSet<Statement>(attached.getAssociations());
-		final AssociationKeeper detached = AssocKeeperAccess.getInstance().getAssociationKeeper(changed);
-		for (Statement toBeRemoved : detached.getAssociationsForRemoval()) {
-			attached.removeAssociation(toBeRemoved);
-		}
-		for(Statement assoc : detached.getAssociations()){
-			if (!currentAssocs.contains(assoc)){
-				attached.addAssociation(assoc);
-			}
-		}
+        final AssociationKeeper detached = AssocKeeperAccess.getInstance().getAssociationKeeper(changed);
+        AssocKeeperAccess.getInstance().merge(attached, detached);
         AssocKeeperAccess.getInstance().setAssociationKeeper(changed, attached);
+        conversationContext.attach(changed.getQualifiedName(), (NeoAssociationKeeper) attached);
 	}
 	
 	protected NeoAssociationKeeper createKeeper(QualifiedName qn, Node neoNode) {

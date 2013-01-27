@@ -41,7 +41,6 @@ import java.util.Set;
 public class NodeRemover {
 
 	private final ResourceIndex index;
-    private final NeoConversationContext context;
 
     // -----------------------------------------------------
 
@@ -50,7 +49,6 @@ public class NodeRemover {
 	 * @param context The context.
 	 */
 	public NodeRemover(NeoConversationContext context) {
-        this.context = context;
         this.index = new ResourceIndex(context.getConnection(), context);
 	}
 	

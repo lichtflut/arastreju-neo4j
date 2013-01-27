@@ -79,7 +79,7 @@ public class NeoIndex implements NeoConstants {
     /**
 	 * Index for all resources by their qualified name.
 	 */
-	private static final String INDEX_RESOURCES = "resources";
+	public static final String INDEX_RESOURCES = "resources";
 
     /**
      * Index for statements in this domain: "local public"
@@ -272,7 +272,7 @@ public class NeoIndex implements NeoConstants {
 
 	// ----------------------------------------------------
 	
-	private String normalize(final String s) {
+	public static String normalize(final String s) {
 		return s.trim().toLowerCase();
 	}
 
@@ -287,6 +287,5 @@ public class NeoIndex implements NeoConstants {
         }
         return INDEX_CONTEXT_PREFIX + value;
     }
-
 
 }

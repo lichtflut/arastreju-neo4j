@@ -60,7 +60,7 @@ public class Neo4jGate extends AbstractArastrejuGate {
 
     @Override
 	public Conversation startConversation() {
-        return new Neo4jModellingConversation(connection, newConversationContext());
+        return new NeoConversation(connection, newConversationContext());
 	}
 
     @Override
@@ -68,7 +68,7 @@ public class Neo4jGate extends AbstractArastrejuGate {
         NeoConversationContext cc = new NeoConversationContext(connection);
         cc.setPrimaryContext(primary);
         cc.setReadContexts(readContexts);
-        return new Neo4jModellingConversation(connection, cc);
+        return new NeoConversation(connection, cc);
     }
 
     @Override

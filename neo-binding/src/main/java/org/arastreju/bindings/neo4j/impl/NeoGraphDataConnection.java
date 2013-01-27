@@ -7,6 +7,7 @@ import org.arastreju.bindings.neo4j.tx.NeoTxProvider;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.persistence.TxProvider;
 import org.arastreju.sge.spi.GraphDataConnection;
+import org.arastreju.sge.spi.abstracts.AbstractGraphDataConnection;
 import org.neo4j.graphdb.index.IndexManager;
 
 import java.util.ArrayList;
@@ -25,10 +26,8 @@ import java.util.Set;
  *
  * @author Oliver Tigges
  */
-public class NeoGraphDataConnection implements GraphDataConnection {
+public class NeoGraphDataConnection extends AbstractGraphDataConnection<NeoConversationContext> {
 
-    private final Set<NeoConversationContext> openConversations = new HashSet<NeoConversationContext>();
-	
 	private final NeoGraphDataStore store;
 	
 	private final TxProvider txProvider;
@@ -65,14 +64,6 @@ public class NeoGraphDataConnection implements GraphDataConnection {
         return store.getIndexManager();
     }
 
-    public void register(NeoConversationContext conversationContext) {
-        openConversations.add(conversationContext);
-    }
-
-    public void unregister(NeoConversationContext conversationContext) {
-        openConversations.remove(conversationContext);
-    }
-
     // ----------------------------------------------------
 
     /**
@@ -81,30 +72,11 @@ public class NeoGraphDataConnection implements GraphDataConnection {
      * @param context The context, where the modification occurred.
      */
     public void notifyModification(QualifiedName qn, NeoConversationContext context) {
-        for (NeoConversationContext conversation : openConversations) {
+        for (NeoConversationContext conversation : getOpenConversations()) {
             if (!conversation.equals(context)) {
                 conversation.onModification(qn, context);
             }
         }
     }
 	
-	// ----------------------------------------------------
-	
-	/**
-	 * (re-)open the connection.
-	 */
-	public void open() {
-    }
-	
-	/**
-	 * Close the connection and free all resources.
-	 */
-	public void close() {
-        List<NeoConversationContext> copy = new ArrayList<NeoConversationContext>(openConversations);
-        // iterating over copy because original will be remove itself while closing.
-        for (NeoConversationContext cc : copy) {
-            cc.close();
-        }
-	}
-
 }

@@ -34,6 +34,7 @@ import org.arastreju.sge.model.nodes.ValueNode;
 import org.arastreju.sge.persistence.ResourceResolver;
 import org.arastreju.sge.persistence.TxAction;
 import org.arastreju.sge.persistence.TxProvider;
+import org.arastreju.sge.spi.AssocKeeperAccess;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -254,7 +255,7 @@ public class AssociationHandler implements NeoConstants {
         LOGGER.debug("Created statement {}. ", stmt);
 		if (stmt.getObject().isResourceNode()){
 			final ResourceNode arasClient = resourceResolver.resolve(stmt.getObject().asResource());
-			final Node neoClient = NeoAssocKeeperAccess.getNeoNode(arasClient);
+			final Node neoClient = getNeoNode(arasClient);
 			createRelationShip(subject, neoClient, stmt);
 		} else {
 			final Node neoClient = subject.getGraphDatabase().createNode();
@@ -375,6 +376,16 @@ public class AssociationHandler implements NeoConstants {
             return new SNValueNeo(node);
         } else {
             return null;
+        }
+    }
+
+    private Node getNeoNode(final ResourceNode node){
+        try {
+            NeoAssociationKeeper keeper =
+                    (NeoAssociationKeeper) AssocKeeperAccess.getInstance().getAssociationKeeper(node);
+            return keeper.getNeoNode();
+        } catch (ClassCastException e){
+            throw new RuntimeException(e);
         }
     }
 

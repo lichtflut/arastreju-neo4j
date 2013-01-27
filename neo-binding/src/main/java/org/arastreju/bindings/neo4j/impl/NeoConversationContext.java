@@ -27,8 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -42,12 +40,10 @@ import java.util.Set;
  *
  * @author Oliver Tigges
  */
-public class NeoConversationContext extends AbstractConversationContext implements NeoConstants {
+public class NeoConversationContext extends AbstractConversationContext<NeoAssociationKeeper> implements NeoConstants {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NeoConversationContext.class);
 
-	private final Map<QualifiedName, NeoAssociationKeeper> register = new HashMap<QualifiedName, NeoAssociationKeeper>();
-	
 	private final AssociationHandler handler;
 
     private final NeoGraphDataConnection connection;
@@ -72,32 +68,11 @@ public class NeoConversationContext extends AbstractConversationContext implemen
 	 */
 	public NeoAssociationKeeper getAssociationKeeper(QualifiedName qn) {
 		assertActive();
-        NeoAssociationKeeper registered = register.get(qn);
+        NeoAssociationKeeper registered = lookup(qn);
         if (registered != null && !registered.isAttached()) {
             LOGGER.warn("There is a detached NeoAssociationKeeper in the conversation register: {}.", qn);
         }
         return registered;
-	}
-	
-	/**
-	 * @param qn The resource's qualified name.
-	 * @param keeper The keeper to be accessed.
-	 */
-	public void attach(QualifiedName qn, NeoAssociationKeeper keeper) {
-		assertActive();
-		register.put(qn, keeper);
-		keeper.setConversationContext(this);
-	}
-	
-	/**
-	 * @param qn The resource's qualified name.
-	 */
-	public void detach(QualifiedName qn) {
-		assertActive();
-		final NeoAssociationKeeper removed = register.remove(qn);
-		if (removed != null) {
-			removed.detach();
-		}
 	}
 	
 	// ----------------------------------------------------
@@ -118,7 +93,7 @@ public class NeoConversationContext extends AbstractConversationContext implemen
      */
     public Set<Statement> getIncomingStatements(ResourceID object) {
         assertActive();
-        NeoAssociationKeeper keeper = register.get(object.getQualifiedName());
+        NeoAssociationKeeper keeper = lookup(object.getQualifiedName());
         if (keeper == null) {
             return Collections.emptySet();
         }
@@ -164,7 +139,7 @@ public class NeoConversationContext extends AbstractConversationContext implemen
      * @param context The other context, where the modification occurred.
      */
     public void onModification(QualifiedName qualifiedName, NeoConversationContext context) {
-        NeoAssociationKeeper existing = register.get(qualifiedName);
+        NeoAssociationKeeper existing = lookup(qualifiedName);
         if (existing != null) {
             LOGGER.info("Concurrent change on node {} in other context {}.", qualifiedName, context);
             existing.notifyChanged();
@@ -176,14 +151,6 @@ public class NeoConversationContext extends AbstractConversationContext implemen
     @Override
     protected void onClose() {
         connection.unregister(this);
-    }
-
-    @Override
-    protected void clearCaches() {
-        for (NeoAssociationKeeper keeper : register.values()) {
-            keeper.detach();
-        }
-        register.clear();
     }
 
 }

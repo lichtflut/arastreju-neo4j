@@ -29,7 +29,7 @@ import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.persistence.ResourceResolver;
 import org.arastreju.sge.query.Query;
-import org.arastreju.sge.spi.abstracts.AbstractModelingConversation;
+import org.arastreju.sge.spi.abstracts.AbstractConversation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,9 +46,9 @@ import java.util.Set;
  *
  * @author Oliver Tigges
  */
-public class Neo4jModellingConversation extends AbstractModelingConversation implements Conversation {
+public class NeoConversation extends AbstractConversation implements Conversation {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(Neo4jModellingConversation.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(NeoConversation.class);
 
     // ----------------------------------------------------
 	
@@ -63,7 +63,7 @@ public class Neo4jModellingConversation extends AbstractModelingConversation imp
     /**
      * Create a new Modelling Conversation instance using a given data store.
      */
-    public Neo4jModellingConversation(final NeoGraphDataConnection connection, final NeoConversationContext context) {
+    public NeoConversation(final NeoGraphDataConnection connection, final NeoConversationContext context) {
         super(context);
         this.conversationContext = context;
         this.sna = new SemanticNetworkAccess(connection, context);

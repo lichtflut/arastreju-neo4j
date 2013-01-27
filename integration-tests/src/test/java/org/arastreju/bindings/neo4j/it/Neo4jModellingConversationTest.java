@@ -27,7 +27,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import org.arastreju.bindings.neo4j.Neo4jModellingConversation;
+import org.arastreju.bindings.neo4j.NeoConversation;
 import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.NeoGraphDataStore;
 import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
@@ -51,7 +51,7 @@ import org.junit.Test;
 
 /**
  * <p>
- *  Test case for the {@link org.arastreju.bindings.neo4j.Neo4jModellingConversation}.
+ *  Test case for the {@link org.arastreju.bindings.neo4j.NeoConversation}.
  * </p>
  *
  * <p>
@@ -63,7 +63,7 @@ import org.junit.Test;
 public class Neo4jModellingConversationTest {
 	
 	private NeoGraphDataStore store;
-	private Neo4jModellingConversation mc;
+	private NeoConversation mc;
 	private NeoGraphDataConnection connection;
 	
 	// -----------------------------------------------------
@@ -75,7 +75,7 @@ public class Neo4jModellingConversationTest {
 	public void setUp() throws Exception {
 		store = new NeoGraphDataStore();
 		connection = new NeoGraphDataConnection(store);
-		mc = new Neo4jModellingConversation(connection, new NeoConversationContext(connection));
+		mc = new NeoConversation(connection, new NeoConversationContext(connection));
 	}
 
 	/**

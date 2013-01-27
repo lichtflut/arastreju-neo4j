@@ -18,6 +18,7 @@ package org.arastreju.bindings.neo4j.impl;
 
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
+import org.arastreju.sge.ConversationContext;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.naming.QualifiedName;
@@ -46,8 +47,6 @@ public class NeoConversationContext extends AbstractConversationContext<NeoAssoc
 
 	private final AssociationHandler handler;
 
-    private final NeoGraphDataConnection connection;
-
     // ----------------------------------------------------
 	
 	/**
@@ -55,7 +54,7 @@ public class NeoConversationContext extends AbstractConversationContext<NeoAssoc
 	 * @param connection The connection.
 	 */
 	public NeoConversationContext(NeoGraphDataConnection connection) {
-        this.connection = connection;
+        super(connection);
         this.handler = new AssociationHandler(connection, this);
         connection.register(this);
 	}
@@ -125,32 +124,13 @@ public class NeoConversationContext extends AbstractConversationContext<NeoAssoc
 
     // ----------------------------------------------------
 
-    public TxProvider getTxProvider() {
-        return connection.getTxProvider();
-    }
-
-    public NeoGraphDataConnection getConnection() {
-        return connection;
-    }
-
-    /**
-     * Called when a resource has been modified by another conversation context with same graph data connection.
-     * @param qualifiedName The qualified name of the modified resource.
-     * @param context The other context, where the modification occurred.
-     */
-    public void onModification(QualifiedName qualifiedName, NeoConversationContext context) {
+    @Override
+    public void onModification(QualifiedName qualifiedName, ConversationContext otherContext) {
         NeoAssociationKeeper existing = lookup(qualifiedName);
         if (existing != null) {
-            LOGGER.info("Concurrent change on node {} in other context {}.", qualifiedName, context);
+            LOGGER.info("Concurrent change on node {} in other context {}.", qualifiedName, otherContext);
             existing.notifyChanged();
         }
-    }
-
-    // ----------------------------------------------------
-
-    @Override
-    protected void onClose() {
-        connection.unregister(this);
     }
 
 }

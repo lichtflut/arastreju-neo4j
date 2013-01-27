@@ -49,7 +49,7 @@ public class NodeRemover {
 	 * @param context The context.
 	 */
 	public NodeRemover(NeoConversationContext context) {
-        this.index = new ResourceIndex(context.getConnection(), context);
+        this.index = new ResourceIndex(context);
 	}
 	
 	// -----------------------------------------------------

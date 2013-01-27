@@ -3,17 +3,12 @@
  */
 package org.arastreju.bindings.neo4j.impl;
 
+import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
 import org.arastreju.bindings.neo4j.tx.NeoTxProvider;
 import org.arastreju.sge.naming.QualifiedName;
-import org.arastreju.sge.persistence.TxProvider;
-import org.arastreju.sge.spi.GraphDataConnection;
+import org.arastreju.sge.spi.abstracts.AbstractConversationContext;
 import org.arastreju.sge.spi.abstracts.AbstractGraphDataConnection;
 import org.neo4j.graphdb.index.IndexManager;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * <p>
@@ -26,12 +21,10 @@ import java.util.Set;
  *
  * @author Oliver Tigges
  */
-public class NeoGraphDataConnection extends AbstractGraphDataConnection<NeoConversationContext> {
+public class NeoGraphDataConnection extends AbstractGraphDataConnection<NeoAssociationKeeper> {
 
 	private final NeoGraphDataStore store;
 	
-	private final TxProvider txProvider;
-
 	// ----------------------------------------------------
 
 	/**
@@ -39,26 +32,11 @@ public class NeoGraphDataConnection extends AbstractGraphDataConnection<NeoConve
 	 * @param store The store.
 	 */
 	public NeoGraphDataConnection(NeoGraphDataStore store) {
-		this.store = store;
-		this.txProvider = new NeoTxProvider(store.getGdbService());
+        super(store, new NeoTxProvider(store.getGdbService()));
+        this.store = store;
 	}
 	
 	// ----------------------------------------------------
-
-	/**
-	 * @return the store
-	 */
-    @Override
-	public NeoGraphDataStore getStore() {
-		return store;
-	}
-	
-	/**
-	 * @return the txProvider
-	 */
-	public TxProvider getTxProvider() {
-		return txProvider;
-	}
 
     public IndexManager getIndexManager() {
         return store.getIndexManager();
@@ -72,11 +50,11 @@ public class NeoGraphDataConnection extends AbstractGraphDataConnection<NeoConve
      * @param context The context, where the modification occurred.
      */
     public void notifyModification(QualifiedName qn, NeoConversationContext context) {
-        for (NeoConversationContext conversation : getOpenConversations()) {
+        for (AbstractConversationContext<NeoAssociationKeeper> conversation : getOpenConversations()) {
             if (!conversation.equals(context)) {
                 conversation.onModification(qn, context);
             }
         }
     }
-	
+
 }

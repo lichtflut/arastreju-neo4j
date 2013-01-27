@@ -57,7 +57,6 @@ public class SemanticNetworkAccess implements NeoConstants {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SemanticNetworkAccess.class);
 	
-	private final NeoGraphDataConnection connection;
 	private final NeoConversationContext conversationContext;
 	private final ResourceIndex index;
 
@@ -69,7 +68,6 @@ public class SemanticNetworkAccess implements NeoConstants {
 	 * @param conversationContext The conversation context.
 	 */
 	public SemanticNetworkAccess(final NeoGraphDataConnection connection, final NeoConversationContext conversationContext) {
-		this.connection = connection;
 		this.conversationContext = conversationContext;
 		this.index = new ResourceIndex(connection, conversationContext);
 	}
@@ -182,8 +180,7 @@ public class SemanticNetworkAccess implements NeoConstants {
 	 */
 	protected ResourceNode persist(final ResourceNode node) {
 		// 1st: create a corresponding Neo node and attach the Resource with the current context.
-        NeoAssociationKeeper keeper = connection.getStore().create(node.getQualifiedName());
-        conversationContext.attach(node.getQualifiedName(), keeper);
+        NeoAssociationKeeper keeper = conversationContext.create(node.getQualifiedName());
 
 		// 2nd: retain copy of current associations
 		final Set<Statement> copy = node.getAssociations();

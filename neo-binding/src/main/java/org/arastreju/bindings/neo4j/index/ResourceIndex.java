@@ -70,7 +70,8 @@ public class ResourceIndex implements NeoConstants {
      */
     public ResourceIndex(NeoConversationContext ctx) {
         this.resolver = new NeoNodeResolver(ctx);
-        this.neoIndex = new NeoIndex(ctx, ctx.getConnection().getIndexManager());
+        NeoGraphDataConnection connection = (NeoGraphDataConnection) ctx.getConnection();
+        this.neoIndex = new NeoIndex(ctx, connection.getIndexManager());
     }
 	
 	// -----------------------------------------------------

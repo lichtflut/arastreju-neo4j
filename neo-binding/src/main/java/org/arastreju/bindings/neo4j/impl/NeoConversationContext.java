@@ -18,12 +18,11 @@ package org.arastreju.bindings.neo4j.impl;
 
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
-import org.arastreju.sge.ConversationContext;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.naming.QualifiedName;
-import org.arastreju.sge.persistence.TxProvider;
 import org.arastreju.sge.spi.abstracts.AbstractConversationContext;
+import org.arastreju.sge.spi.abstracts.WorkingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +55,6 @@ public class NeoConversationContext extends AbstractConversationContext<NeoAssoc
 	public NeoConversationContext(NeoGraphDataConnection connection) {
         super(connection);
         this.handler = new AssociationHandler(connection, this);
-        connection.register(this);
 	}
 
 	// ----------------------------------------------------
@@ -125,7 +123,7 @@ public class NeoConversationContext extends AbstractConversationContext<NeoAssoc
     // ----------------------------------------------------
 
     @Override
-    public void onModification(QualifiedName qualifiedName, ConversationContext otherContext) {
+    public void onModification(QualifiedName qualifiedName, WorkingContext otherContext) {
         NeoAssociationKeeper existing = lookup(qualifiedName);
         if (existing != null) {
             LOGGER.info("Concurrent change on node {} in other context {}.", qualifiedName, otherContext);

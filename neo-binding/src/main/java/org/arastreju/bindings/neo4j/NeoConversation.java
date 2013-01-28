@@ -30,6 +30,7 @@ import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.persistence.TxResultAction;
 import org.arastreju.sge.query.Query;
+import org.arastreju.sge.spi.AssocKeeperAccess;
 import org.arastreju.sge.spi.abstracts.AbstractConversation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,7 +115,15 @@ public class NeoConversation extends AbstractConversation implements Conversatio
     @Override
 	public void reset(final ResourceNode node) {
 		assertActive();
-		sna.reset(node);
+        if (isAttached(node)) {
+            return;
+        }
+        NeoAssociationKeeper existing = getConversationContext().find(node.getQualifiedName());
+        if (existing != null) {
+            AssocKeeperAccess.getInstance().setAssociationKeeper(node, existing);
+        } else {
+            throw new IllegalStateException("Detached node cannot be reset.");
+        }
 	}
 
     @Override

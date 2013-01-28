@@ -29,7 +29,7 @@ import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.naming.Namespace;
 import org.arastreju.sge.query.Query;
 import org.arastreju.sge.query.QueryResult;
-import org.arastreju.sge.spi.abstracts.AbstractOrganizer;
+import org.arastreju.sge.organize.AbstractOrganizer;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -119,7 +119,7 @@ public class NeoIndex implements NeoConstants {
 	 * Find in Index by key and value.
 	 */
 	public Node lookup(final QualifiedName qn) {
-		return resourceIndex().get(INDEX_KEY_RESOURCE_URI, normalize(qn.toURI())).getSingle();
+		return qnIndex().get(INDEX_KEY_RESOURCE_URI, normalize(qn.toURI())).getSingle();
 	}
 	
 	/**
@@ -137,11 +137,11 @@ public class NeoIndex implements NeoConstants {
     /**
      * Find in Index by key and value.
      */
-    public IndexHits<Node>  allNodes() {
+    public IndexHits<Node> allNodes() {
         return tx().doTransacted(new TxResultAction<IndexHits<Node>>() {
             @Override
             public IndexHits<Node> execute() {
-                return resourceIndex().query(INDEX_KEY_RESOURCE_URI, "*");
+                return qnIndex().query(INDEX_KEY_RESOURCE_URI, "*");
             }
         });
     }
@@ -203,7 +203,7 @@ public class NeoIndex implements NeoConstants {
 	}
 	
 	public void index(Node subject, QualifiedName qn) {
-        resourceIndex().add(subject, INDEX_KEY_RESOURCE_URI, normalize(qn.toURI()));
+        qnIndex().add(subject, INDEX_KEY_RESOURCE_URI, normalize(qn.toURI()));
 		indexResource(subject, INDEX_KEY_RESOURCE_URI, qn.toURI());
 	}
 	
@@ -266,7 +266,7 @@ public class NeoIndex implements NeoConstants {
 	    }
     }
 
-    private Index<Node> resourceIndex() {
+    private Index<Node> qnIndex() {
         return manager.forNodes(INDEX_RESOURCES);
     }
 

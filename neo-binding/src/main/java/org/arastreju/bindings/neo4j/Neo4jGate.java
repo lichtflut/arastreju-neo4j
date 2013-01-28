@@ -20,7 +20,7 @@ import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
 import org.arastreju.sge.ArastrejuGate;
 import org.arastreju.sge.Conversation;
-import org.arastreju.sge.Organizer;
+import org.arastreju.sge.organize.Organizer;
 import org.arastreju.sge.context.Context;
 import org.arastreju.sge.context.DomainIdentifier;
 import org.arastreju.sge.spi.GateInitializationException;

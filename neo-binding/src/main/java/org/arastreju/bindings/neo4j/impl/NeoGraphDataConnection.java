@@ -8,6 +8,7 @@ import org.arastreju.bindings.neo4j.tx.NeoTxProvider;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.spi.abstracts.AbstractConversationContext;
 import org.arastreju.sge.spi.abstracts.AbstractGraphDataConnection;
+import org.arastreju.sge.spi.abstracts.WorkingContext;
 import org.neo4j.graphdb.index.IndexManager;
 
 /**
@@ -50,7 +51,7 @@ public class NeoGraphDataConnection extends AbstractGraphDataConnection<NeoAssoc
      * @param context The context, where the modification occurred.
      */
     public void notifyModification(QualifiedName qn, NeoConversationContext context) {
-        for (AbstractConversationContext<NeoAssociationKeeper> conversation : getOpenConversations()) {
+        for (WorkingContext<NeoAssociationKeeper> conversation : getOpenConversations()) {
             if (!conversation.equals(context)) {
                 conversation.onModification(qn, context);
             }

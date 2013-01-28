@@ -19,10 +19,12 @@ package org.arastreju.bindings.neo4j.impl;
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
 import org.arastreju.bindings.neo4j.index.NeoIndex;
+import org.arastreju.bindings.neo4j.index.NeoNodeKeyTable;
 import org.arastreju.sge.ArastrejuProfile;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.model.SimpleResourceID;
 import org.arastreju.sge.naming.QualifiedName;
+import org.arastreju.sge.persistence.NodeKeyTable;
 import org.arastreju.sge.spi.GraphDataStore;
 import org.arastreju.sge.spi.ProfileCloseListener;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -50,6 +52,8 @@ import java.io.IOException;
 public class NeoGraphDataStore implements GraphDataStore<NeoAssociationKeeper>, ProfileCloseListener {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(NeoGraphDataStore.class);
+
+    private final NodeKeyTable keyTable;
 	
 	private final GraphDatabaseService gdbService;
 	
@@ -76,6 +80,7 @@ public class NeoGraphDataStore implements GraphDataStore<NeoAssociationKeeper>, 
         }
 		gdbService = new EmbeddedGraphDatabase(dir); 
 		indexManager = gdbService.index();
+        keyTable = new NeoNodeKeyTable(indexManager);
 	}
 	
 	// -----------------------------------------------------
@@ -96,6 +101,11 @@ public class NeoGraphDataStore implements GraphDataStore<NeoAssociationKeeper>, 
         Node node = gdbService.createNode();
         node.setProperty(NeoConstants.PROPERTY_URI, qn.toURI());
         return new NeoAssociationKeeper(SNOPS.id(qn), node);
+    }
+
+    @Override
+    public void remove(QualifiedName qn) {
+        keyTable.lookup(qn);
     }
 
     // ----------------------------------------------------

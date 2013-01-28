@@ -22,7 +22,7 @@ import org.arastreju.bindings.neo4j.NeoOrganizer;
 import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.NeoGraphDataStore;
 import org.arastreju.sge.Conversation;
-import org.arastreju.sge.Organizer;
+import org.arastreju.sge.organize.Organizer;
 import org.arastreju.sge.context.Context;
 import org.arastreju.sge.context.PhysicalDomain;
 import org.arastreju.sge.io.StatementContainer;

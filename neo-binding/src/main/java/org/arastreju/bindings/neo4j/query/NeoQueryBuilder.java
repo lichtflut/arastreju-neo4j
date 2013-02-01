@@ -62,21 +62,11 @@ public class NeoQueryBuilder extends QueryBuilder {
 	
 	// -----------------------------------------------------
 
-	/** 
-	 * {@inheritDoc}
-	 */
+	@Override
 	public QueryResult getResult() {
 		return index.search(toQueryContext());
 	}
 
-	/** 
-	 * {@inheritDoc}
-	 */
-	public ResourceNode getSingleNode() {
-		final QueryResult result = index.search(toQueryContext());
-		return result.getSingleNode();
-	}
-	
 	// -----------------------------------------------------
 	
 	protected QueryContext toQueryContext() {

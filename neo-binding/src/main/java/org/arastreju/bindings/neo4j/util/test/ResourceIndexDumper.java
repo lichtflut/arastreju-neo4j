@@ -22,7 +22,7 @@ import java.io.PrintStream;
 import java.util.List;
 
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Fieldable;
+//import org.apache.lucene.document.Fieldable;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.store.FSDirectory;
@@ -56,15 +56,16 @@ public class ResourceIndexDumper {
 	/**
 	 * Dumps out the lucene indices into the given {@PrintStream}
 	 */
+	//FIXME: broken by lucene 4.1, commented out for now
 	public void writeOut(final PrintStream out) throws CorruptIndexException, IOException{
-		IndexReader reader = IndexReader.open(FSDirectory.open(new File(dir)),true);
-		for (int i = 0; i < reader.numDocs(); i++){
-            Document document = reader.document(i);
-            List<Fieldable> fields = document.getFields();
-            for (Fieldable field : fields) {
-            	out.println(field.name() + " -> " + field.stringValue());
-			}
-		}
-		out.flush();
+//		IndexReader reader = IndexReader.open(FSDirectory.open(new File(dir)),true);
+//		for (int i = 0; i < reader.numDocs(); i++){
+//            Document document = reader.document(i);
+//            List<Fieldable> fields = document.getFields();
+//            for (Fieldable field : fields) {
+//            	out.println(field.name() + " -> " + field.stringValue());
+//			}
+//		}
+//		out.flush();
 	}
 }

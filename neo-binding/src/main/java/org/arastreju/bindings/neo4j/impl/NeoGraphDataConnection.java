@@ -43,19 +43,4 @@ public class NeoGraphDataConnection extends AbstractGraphDataConnection<NeoAssoc
         return store.getIndexManager();
     }
 
-    // ----------------------------------------------------
-
-    /**
-     * Called when a resource has been modified by conversation context belonging to this graph data connection.
-     * @param qn The qualified name of the modified resource.
-     * @param context The context, where the modification occurred.
-     */
-    public void notifyModification(QualifiedName qn, NeoConversationContext context) {
-        for (WorkingContext<NeoAssociationKeeper> conversation : getOpenConversations()) {
-            if (!conversation.equals(context)) {
-                conversation.onModification(qn, context);
-            }
-        }
-    }
-
 }

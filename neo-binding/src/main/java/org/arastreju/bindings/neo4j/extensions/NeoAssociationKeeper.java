@@ -47,7 +47,7 @@ public class NeoAssociationKeeper extends AttachedAssociationKeeper {
 	 * @param neoNode The neo node.
 	 */
 	public NeoAssociationKeeper(final ResourceID id, final Node neoNode) {
-        super(id.getQualifiedName());
+        super(id.getQualifiedName(), null);
 		this.neoNode = neoNode;
 	}
 	
@@ -59,16 +59,6 @@ public class NeoAssociationKeeper extends AttachedAssociationKeeper {
 
 	public ResourceID getID() {
 		return SNOPS.id(getQualifiedName());
-	}
-	
-	// ----------------------------------------------------
-	
-	/**
-	 * Add an association directly to the set, without resolving.
-	 * @param assoc The association to add.
-	 */
-	public void addAssociationDirectly(final Statement assoc) {
-		getAssociationsDirectly().add(assoc);
 	}
 	
 	// ----------------------------------------------------

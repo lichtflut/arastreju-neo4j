@@ -32,8 +32,6 @@ import org.arastreju.sge.persistence.TxResultAction;
 import org.arastreju.sge.query.Query;
 import org.arastreju.sge.spi.AssocKeeperAccess;
 import org.arastreju.sge.spi.abstracts.AbstractConversation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
@@ -49,10 +47,6 @@ import java.util.Set;
  * @author Oliver Tigges
  */
 public class NeoConversation extends AbstractConversation implements Conversation {
-	
-	private static final Logger LOGGER = LoggerFactory.getLogger(NeoConversation.class);
-
-    // ----------------------------------------------------
 	
 	private final NeoConversationContext conversationContext;
 	
@@ -157,13 +151,5 @@ public class NeoConversation extends AbstractConversation implements Conversatio
             }
         });
     }
-	
-	@Override
-    protected void assertActive() {
-		if (!conversationContext.isActive()) {
-			LOGGER.warn("Conversation already closed.");
-			//throw new IllegalStateException("Conversation already closed.");
-		}
-	}
 	
 }

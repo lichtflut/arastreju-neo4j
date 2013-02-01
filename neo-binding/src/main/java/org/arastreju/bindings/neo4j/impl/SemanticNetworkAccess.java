@@ -20,8 +20,6 @@ import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.sge.SNOPS;
-import org.arastreju.sge.eh.ArastrejuRuntimeException;
-import org.arastreju.sge.eh.ErrorCodes;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.model.associations.AssociationKeeper;
@@ -114,24 +112,6 @@ public class SemanticNetworkAccess implements NeoConstants {
         AssocKeeperAccess.getInstance().setAssociationKeeper(
                 node, new DetachedAssociationKeeper(node.getAssociations()));
 		conversationContext.detach(node.getQualifiedName());
-	}
-	
-	/**
-	 * Reset the given node if it is detached.
-	 * @param node The node to be reseted.
-	 */
-	public void reset(final ResourceNode node) {
-		// 1st: check if node is detached.
-		if (!node.isAttached()){
-			return;
-		}
-		final AssociationKeeper keeper = findAssociationKeeper(node.getQualifiedName());
-		if (keeper != null) {
-            AssocKeeperAccess.getInstance().setAssociationKeeper(node, keeper);
-		} else {
-			throw new ArastrejuRuntimeException(ErrorCodes.GENERAL_CONSISTENCY_FAILURE, 
-					"Can't find node/keeper for attached node " + node.getQualifiedName());
-		}
 	}
 	
 	/**

@@ -16,6 +16,7 @@
  */
 package org.arastreju.bindings.neo4j.impl;
 
+import de.lichtflut.infra.exceptions.NotYetImplementedException;
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
 import org.arastreju.bindings.neo4j.index.NeoIndex;
@@ -23,9 +24,11 @@ import org.arastreju.bindings.neo4j.index.NeoNodeKeyTable;
 import org.arastreju.sge.ArastrejuProfile;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.model.SimpleResourceID;
+import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.persistence.NodeKeyTable;
 import org.arastreju.sge.spi.GraphDataStore;
+import org.arastreju.sge.spi.PhysicalNodeID;
 import org.arastreju.sge.spi.ProfileCloseListener;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -106,6 +109,11 @@ public class NeoGraphDataStore implements GraphDataStore<NeoAssociationKeeper>, 
     @Override
     public void remove(QualifiedName qn) {
         keyTable.lookup(qn);
+    }
+
+    @Override
+    public boolean addAssociation(PhysicalNodeID id, Statement assoc) {
+        throw new NotYetImplementedException();
     }
 
     // -- Neo Services ------------------------------------

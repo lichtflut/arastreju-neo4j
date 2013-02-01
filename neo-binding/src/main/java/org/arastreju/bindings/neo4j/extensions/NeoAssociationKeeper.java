@@ -16,15 +16,12 @@
  */
 package org.arastreju.bindings.neo4j.extensions;
 
-import org.arastreju.bindings.neo4j.NeoConstants;
-import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
-import org.arastreju.sge.ConversationContext;
+import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.Statement;
-import org.arastreju.sge.model.associations.AbstractAssociationKeeper;
 import org.arastreju.sge.model.associations.AssociationKeeper;
+import org.arastreju.sge.model.associations.AttachedAssociationKeeper;
 import org.arastreju.sge.model.associations.DetachedAssociationKeeper;
-import org.arastreju.sge.naming.QualifiedName;
 import org.neo4j.graphdb.Node;
 
 /**
@@ -38,14 +35,10 @@ import org.neo4j.graphdb.Node;
  *
  * @author Oliver Tigges
  */
-public class NeoAssociationKeeper extends AbstractAssociationKeeper implements NeoConstants {
+public class NeoAssociationKeeper extends AttachedAssociationKeeper {
 
-	private final ResourceID id;
-	
 	private final Node neoNode;
-	
-	private NeoConversationContext context;
-	
+
 	// -----------------------------------------------------
 	
 	/**
@@ -54,7 +47,7 @@ public class NeoAssociationKeeper extends AbstractAssociationKeeper implements N
 	 * @param neoNode The neo node.
 	 */
 	public NeoAssociationKeeper(final ResourceID id, final Node neoNode) {
-		this.id = id;
+        super(id.getQualifiedName());
 		this.neoNode = neoNode;
 	}
 	
@@ -64,12 +57,8 @@ public class NeoAssociationKeeper extends AbstractAssociationKeeper implements N
 		return neoNode;
 	}
 
-	public QualifiedName getQualifiedName() {
-		return id.getQualifiedName();
-	}
-	
 	public ResourceID getID() {
-		return id;
+		return SNOPS.id(getQualifiedName());
 	}
 	
 	// -----------------------------------------------------
@@ -80,7 +69,7 @@ public class NeoAssociationKeeper extends AbstractAssociationKeeper implements N
 			return;
 		}
 		if (isAttached()) {
-			context.addAssociation(this, assoc);
+            getConversationContext().addAssociation(this, assoc);
 		} else {
 			super.addAssociation(assoc);
 		}
@@ -90,7 +79,7 @@ public class NeoAssociationKeeper extends AbstractAssociationKeeper implements N
 	public boolean removeAssociation(final Statement assoc) {
 		if (isAttached()) {
 			getAssociations().remove(assoc);
-			return context.removeAssociation(this, assoc);
+			return getConversationContext().removeAssociation(this, assoc);
 		} else {
 			return super.removeAssociation(assoc);
 		}
@@ -98,43 +87,6 @@ public class NeoAssociationKeeper extends AbstractAssociationKeeper implements N
 	
 	// ----------------------------------------------------
 	
-	@Override
-	public boolean isAttached() {
-		return context != null && context.isActive();
-	}
-
-	/**
-	 * Detaches this node from the working context.
-	 */
-	public void detach() {
-		markResolved();
-		this.context = null;
-	}
-	
-	/**
-	 * Set the conversation context.
-	 * @param context the context to set
-	 */
-	public void setConversationContext(ConversationContext context) {
-		setConversationContext((NeoConversationContext) context);
-	}
-
-    /**
-     * Set the conversation context.
-     * @param context the context to set
-     */
-    public void setConversationContext(NeoConversationContext context) {
-        this.context = context;
-    }
-
-    /**
-     * Get the current conversation context.
-     * @return The context.
-     */
-    public NeoConversationContext getConversationContext() {
-        return context;
-    }
-
     /**
      * Called when the underlying neo node has been changed in another conversation.
      * The state of this node must be reset to trigger a reload later.
@@ -158,7 +110,7 @@ public class NeoAssociationKeeper extends AbstractAssociationKeeper implements N
 	@Override
 	protected void resolveAssociations() {
 		if (isAttached()) {
-			context.resolveAssociations(this);
+			getConversationContext().resolveAssociations(this);
 		} else {
 			throw new IllegalStateException("This node is no longer attached. Cannot resolve associations.");
 		}

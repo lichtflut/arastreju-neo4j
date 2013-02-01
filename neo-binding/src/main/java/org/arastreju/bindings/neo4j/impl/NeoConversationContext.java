@@ -71,17 +71,6 @@ public class NeoConversationContext extends AbstractConversationContext<NeoAssoc
         }
         return registered;
 	}
-	
-	// ----------------------------------------------------
-
-	/**
-	 * Resolve the associations of given association keeper.
-	 * @param keeper The association keeper to be resolved.
-	 */
-	public void resolveAssociations(NeoAssociationKeeper keeper) {
-		assertActive();
-		handler.resolveAssociations(keeper);
-	}
 
     /**
      * Get the incoming statements of the given node.
@@ -98,23 +87,24 @@ public class NeoConversationContext extends AbstractConversationContext<NeoAssoc
     }
 	
 	// ----------------------------------------------------
-	
+
 	/**
-	 * Add a new Association to given Neo node, or rather create a corresponding Relation.
-	 * @param keeper The neo node, which shall be the subject in the new Relation.
-	 * @param stmt The Association.
+	 * Resolve the associations of given association keeper.
+	 * @param keeper The association keeper to be resolved.
 	 */
+    @Override
+	public void resolveAssociations(NeoAssociationKeeper keeper) {
+		assertActive();
+		handler.resolveAssociations(keeper);
+	}
+
+    @Override
 	public void addAssociation(final NeoAssociationKeeper keeper, final Statement stmt) {
 		assertActive();
 		handler.addAssociation(keeper, stmt);
 	}
 
-	/**
-	 * Remove the given association.
-	 * @param keeper The keeper.
-	 * @param assoc The association.
-	 * @return true if the association has been removed.
-	 */
+	@Override
 	public boolean removeAssociation(final NeoAssociationKeeper keeper, final Statement assoc) {
 		assertActive();
 		return handler.removeAssociation(keeper, assoc);

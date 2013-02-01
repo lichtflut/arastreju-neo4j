@@ -83,7 +83,7 @@ public class NeoGraphDataStore implements GraphDataStore<NeoAssociationKeeper>, 
         keyTable = new NeoNodeKeyTable(indexManager);
 	}
 	
-	// -----------------------------------------------------
+	// -- GraphDataStore ----------------------------------
 
     @Override
     public NeoAssociationKeeper find(QualifiedName qn) {
@@ -108,7 +108,7 @@ public class NeoGraphDataStore implements GraphDataStore<NeoAssociationKeeper>, 
         keyTable.lookup(qn);
     }
 
-    // ----------------------------------------------------
+    // -- Neo Services ------------------------------------
 
 	/**
 	 * @return the gdbService

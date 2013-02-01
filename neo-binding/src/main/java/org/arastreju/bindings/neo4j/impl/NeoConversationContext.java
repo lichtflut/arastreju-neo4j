@@ -22,7 +22,6 @@ import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.spi.abstracts.AbstractConversationContext;
-import org.arastreju.sge.spi.abstracts.WorkingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,16 +108,5 @@ public class NeoConversationContext extends AbstractConversationContext<NeoAssoc
 		assertActive();
 		return handler.removeAssociation(keeper, assoc);
 	}
-
-    // ----------------------------------------------------
-
-    @Override
-    public void onModification(QualifiedName qualifiedName, WorkingContext otherContext) {
-        NeoAssociationKeeper existing = lookup(qualifiedName);
-        if (existing != null) {
-            LOGGER.info("Concurrent change on node {} in other context {}.", qualifiedName, otherContext);
-            existing.notifyChanged();
-        }
-    }
 
 }

@@ -61,59 +61,14 @@ public class NeoAssociationKeeper extends AttachedAssociationKeeper {
 		return SNOPS.id(getQualifiedName());
 	}
 	
-	// -----------------------------------------------------
-
-	@Override
-	public void addAssociation(final Statement assoc) {
-		if (getAssociations().contains(assoc)) {
-			return;
-		}
-		if (isAttached()) {
-            getConversationContext().addAssociation(this, assoc);
-		} else {
-			super.addAssociation(assoc);
-		}
-	}
-	
-	@Override
-	public boolean removeAssociation(final Statement assoc) {
-		if (isAttached()) {
-			getAssociations().remove(assoc);
-			return getConversationContext().removeAssociation(this, assoc);
-		} else {
-			return super.removeAssociation(assoc);
-		}
-	}
-	
 	// ----------------------------------------------------
 	
-    /**
-     * Called when the underlying neo node has been changed in another conversation.
-     * The state of this node must be reset to trigger a reload later.
-     */
-    public void notifyChanged() {
-        reset();
-    }
-
-    // ----------------------------------------------------
-
 	/**
 	 * Add an association directly to the set, without resolving.
 	 * @param assoc The association to add.
 	 */
 	public void addAssociationDirectly(final Statement assoc) {
 		getAssociationsDirectly().add(assoc);
-	}
-	
-	// ----------------------------------------------------
-	
-	@Override
-	protected void resolveAssociations() {
-		if (isAttached()) {
-			getConversationContext().resolveAssociations(this);
-		} else {
-			throw new IllegalStateException("This node is no longer attached. Cannot resolve associations.");
-		}
 	}
 	
 	// ----------------------------------------------------

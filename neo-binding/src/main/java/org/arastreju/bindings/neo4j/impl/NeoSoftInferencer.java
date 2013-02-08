@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 lichtflut Forschungs- und Entwicklungsgesellschaft mbH
+ * Copyright (C) 2013 lichtflut Forschungs- und Entwicklungsgesellschaft mbH
  *
  * The Arastreju-Neo4j binding is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,9 @@
 package org.arastreju.bindings.neo4j.impl;
 
 import org.arastreju.sge.apriori.RDF;
+import org.arastreju.sge.apriori.RDFS;
 import org.arastreju.sge.inferencing.CompoundInferencer;
+import org.arastreju.sge.inferencing.implicit.SubClassOfInferencer;
 import org.arastreju.sge.inferencing.implicit.TypeInferencer;
 import org.arastreju.sge.persistence.ResourceResolver;
 
@@ -37,6 +39,7 @@ public class NeoSoftInferencer extends CompoundInferencer {
 
 	public NeoSoftInferencer(final ResourceResolver resolver) {
 		addInferencer(new TypeInferencer(resolver), RDF.TYPE);
+        addInferencer(new SubClassOfInferencer(resolver), RDFS.SUB_CLASS_OF);
 	}
 	
 }

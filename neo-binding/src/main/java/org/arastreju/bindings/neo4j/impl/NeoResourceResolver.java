@@ -7,7 +7,9 @@ import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
 import org.arastreju.bindings.neo4j.extensions.SNResourceNeo;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.sge.SNOPS;
+import org.arastreju.sge.index.QNResolver;
 import org.arastreju.sge.model.ResourceID;
+import org.arastreju.sge.model.SimpleResourceID;
 import org.arastreju.sge.model.associations.AssociationKeeper;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.naming.QualifiedName;
@@ -25,8 +27,8 @@ import org.neo4j.graphdb.Node;
  *
  * @author Oliver Tigges
  */
-public class NeoResourceResolver implements ResourceResolver {
-	
+public class NeoResourceResolver implements ResourceResolver, QNResolver {
+
 	private final NeoGraphDataConnection connection;
 	private final NeoConversationContext conversationContext;
 	
@@ -69,6 +71,10 @@ public class NeoResourceResolver implements ResourceResolver {
 		}
 	}
 
+	@Override
+	public ResourceNode resolve(QualifiedName qn) {
+		return resolve(new SimpleResourceID(qn));
+	}
 	// ----------------------------------------------------
 	
 	/**

@@ -23,6 +23,7 @@ import org.arastreju.bindings.neo4j.extensions.SNValueNeo;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.context.Context;
+import org.arastreju.sge.index.ArasIndexerImpl;
 import org.arastreju.sge.inferencing.Inferencer;
 import org.arastreju.sge.model.DetachedStatement;
 import org.arastreju.sge.model.SimpleResourceID;
@@ -79,8 +80,8 @@ public class AssociationHandler implements NeoConstants {
 	private final ResourceResolver resourceResolver;
 
     private final NeoNodeResolver neoNodeResolver;
-	
-	private final ResourceIndex index;
+
+	private final ArasIndexerImpl index;
 
 	private final ContextAccess ctxAccess;
 
@@ -96,7 +97,7 @@ public class AssociationHandler implements NeoConstants {
         this.convContext = conversationContext;
 		this.resourceResolver = new NeoResourceResolver(connection, conversationContext);
         this.neoNodeResolver = new NeoNodeResolver(conversationContext);
-		this.index = new ResourceIndex(conversationContext);
+		this.index = new ArasIndexerImpl(conversationContext);
 		this.ctxAccess = new ContextAccess(resourceResolver);
 		this.softInferencer = new NeoSoftInferencer(resourceResolver);
 		this.hardInferencer = new NeoHardInferencer(resourceResolver);
@@ -183,7 +184,9 @@ public class AssociationHandler implements NeoConstants {
                     relationship.delete();
                     //index.removeFromIndex(keeper.getNeoNode(), assoc);
                     removeHardInferences(Collections.singleton(assoc));
-                    index.reindex(keeper.getNeoNode(), keeper.getQualifiedName(), keeper.getAssociations());
+                    ResourceNode sub = resourceResolver.resolve(assoc.getSubject());
+                    index.index(sub);
+//                    index.reindex(keeper.getNeoNode(), keeper.getQualifiedName(), keeper.getAssociations());
                     addSoftInferences(keeper, keeper.getAssociations());
                     connection.notifyModification(keeper.getQualifiedName(), convContext);
                 }
@@ -204,7 +207,7 @@ public class AssociationHandler implements NeoConstants {
 		}
 		for (Statement stmt : inferenced) {
 			if (stmt.getSubject().getQualifiedName().equals(keeper.getQualifiedName())) {
-				index.index(keeper.getNeoNode(), stmt);
+				index.index(stmt);
 			} else {
 				LOGGER.warn("Inferred statement can not be indexed: " + stmt);
 			}
@@ -265,7 +268,7 @@ public class AssociationHandler implements NeoConstants {
 			addLocale(neoClient, value.getLocale());
 			createRelationShip(subject, neoClient, stmt);
 		}
-		index.index(subject, stmt);
+		index.index(stmt);
 	}
 	
 	private void createRelationShip(final Node subject, final Node object, final Statement stmt) {

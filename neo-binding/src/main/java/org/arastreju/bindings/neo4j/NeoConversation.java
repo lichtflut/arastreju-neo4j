@@ -20,10 +20,12 @@ import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
 import org.arastreju.bindings.neo4j.extensions.SNResourceNeo;
 import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
+import org.arastreju.bindings.neo4j.impl.NeoResourceResolver;
 import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.bindings.neo4j.query.NeoQueryBuilder;
 import org.arastreju.sge.Conversation;
+import org.arastreju.sge.index.QNResolver;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.model.nodes.ResourceNode;
@@ -78,6 +80,10 @@ public class NeoConversation extends AbstractConversation implements Conversatio
     }
 
     // ----------------------------------------------------
+
+	protected QNResolver getQNResolver() {
+		return new NeoResourceResolver((NeoGraphDataConnection) conversationContext.getConnection(), conversationContext);
+	}
 
     @Override
 	public ResourceNode findResource(final QualifiedName qn) {

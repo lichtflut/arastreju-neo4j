@@ -433,14 +433,29 @@ public class SemanticNetworkAccessTest {
 		
 		sna.attach(vehicle);
 		sna.attach(car);
-		
-		QueryResult hits = index.lookup(RDF.TYPE, id(qnVehicle));
-		assertEquals(2, hits.size());
-		
+
+//		QueryResult hits = index.lookup(RDF.TYPE, id(qnVehicle));
+		Iterable<QualifiedName> res = index.search(escapeColon(RDF.TYPE.toURI())+":"+escapeColon(id(qnVehicle).toURI()));
+		assertNotNull(res);
+
+		Iterator<QualifiedName> it = res.iterator();
+
+		assertTrue(it.hasNext());
+		it.next();
+		assertTrue(it.hasNext());
+		it.next();
+		assertFalse(it.hasNext());
+
 		SNOPS.remove(car, RDF.TYPE);
-		
-		hits = index.lookup(RDF.TYPE, id(qnVehicle));
-		assertEquals(1, hits.size());
+
+		res = index.search(escapeColon(RDF.TYPE.toURI())+":"+escapeColon(id(qnVehicle).toURI()));
+		assertNotNull(res);
+
+		it = res.iterator();
+
+		assertTrue(it.hasNext());
+		it.next();
+		assertFalse(it.hasNext());
 	}
 	
 	@Test

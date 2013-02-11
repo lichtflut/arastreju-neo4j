@@ -21,13 +21,14 @@ import junit.framework.Assert;
 import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.NeoGraphDataStore;
 import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
+import org.arastreju.bindings.neo4j.impl.NeoResourceResolver;
 import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
-import org.arastreju.bindings.neo4j.index.ResourceIndex;
-import org.arastreju.bindings.neo4j.query.NeoQueryBuilder;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.apriori.Aras;
 import org.arastreju.sge.apriori.RDF;
 import org.arastreju.sge.apriori.RDFS;
+import org.arastreju.sge.index.ArasIndexerImpl;
+import org.arastreju.sge.index.LuceneQueryBuilder;
 import org.arastreju.sge.model.SimpleResourceID;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.model.nodes.SNResource;
@@ -66,6 +67,7 @@ public class NeoQueryTest {
 	private NeoGraphDataConnection connection;
 	private SemanticNetworkAccess sna;
 	private NeoConversationContext convCtx;
+	private ArasIndexerImpl index;
 
 	// -----------------------------------------------------
 
@@ -78,6 +80,7 @@ public class NeoQueryTest {
 		connection = new NeoGraphDataConnection(store);
 		convCtx = new NeoConversationContext(connection);
 		sna = new SemanticNetworkAccess(connection, convCtx);
+		index = new ArasIndexerImpl(convCtx);
 	}
 
 	/**
@@ -89,17 +92,17 @@ public class NeoQueryTest {
 		connection.close();
 		store.close();
 	}
-	
+
 	// -----------------------------------------------------
-	
+
 	@Test
 	public void testFindByTag(){
 		final ResourceNode car = new SNResource(qnCar);
 		SNOPS.associate(car, Aras.HAS_PROPER_NAME, new SNText("BMW"));
 		SNOPS.associate(car, RDFS.LABEL, new SNText("Automobil"));
 		sna.attach(car);
-		
-		Query query = new NeoQueryBuilder(new ResourceIndex(connection, convCtx));
+
+		Query query = new LuceneQueryBuilder(index, new NeoResourceResolver(connection,  convCtx));
 		query
 				.addValue("Automobil")
 				.and()
@@ -117,15 +120,15 @@ public class NeoQueryTest {
 		SNOPS.associate(car, Aras.HAS_PROPER_NAME, new SNText("BMW"));
 		SNOPS.associate(car, RDFS.LABEL, new SNText("Automobil"));
 		sna.attach(car);
-		
-		Query query = new NeoQueryBuilder(new ResourceIndex(connection, convCtx));
+
+		Query query = new LuceneQueryBuilder(index, new NeoResourceResolver(connection,  convCtx));
 		query.addValue("Automobil")
 				.and()
 				.not().add(new ValueParam("BMW"));
 		
 		Assert.assertEquals(0, query.getResult().size());
-		
-		query = new NeoQueryBuilder(new ResourceIndex(connection, convCtx));
+
+		query = new LuceneQueryBuilder(index, new NeoResourceResolver(connection,  convCtx));
 		query
 				.addValue("Automobil")
 				.and()
@@ -143,8 +146,8 @@ public class NeoQueryTest {
 		SNOPS.associate(car, Aras.HAS_PROPER_NAME, new SNText("BMW"));
 		SNOPS.associate(car, RDFS.LABEL, new SNText("Automobil"));
 		sna.attach(car);
-		
-		Query query = new NeoQueryBuilder(new ResourceIndex(connection, convCtx));
+
+		Query query = new LuceneQueryBuilder(index, new NeoResourceResolver(connection,  convCtx));
 		query.add(new FieldParam(RDFS.LABEL, "Automobil"));
 		final QueryResult result = query.getResult();
 		final List<ResourceNode> list = result.toList();
@@ -168,8 +171,8 @@ public class NeoQueryTest {
 		
 		final SNEntity aBike = SNClass.from(bike).createInstance();
 		sna.attach(aBike);
-		
-		Query query = new NeoQueryBuilder(new ResourceIndex(connection, convCtx));
+
+		Query query = new LuceneQueryBuilder(index, new NeoResourceResolver(connection,  convCtx));
 		query.add(new UriParam("*Car"));
 		
 		final QueryResult result = query.getResult();

@@ -91,6 +91,7 @@ public class NeoQueryTest {
 		convCtx.close();
 		connection.close();
 		store.close();
+		index.close();
 	}
 
 	// -----------------------------------------------------

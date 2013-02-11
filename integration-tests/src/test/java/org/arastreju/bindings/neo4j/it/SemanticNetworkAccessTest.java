@@ -116,6 +116,7 @@ public class SemanticNetworkAccessTest {
 		connection.close();
 		ctx.close();
 		store.close();
+		index.close();
 	}
 	
 	// -----------------------------------------------------

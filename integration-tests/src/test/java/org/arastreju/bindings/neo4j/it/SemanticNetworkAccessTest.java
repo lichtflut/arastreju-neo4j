@@ -50,6 +50,7 @@ import org.neo4j.graphdb.Transaction;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.regex.Matcher;
 
 import static org.arastreju.sge.SNOPS.associate;
 import static org.arastreju.sge.SNOPS.associations;
@@ -88,7 +89,7 @@ public class SemanticNetworkAccessTest {
 	private NeoGraphDataStore store;
 	private NeoGraphDataConnection connection;
 	private ResourceResolver resolver;
-	private ResourceIndex index;
+	private ArasIndexerImpl index;
 	private NeoConversationContext ctx;
 	
 	// -----------------------------------------------------
@@ -101,7 +102,7 @@ public class SemanticNetworkAccessTest {
 		store = new NeoGraphDataStore();
 		connection = new NeoGraphDataConnection(store);
 		ctx = new NeoConversationContext(connection);
-		index = new ResourceIndex(connection, ctx);
+		index = new ArasIndexerImpl(ctx);
 		sna = new SemanticNetworkAccess(connection, ctx);
 		resolver = new NeoResourceResolver(connection, ctx);
 		
@@ -134,21 +135,21 @@ public class SemanticNetworkAccessTest {
 	
 	@Test
 	public void testValueIndexing() throws IOException {
-		final IndexSearcher indexSearcher = new ArasIndexerImpl(ctx);
-
 		final ResourceNode car = new SNResource(qnCar);
 		SNOPS.associate(car, Aras.HAS_PROPER_NAME, new SNText("BMW"));
 		
 		sna.attach(car);
 
-		final Iterable<QualifiedName> found = indexSearcher.search("http\\://arastreju.org/kernel#hasProperName:BMW");
-		assertNotNull(found);
-
-		Iterator<QualifiedName> it = found.iterator();
-		QualifiedName res = it.next();
-
+		Iterable<QualifiedName> res = index.search(escapeColon(Aras.HAS_PROPER_NAME.toURI())+":BMW");
 		assertNotNull(res);
-		assertEquals(qnCar.toURI(), res.toURI());
+		Iterator<QualifiedName> it = res.iterator();
+
+		assertTrue(it.hasNext());
+
+		QualifiedName qn = it.next();
+
+		assertNotNull(qn);
+		assertEquals(qnCar.toURI(), qn.toURI());
 		assertFalse(it.hasNext());
 	}
 	
@@ -480,4 +481,7 @@ public class SemanticNetworkAccessTest {
 		assertArrayEquals(new Context[] {convCtx2, ctx1, ctx2, ctx3}, cl3);
 	}
 
+	private static String escapeColon(String s) {
+		return s.replaceAll(":", Matcher.quoteReplacement("\\:"));
+	}
 }

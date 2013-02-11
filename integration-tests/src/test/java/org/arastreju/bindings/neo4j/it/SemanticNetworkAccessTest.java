@@ -28,6 +28,8 @@ import org.arastreju.sge.apriori.RDF;
 import org.arastreju.sge.apriori.RDFS;
 import org.arastreju.sge.context.Context;
 import org.arastreju.sge.context.SimpleContextID;
+import org.arastreju.sge.index.ArasIndexerImpl;
+import org.arastreju.sge.index.IndexSearcher;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.SimpleResourceID;
 import org.arastreju.sge.model.Statement;
@@ -47,6 +49,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 import static org.arastreju.sge.SNOPS.associate;
 import static org.arastreju.sge.SNOPS.associations;
@@ -131,21 +134,22 @@ public class SemanticNetworkAccessTest {
 	
 	@Test
 	public void testValueIndexing() throws IOException {
-		final ResourceIndex index = new ResourceIndex(connection, ctx);
-		
+		final IndexSearcher indexSearcher = new ArasIndexerImpl(ctx);
+
 		final ResourceNode car = new SNResource(qnCar);
 		SNOPS.associate(car, Aras.HAS_PROPER_NAME, new SNText("BMW"));
 		
 		sna.attach(car);
-		
-		final GraphDatabaseService gdbService = store.getGdbService();
-		Transaction tx = gdbService.beginTx();
-		
-		final QueryResult found = index.lookup(Aras.HAS_PROPER_NAME, "BMW");
+
+		final Iterable<QualifiedName> found = indexSearcher.search("http\\://arastreju.org/kernel#hasProperName:BMW");
 		assertNotNull(found);
-		assertEquals(1, found.size());
-		
-		tx.finish();
+
+		Iterator<QualifiedName> it = found.iterator();
+		QualifiedName res = it.next();
+
+		assertNotNull(res);
+		assertEquals(qnCar.toURI(), res.toURI());
+		assertFalse(it.hasNext());
 	}
 	
 	@Test

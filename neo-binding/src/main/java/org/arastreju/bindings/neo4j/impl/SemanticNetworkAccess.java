@@ -167,7 +167,7 @@ public class SemanticNetworkAccess implements NeoConstants {
         AssocKeeperAccess.getInstance().setAssociationKeeper(node, keeper);
 
 		// 3rd: index the Neo node.
-		index.index(keeper.getNeoNode(), node);
+		index.index(keeper.getNeoNode(), node.getQualifiedName());
 		
 		// 4th: store all associations.
 		for (Statement assoc : copy) {

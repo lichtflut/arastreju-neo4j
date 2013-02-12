@@ -23,7 +23,6 @@ import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.NeoResourceResolver;
 import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
-import org.arastreju.bindings.neo4j.query.NeoQueryBuilder;
 import org.arastreju.sge.Conversation;
 import org.arastreju.sge.index.QNResolver;
 import org.arastreju.sge.model.ResourceID;
@@ -31,7 +30,6 @@ import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.persistence.TxResultAction;
-import org.arastreju.sge.query.Query;
 import org.arastreju.sge.spi.AssocKeeperAccess;
 import org.arastreju.sge.spi.abstracts.AbstractConversation;
 
@@ -66,12 +64,6 @@ public class NeoConversation extends AbstractConversation implements Conversatio
     }
 	
     // ----------------------------------------------------
-	
-	@Override
-	public Query createQuery() {
-		assertActive();
-		return new NeoQueryBuilder(new ResourceIndex(conversationContext));
-	}
 
     @Override
     public Set<Statement> findIncomingStatements(ResourceID object) {
@@ -152,7 +144,8 @@ public class NeoConversation extends AbstractConversation implements Conversatio
             public ResourceNode execute() {
                 NeoAssociationKeeper created = getConversationContext().create(qn);
                 SNResourceNeo createdResource = new SNResourceNeo(qn, created);
-                new ResourceIndex(getConversationContext()).index(created.getNeoNode(), createdResource);
+                new ResourceIndex(getConversationContext()).index(created.getNeoNode(),
+                        createdResource.getQualifiedName());
                 return createdResource;
             }
         });

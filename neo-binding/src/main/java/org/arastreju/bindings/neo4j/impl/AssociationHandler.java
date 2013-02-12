@@ -20,7 +20,6 @@ import org.arastreju.bindings.neo4j.ArasRelTypes;
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
 import org.arastreju.bindings.neo4j.extensions.SNValueNeo;
-import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.context.Context;
 import org.arastreju.sge.index.ArasIndexerImpl;

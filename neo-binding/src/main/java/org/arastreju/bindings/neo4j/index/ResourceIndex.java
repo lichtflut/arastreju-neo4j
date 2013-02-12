@@ -17,21 +17,15 @@
 package org.arastreju.bindings.neo4j.index;
 
 import org.arastreju.bindings.neo4j.NeoConstants;
-import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
+import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.NeoNodeResolver;
 import org.arastreju.bindings.neo4j.query.NeoQueryResult;
 import org.arastreju.sge.model.ResourceID;
-import org.arastreju.sge.model.Statement;
-import org.arastreju.sge.model.nodes.ResourceNode;
-import org.arastreju.sge.model.nodes.ValueNode;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.query.QueryResult;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.IndexHits;
-import org.neo4j.index.lucene.QueryContext;
-
-import java.util.Collection;
 
 import static org.arastreju.sge.SNOPS.uri;
 
@@ -99,48 +93,11 @@ public class ResourceIndex implements NeoConstants {
 		final IndexHits<Node> hits = lookup(uri(predicate), uri(value));
 		return new NeoQueryResult(hits, resolver);
 	}
-	
-	/**
-	 * Find in Index by key and value.
-	 */
-	public QueryResult lookup(final ResourceID predicate, final String value) {
-		final IndexHits<Node> hits = lookup(uri(predicate), value);
-		return new NeoQueryResult(hits, resolver);
-	}
-	
-	// -- SEARCH ------------------------------------------
-	
-	public QueryResult search(final QueryContext query) {
-		return new NeoQueryResult(neoIndex.search(query), resolver);
-	}
-	
+
 	// -- ADD TO INDEX ------------------------------------
-	
-	public void index(final Node neoNode, final Statement stmt) {
-		if (stmt.getObject().isValueNode()) {
-			final ValueNode value = stmt.getObject().asValue();
-			neoIndex.index(neoNode, stmt.getPredicate(), value);
-		} else {
-			neoIndex.index(neoNode, stmt.getPredicate(), stmt.getObject().asResource());
-		}
-	}
-	
-	public void index(final Node neoNode, final ResourceNode resourceNode) {
-		neoIndex.index(neoNode, resourceNode.getQualifiedName());
-	}
-	
-	/**
-	 * Re-index a node.
-	 * @param neoNode The Neo node.
-	 * @param qn The corresponding Arastreju node.
-	 * @param statements The statements to be indexed.
-	 */
-	public void reindex(final Node neoNode, final QualifiedName qn, final Collection<? extends Statement> statements) {
-		removeFromIndex(neoNode);
+
+	public void index(final Node neoNode, final QualifiedName qn) {
 		neoIndex.index(neoNode, qn);
-		for (Statement stmt : statements) {
-			index(neoNode, stmt);
-		}
 	}
 	
 	// --REMOVE FROM INDEX --------------------------------

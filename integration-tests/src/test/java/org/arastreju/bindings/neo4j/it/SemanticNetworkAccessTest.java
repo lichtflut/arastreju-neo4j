@@ -16,12 +16,11 @@
  */
 package org.arastreju.bindings.neo4j.it;
 
+import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.NeoGraphDataStore;
-import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.bindings.neo4j.impl.NeoResourceResolver;
 import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
-import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.apriori.Aras;
 import org.arastreju.sge.apriori.RDF;
@@ -29,7 +28,6 @@ import org.arastreju.sge.apriori.RDFS;
 import org.arastreju.sge.context.Context;
 import org.arastreju.sge.context.SimpleContextID;
 import org.arastreju.sge.index.ArasIndexerImpl;
-import org.arastreju.sge.index.IndexSearcher;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.SimpleResourceID;
 import org.arastreju.sge.model.Statement;
@@ -41,12 +39,9 @@ import org.arastreju.sge.model.nodes.views.SNEntity;
 import org.arastreju.sge.model.nodes.views.SNText;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.persistence.ResourceResolver;
-import org.arastreju.sge.query.QueryResult;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Transaction;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -94,9 +89,6 @@ public class SemanticNetworkAccessTest {
 	
 	// -----------------------------------------------------
 
-	/**
-	 * @throws java.lang.Exception
-	 */
 	@Before
 	public void setUp() throws Exception {
 		store = new NeoGraphDataStore();
@@ -108,9 +100,6 @@ public class SemanticNetworkAccessTest {
 		
 	}
 
-	/**
-	 * @throws java.lang.Exception
-	 */
 	@After
 	public void tearDown() throws Exception {
 		connection.close();
@@ -153,6 +142,7 @@ public class SemanticNetworkAccessTest {
 		assertNotNull(qn);
 		assertEquals(qnCar.toURI(), qn.toURI());
 		assertFalse(it.hasNext());
+
 	}
 	
 	@Test
@@ -458,6 +448,7 @@ public class SemanticNetworkAccessTest {
 		assertTrue(it.hasNext());
 		it.next();
 		assertFalse(it.hasNext());
+
 	}
 	
 	@Test

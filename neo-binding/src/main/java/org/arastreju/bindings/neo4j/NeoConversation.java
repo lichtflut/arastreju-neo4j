@@ -19,10 +19,9 @@ package org.arastreju.bindings.neo4j;
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
 import org.arastreju.bindings.neo4j.extensions.SNResourceNeo;
 import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
-import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
-import org.arastreju.bindings.neo4j.impl.NeoResourceResolver;
 import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
 import org.arastreju.sge.Conversation;
+import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.index.QNResolver;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.Statement;
@@ -56,7 +55,7 @@ public class NeoConversation extends AbstractConversation implements Conversatio
     /**
      * Create a new Modelling Conversation instance using a given data store.
      */
-    public NeoConversation(final NeoGraphDataConnection connection, final NeoConversationContext context) {
+    public NeoConversation(final NeoConversationContext context) {
         super(context);
         this.conversationContext = context;
         this.sna = new SemanticNetworkAccess(context);
@@ -100,20 +99,6 @@ public class NeoConversation extends AbstractConversation implements Conversatio
 	}
 
     @Override
-	public void reset(final ResourceNode node) {
-		assertActive();
-        if (isAttached(node)) {
-            return;
-        }
-        NeoAssociationKeeper existing = getConversationContext().find(node.getQualifiedName());
-        if (existing != null) {
-            AssocKeeperAccess.getInstance().setAssociationKeeper(node, existing);
-        } else {
-            throw new IllegalStateException("Detached node cannot be reset.");
-        }
-	}
-
-    @Override
 	public void detach(final ResourceNode node) {
 		assertActive();
 		sna.detach(node);
@@ -124,6 +109,20 @@ public class NeoConversation extends AbstractConversation implements Conversatio
 		assertActive();
 		sna.remove(id);
 	}
+
+    @Override
+    public void reset(final ResourceNode node) {
+        assertActive();
+        if (isAttached(node)) {
+            return;
+        }
+        NeoAssociationKeeper existing = getConversationContext().find(node.getQualifiedName());
+        if (existing != null) {
+            AssocKeeperAccess.getInstance().setAssociationKeeper(node, existing);
+        } else {
+            throw new IllegalStateException("Detached node cannot be reset.");
+        }
+    }
 	
 	// ----------------------------------------------------
 
@@ -133,8 +132,14 @@ public class NeoConversation extends AbstractConversation implements Conversatio
 
     // ----------------------------------------------------
 
+    @Override
     protected QNResolver getQNResolver() {
-        return new NeoResourceResolver(conversationContext);
+        return new QNResolver() {
+            @Override
+            public ResourceNode resolve(QualifiedName qn) {
+                return NeoConversation.this.resolve(SNOPS.id(qn));
+            }
+        };
     }
 
     protected ResourceNode create(final QualifiedName qn) {

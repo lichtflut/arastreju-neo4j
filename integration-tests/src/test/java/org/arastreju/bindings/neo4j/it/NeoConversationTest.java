@@ -75,7 +75,7 @@ public class NeoConversationTest {
 	public void setUp() throws Exception {
 		store = new NeoGraphDataStore();
 		connection = new NeoGraphDataConnection(store);
-		mc = new NeoConversation(connection, new NeoConversationContext(connection));
+		mc = new NeoConversation(new NeoConversationContext(connection));
 	}
 
 	/**

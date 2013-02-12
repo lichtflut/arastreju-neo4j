@@ -18,7 +18,6 @@ package org.arastreju.bindings.neo4j.impl;
 
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
-import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.model.associations.AssociationKeeper;
 import org.arastreju.sge.model.associations.DetachedAssociationKeeper;
@@ -64,15 +63,15 @@ public class SemanticNetworkAccess implements NeoConstants {
 	}
 
 	// -----------------------------------------------------
-	
-	public void create(final ResourceNode resource) {
-		tx().doTransacted(new TxAction() {
-			public void execute() {
-				persist(resource);
-			}
-		});
-	}
-	
+
+    public void create(final ResourceNode resource) {
+        tx().doTransacted(new TxAction() {
+            public void execute() {
+                persist(resource);
+            }
+        });
+    }
+
 	/**
 	 * Attach the given node if it is not already attached.
 	 * @param resource The node to attach.
@@ -105,14 +104,6 @@ public class SemanticNetworkAccess implements NeoConstants {
         AssocKeeperAccess.getInstance().setAssociationKeeper(
                 node, new DetachedAssociationKeeper(node.getAssociations()));
 		conversationContext.detach(node.getQualifiedName());
-	}
-	
-	/**
-	 * Remove the node.
-	 * @param id The ID.
-	 */
-	public void remove(final ResourceID id) {
-        conversationContext.remove(id.getQualifiedName());
 	}
 	
 	// -----------------------------------------------------

@@ -333,9 +333,9 @@ public class SemanticNetworkAccessTest {
 		
 		sna.attach(car1);
 
-		sna.remove(car);
+        ctx.remove(car.getQualifiedName());
 		assertNull(resolver.findResource(qnCar));
-		sna.remove(car1);
+        ctx.remove(car1.getQualifiedName());
 		
 		assertFalse(car1.isAttached());
 		assertFalse(car.isAttached());

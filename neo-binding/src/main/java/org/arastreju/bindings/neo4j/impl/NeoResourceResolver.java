@@ -3,6 +3,7 @@
  */
 package org.arastreju.bindings.neo4j.impl;
 
+import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
 import org.arastreju.bindings.neo4j.extensions.SNResourceNeo;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.associations.AssociationKeeper;
@@ -52,12 +53,15 @@ public class NeoResourceResolver implements ResourceResolver {
 		if (node.isAttached()){
 			return node;
 		} else {
-			final ResourceNode attached = findResource(resource.getQualifiedName());
+            final QualifiedName qn = resource.getQualifiedName();
+            final ResourceNode attached = findResource(qn);
 			if (attached != null) {
 				return attached;
 			} else {
-				new SemanticNetworkAccess(conversationContext).create(node);
-				return node;
+                new SemanticNetworkAccess(conversationContext).create(node);
+                return node;
+                //NeoAssociationKeeper created = conversationContext.create(qn);
+                //return new SNResourceNeo(qn, created);
 			}
 		}
 	}

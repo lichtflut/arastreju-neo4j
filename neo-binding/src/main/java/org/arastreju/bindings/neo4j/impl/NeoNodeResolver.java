@@ -46,7 +46,7 @@ public class NeoNodeResolver {
             return null;
         }
         final QualifiedName qn = QualifiedName.create(uriProperty.toString());
-		NeoAssociationKeeper keeper = conversationContext.getAssociationKeeper(qn);
+		NeoAssociationKeeper keeper = conversationContext.lookup(qn);
 		if (keeper == null){
             keeper = new NeoAssociationKeeper(SNOPS.id(qn), neoNode);
             conversationContext.attach(qn, keeper);

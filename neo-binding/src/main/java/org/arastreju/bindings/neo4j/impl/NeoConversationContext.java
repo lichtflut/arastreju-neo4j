@@ -18,13 +18,9 @@ package org.arastreju.bindings.neo4j.impl;
 
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
-import org.arastreju.sge.index.IndexProvider;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.Statement;
-import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.spi.abstracts.AbstractConversationContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.Set;
@@ -42,8 +38,6 @@ import java.util.Set;
  */
 public class NeoConversationContext extends AbstractConversationContext<NeoAssociationKeeper> implements NeoConstants {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NeoConversationContext.class);
-
 	private final AssociationHandler handler;
 
     // ----------------------------------------------------
@@ -59,22 +53,10 @@ public class NeoConversationContext extends AbstractConversationContext<NeoAssoc
 
 	// ----------------------------------------------------
 	
-	/**
-	 * @param qn The resource's qualified name.
-	 * @return The association keeper or null;
-	 */
-	public NeoAssociationKeeper getAssociationKeeper(QualifiedName qn) {
-        NeoAssociationKeeper registered = lookup(qn);
-        if (registered != null && !registered.isAttached()) {
-            LOGGER.warn("There is a detached NeoAssociationKeeper in the conversation register: {}.", qn);
-        }
-        return registered;
-	}
-
     /**
      * Get the incoming statements of the given node.
      * @param object The node which is the object of the searched statements.
-     * @return The statments.
+     * @return The statements.
      */
     public Set<Statement> getIncomingStatements(ResourceID object) {
         assertActive();

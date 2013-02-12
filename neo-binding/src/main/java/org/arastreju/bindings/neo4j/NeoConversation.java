@@ -107,7 +107,7 @@ public class NeoConversation extends AbstractConversation implements Conversatio
     @Override
 	public void remove(final ResourceID id) {
 		assertActive();
-		sna.remove(id);
+        conversationContext.remove(id.getQualifiedName());
 	}
 
     @Override

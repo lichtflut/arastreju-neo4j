@@ -143,10 +143,7 @@ public class NeoConversation extends AbstractConversation implements Conversatio
             @Override
             public ResourceNode execute() {
                 NeoAssociationKeeper created = getConversationContext().create(qn);
-                SNResourceNeo createdResource = new SNResourceNeo(qn, created);
-                new ResourceIndex(getConversationContext()).index(created.getNeoNode(),
-                        createdResource.getQualifiedName());
-                return createdResource;
+                return new SNResourceNeo(qn, created);
             }
         });
     }

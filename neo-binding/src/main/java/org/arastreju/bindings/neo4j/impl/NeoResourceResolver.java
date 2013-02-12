@@ -3,10 +3,7 @@
  */
 package org.arastreju.bindings.neo4j.impl;
 
-import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
 import org.arastreju.bindings.neo4j.extensions.SNResourceNeo;
-import org.arastreju.bindings.neo4j.index.ResourceIndex;
-import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.index.QNResolver;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.SimpleResourceID;
@@ -14,7 +11,6 @@ import org.arastreju.sge.model.associations.AssociationKeeper;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.persistence.ResourceResolver;
-import org.neo4j.graphdb.Node;
 
 /**
  * <p>
@@ -47,7 +43,7 @@ public class NeoResourceResolver implements ResourceResolver, QNResolver {
 
     @Override
 	public ResourceNode findResource(final QualifiedName qn) {
-		final AssociationKeeper keeper = findAssociationKeeper(qn);
+		final AssociationKeeper keeper =  conversationContext.find(qn);
 		if (keeper != null) {
 			return new SNResourceNeo(qn, keeper);
 		} else {
@@ -75,31 +71,5 @@ public class NeoResourceResolver implements ResourceResolver, QNResolver {
 	public ResourceNode resolve(QualifiedName qn) {
 		return resolve(new SimpleResourceID(qn));
 	}
-	// ----------------------------------------------------
-	
-	/**
-	 * Find the keeper for a qualified name.
-	 * @param qn The qualified name.
-	 * @return The keeper or null.
-	 */
-	protected AssociationKeeper findAssociationKeeper(final QualifiedName qn) {
-		final AssociationKeeper registered = conversationContext.getAssociationKeeper(qn);
-		if (registered != null && registered.isAttached()) {
-			return registered;
-		}
-		final Node neoNode = new ResourceIndex(conversationContext).findNeoNode(qn);
-		if (neoNode != null) {
-			return createKeeper(qn, neoNode);
-		} else {
-			return null;
-		}
-	}
-	
-	// ----------------------------------------------------
 
-	protected NeoAssociationKeeper createKeeper(QualifiedName qn, Node neoNode) {
-		final NeoAssociationKeeper keeper = new NeoAssociationKeeper(SNOPS.id(qn), neoNode);
-		conversationContext.attach(qn, keeper);
-		return keeper;
-	}
 }

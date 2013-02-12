@@ -94,12 +94,6 @@ public class ResourceIndex implements NeoConstants {
 		return new NeoQueryResult(hits, resolver);
 	}
 
-	// -- ADD TO INDEX ------------------------------------
-
-	public void index(final Node neoNode, final QualifiedName qn) {
-		neoIndex.index(neoNode, qn);
-	}
-	
 	// --REMOVE FROM INDEX --------------------------------
 	
 	public void removeFromIndex(final Node node) {

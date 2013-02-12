@@ -63,7 +63,6 @@ public class NeoConversationContext extends AbstractConversationContext<NeoAssoc
 	 * @return The association keeper or null;
 	 */
 	public NeoAssociationKeeper getAssociationKeeper(QualifiedName qn) {
-		assertActive();
         NeoAssociationKeeper registered = lookup(qn);
         if (registered != null && !registered.isAttached()) {
             LOGGER.warn("There is a detached NeoAssociationKeeper in the conversation register: {}.", qn);

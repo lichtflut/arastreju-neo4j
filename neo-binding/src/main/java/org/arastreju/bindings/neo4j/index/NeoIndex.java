@@ -20,27 +20,17 @@ import org.apache.commons.codec.binary.Base64;
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.sge.ConversationContext;
 import org.arastreju.sge.context.Context;
-import org.arastreju.sge.model.ResourceID;
-import org.arastreju.sge.model.nodes.ResourceNode;
-import org.arastreju.sge.model.nodes.ValueNode;
 import org.arastreju.sge.naming.QualifiedName;
-import org.arastreju.sge.persistence.TxAction;
 import org.arastreju.sge.persistence.TxProvider;
 import org.arastreju.sge.persistence.TxResultAction;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.graphdb.index.IndexManager;
-import org.neo4j.index.lucene.QueryContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.arastreju.sge.SNOPS.uri;
 
 /**
  * <p>
@@ -64,22 +54,12 @@ public class NeoIndex implements NeoConstants {
      */
     public static final String INDEX_KEY_RESOURCE_URI = "resource-uri";
 
-    /**
-     * Index key for a resource's values.
-     */
-    public static final String INDEX_KEY_RESOURCE_VALUE = "resource-value";
-
-    /**
-     * Index key for a resource's relations.
-     */
-    public static final String INDEX_KEY_RESOURCE_RELATION = "resource-relation";
-
     // ----------------------------------------------------
 
     /**
 	 * Index for all resources by their qualified name.
 	 */
-	public static final String INDEX_RESOURCES = "resources";
+	private static final String INDEX_RESOURCES = "resources";
 
     /**
      * Index for statements in this domain: "local public"
@@ -146,62 +126,8 @@ public class NeoIndex implements NeoConstants {
         });
     }
 
-	// -- SEARCH ------------------------------------------
-
-	/**
-	 * Execute the query.
-	 * @param query The query.
-	 * @return The resulting index hits.
-	 */
-	public IndexHits<Node> search(final String query) {
-		return tx().doTransacted(new TxResultAction<IndexHits<Node>>() {
-            @Override
-            public IndexHits<Node> execute() {
-                return contextIndex().query(query);
-            }
-        });
-	}
-
-	/**
-	 * Execute the query.
-	 * @param query The query.
-	 * @return The resulting index hits.
-	 */
-	public IndexHits<Node> search(final QueryContext query) {
-		return tx().doTransacted(new TxResultAction<IndexHits<Node>>() {
-            @Override
-            public IndexHits<Node> execute() {
-                return contextIndex().query(query);
-            }
-        });
-	}
-
-	/**
-	 * Find in Index by key and value.
-	 */
-	public List<Node> search(final String key, final String value) {
-		final List<Node> result = new ArrayList<Node>();
-		tx().doTransacted(new TxAction() {
-            @Override
-            public void execute() {
-                toList(result, contextIndex().query(key, normalize(value)));
-            }
-        });
-		return result;
-	}
-	
 	// -- ADD TO INDEX ------------------------------------
-	
-	public void index(Node subject, ResourceID predicate, ValueNode value) {
-		indexResource(subject, uri(predicate), value.getStringValue());
-		indexResource(subject, INDEX_KEY_RESOURCE_VALUE, value.asValue().getStringValue());
-	}
-	
-	public void index(Node subject, ResourceID predicate, ResourceNode relation) {
-		indexResource(subject, uri(predicate), uri(relation));
-		indexResource(subject, INDEX_KEY_RESOURCE_RELATION, relation.toURI());
-	}
-	
+
 	public void index(Node subject, QualifiedName qn) {
         qnIndex().add(subject, INDEX_KEY_RESOURCE_URI, normalize(qn.toURI()));
 		indexResource(subject, INDEX_KEY_RESOURCE_URI, qn.toURI());
@@ -213,42 +139,10 @@ public class NeoIndex implements NeoConstants {
 	    contextIndex().remove(node);
 	}
 
-	/**
-	 * Remove relationship from index.
-	 * @param rel The relationship to be removed.
-	 * TODO: Check - seems to fail
-	 */
-	public void remove(final Relationship rel) {
-		final String value = (String) rel.getProperty(PREDICATE_URI);
-		contextIndex().remove(rel.getStartNode(), normalize(value));
-	}
-	
-
-	/**
-	 * Remove relationship from index.
-	 */
-	public void remove(Node subject, String key, String value) {
-	    contextIndex().remove(subject, key, normalize(value));
-	}
-	
 	// -----------------------------------------------------
 	
 	private void indexResource(Node subject, String key, String value) {
 	    contextIndex().add(subject, key, normalize(value));
-	}
-	
-	private void toList(List<Node> result, IndexHits<Node> nodes) {
-		for (Node node : nodes) {
-			if (node.hasProperty(PROPERTY_URI)) {
-				result.add(node);
-			} else {
-				LOGGER.error("Invalid node in index, will be removed: " + node);
-				remove(node);
-				for(Relationship rel : node.getRelationships()) {
-					remove(rel);
-				}
-			}
-		}
 	}
 
 	private TxProvider tx() {

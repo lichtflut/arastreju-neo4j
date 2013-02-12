@@ -19,20 +19,17 @@ package org.arastreju.bindings.neo4j.impl;
 import de.lichtflut.infra.exceptions.NotYetImplementedException;
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
-import org.arastreju.bindings.neo4j.index.NeoIndex;
 import org.arastreju.bindings.neo4j.index.NeoNodeKeyTable;
 import org.arastreju.sge.ArastrejuProfile;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.model.SimpleResourceID;
 import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.naming.QualifiedName;
-import org.arastreju.sge.persistence.NodeKeyTable;
 import org.arastreju.sge.spi.GraphDataStore;
 import org.arastreju.sge.spi.PhysicalNodeID;
 import org.arastreju.sge.spi.ProfileCloseListener;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
 import org.slf4j.Logger;
@@ -56,7 +53,7 @@ public class NeoGraphDataStore implements GraphDataStore<NeoAssociationKeeper>, 
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(NeoGraphDataStore.class);
 
-    private final NodeKeyTable keyTable;
+    private final NeoNodeKeyTable keyTable;
 	
 	private final GraphDatabaseService gdbService;
 	
@@ -83,17 +80,20 @@ public class NeoGraphDataStore implements GraphDataStore<NeoAssociationKeeper>, 
         }
 		gdbService = new EmbeddedGraphDatabase(dir); 
 		indexManager = gdbService.index();
-        keyTable = new NeoNodeKeyTable(indexManager);
+        keyTable = new NeoNodeKeyTable(gdbService, indexManager);
 	}
 	
 	// -- GraphDataStore ----------------------------------
 
     @Override
     public NeoAssociationKeeper find(QualifiedName qn) {
-        Index<Node> index = indexManager.forNodes(NeoIndex.INDEX_RESOURCES);
-        Node found = index.get(NeoIndex.INDEX_KEY_RESOURCE_URI, NeoIndex.normalize(qn.toURI())).getSingle();
+        //Index<Node> index = indexManager.forNodes(NeoIndex.INDEX_RESOURCES);
+        //Node found = index.get(NeoIndex.INDEX_KEY_RESOURCE_URI, NeoIndex.normalize(qn.toURI())).getSingle();
+        NeoPhysicalNodeID found = keyTable.lookup(qn);
+
         if (found != null) {
-            return new NeoAssociationKeeper(new SimpleResourceID(qn), found);
+            Node node = gdbService.getNodeById(found.getId());
+            return new NeoAssociationKeeper(new SimpleResourceID(qn), node);
         } else {
             return null;
         }
@@ -103,12 +103,13 @@ public class NeoGraphDataStore implements GraphDataStore<NeoAssociationKeeper>, 
     public NeoAssociationKeeper create(QualifiedName qn) {
         Node node = gdbService.createNode();
         node.setProperty(NeoConstants.PROPERTY_URI, qn.toURI());
+        keyTable.put(qn, new NeoPhysicalNodeID(node));
         return new NeoAssociationKeeper(SNOPS.id(qn), node);
     }
 
     @Override
     public void remove(QualifiedName qn) {
-        keyTable.lookup(qn);
+        keyTable.remove(qn);
     }
 
     @Override

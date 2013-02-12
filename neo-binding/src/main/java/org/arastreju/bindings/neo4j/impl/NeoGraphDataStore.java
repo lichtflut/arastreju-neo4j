@@ -30,6 +30,7 @@ import org.arastreju.sge.spi.PhysicalNodeID;
 import org.arastreju.sge.spi.ProfileCloseListener;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
 import org.slf4j.Logger;
@@ -87,8 +88,6 @@ public class NeoGraphDataStore implements GraphDataStore<NeoAssociationKeeper>, 
 
     @Override
     public NeoAssociationKeeper find(QualifiedName qn) {
-        //Index<Node> index = indexManager.forNodes(NeoIndex.INDEX_RESOURCES);
-        //Node found = index.get(NeoIndex.INDEX_KEY_RESOURCE_URI, NeoIndex.normalize(qn.toURI())).getSingle();
         NeoPhysicalNodeID found = keyTable.lookup(qn);
 
         if (found != null) {
@@ -109,7 +108,15 @@ public class NeoGraphDataStore implements GraphDataStore<NeoAssociationKeeper>, 
 
     @Override
     public void remove(QualifiedName qn) {
-        keyTable.remove(qn);
+        NeoPhysicalNodeID existing = keyTable.lookup(qn);
+        if (existing != null) {
+            Node node = gdbService.getNodeById(existing.getId());
+            for (Relationship rel : node.getRelationships()) {
+                rel.delete();
+            }
+            node.delete();
+            keyTable.remove(qn);
+        }
     }
 
     @Override

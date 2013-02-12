@@ -22,7 +22,6 @@ import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.NeoNodeResolver;
 import org.arastreju.bindings.neo4j.query.NeoQueryResult;
 import org.arastreju.sge.model.ResourceID;
-import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.query.QueryResult;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.IndexHits;
@@ -58,24 +57,7 @@ public class ResourceIndex implements NeoConstants {
 		this.neoIndex = new NeoIndex(ctx, connection.getIndexManager());
 	}
 
-    /**
-     * Constructor.
-     * @param ctx The current conversation context.
-     */
-    public ResourceIndex(NeoConversationContext ctx) {
-        this.resolver = new NeoNodeResolver(ctx);
-        NeoGraphDataConnection connection = (NeoGraphDataConnection) ctx.getConnection();
-        this.neoIndex = new NeoIndex(ctx, connection.getIndexManager());
-    }
-	
 	// -----------------------------------------------------
-	
-	/**
-	 * Find Neo node by qualified name.
-	 */
-	public Node findNeoNode(final QualifiedName qn) {
-		return neoIndex.lookup(qn);
-	}
 
     /**
      * Retrieve all resources stored in the datastore.
@@ -90,23 +72,8 @@ public class ResourceIndex implements NeoConstants {
 	 * Find in Index by key and value.
 	 */
 	public QueryResult lookup(final ResourceID predicate, final ResourceID value) {
-		final IndexHits<Node> hits = lookup(uri(predicate), uri(value));
+		final IndexHits<Node> hits = neoIndex.lookup(uri(predicate), uri(value));
 		return new NeoQueryResult(hits, resolver);
 	}
 
-	// --REMOVE FROM INDEX --------------------------------
-	
-	public void removeFromIndex(final Node node) {
-		neoIndex.remove(node);
-	}
-
-	// -----------------------------------------------------
-	
-	/**
-	 * Find in Index by key and value.
-	 */
-	private IndexHits<Node> lookup(final String key, final String value) {
-		return neoIndex.lookup(key, value);
-	}
-	
 }

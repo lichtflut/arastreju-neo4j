@@ -22,7 +22,6 @@ import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.NeoResourceResolver;
 import org.arastreju.bindings.neo4j.impl.SemanticNetworkAccess;
-import org.arastreju.bindings.neo4j.index.ResourceIndex;
 import org.arastreju.sge.Conversation;
 import org.arastreju.sge.index.QNResolver;
 import org.arastreju.sge.model.ResourceID;
@@ -60,7 +59,7 @@ public class NeoConversation extends AbstractConversation implements Conversatio
     public NeoConversation(final NeoGraphDataConnection connection, final NeoConversationContext context) {
         super(context);
         this.conversationContext = context;
-        this.sna = new SemanticNetworkAccess(connection, context);
+        this.sna = new SemanticNetworkAccess(context);
     }
 	
     // ----------------------------------------------------
@@ -72,10 +71,6 @@ public class NeoConversation extends AbstractConversation implements Conversatio
     }
 
     // ----------------------------------------------------
-
-	protected QNResolver getQNResolver() {
-		return new NeoResourceResolver((NeoGraphDataConnection) conversationContext.getConnection(), conversationContext);
-	}
 
     @Override
 	public ResourceNode findResource(final QualifiedName qn) {
@@ -137,6 +132,10 @@ public class NeoConversation extends AbstractConversation implements Conversatio
     }
 
     // ----------------------------------------------------
+
+    protected QNResolver getQNResolver() {
+        return new NeoResourceResolver(conversationContext);
+    }
 
     protected ResourceNode create(final QualifiedName qn) {
         return conversationContext.getTxProvider().doTransacted(new TxResultAction<ResourceNode>() {

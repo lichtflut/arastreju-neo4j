@@ -94,7 +94,7 @@ public class AssociationHandler implements NeoConstants {
 	public AssociationHandler(NeoGraphDataConnection connection, NeoConversationContext conversationContext) {
         this.connection = connection;
         this.convContext = conversationContext;
-		this.resourceResolver = new NeoResourceResolver(connection, conversationContext);
+		this.resourceResolver = new NeoResourceResolver(conversationContext);
         this.neoNodeResolver = new NeoNodeResolver(conversationContext);
 		this.index = new ArasIndexerImpl(conversationContext);
 		this.ctxAccess = new ContextAccess(resourceResolver);

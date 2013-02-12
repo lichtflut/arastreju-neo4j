@@ -25,17 +25,14 @@ import org.arastreju.sge.persistence.ResourceResolver;
  */
 public class NeoResourceResolver implements ResourceResolver, QNResolver {
 
-	private final NeoGraphDataConnection connection;
 	private final NeoConversationContext conversationContext;
 	
 	// ----------------------------------------------------
 	
 	/**
 	 * Constructor.
-	 * @param connection The connection.
-	 */
-	public NeoResourceResolver(NeoGraphDataConnection connection, NeoConversationContext conversationContext) {
-		this.connection = connection;
+     */
+	public NeoResourceResolver(NeoConversationContext conversationContext) {
 		this.conversationContext = conversationContext;
 	}
 	
@@ -61,7 +58,7 @@ public class NeoResourceResolver implements ResourceResolver, QNResolver {
 			if (attached != null) {
 				return attached;
 			} else {
-				new SemanticNetworkAccess(connection, conversationContext).create(node);
+				new SemanticNetworkAccess(conversationContext).create(node);
 				return node;
 			}
 		}

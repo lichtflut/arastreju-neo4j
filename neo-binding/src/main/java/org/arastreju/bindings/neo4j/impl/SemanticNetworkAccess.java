@@ -57,10 +57,9 @@ public class SemanticNetworkAccess implements NeoConstants {
 
 	/**
 	 * Constructor. Creates a store using given directory.
-	 * @param connection The connection to the graph database.
-	 * @param conversationContext The conversation context.
-	 */
-	public SemanticNetworkAccess(final NeoGraphDataConnection connection, final NeoConversationContext conversationContext) {
+     * @param conversationContext The conversation context.
+     */
+	public SemanticNetworkAccess(final NeoConversationContext conversationContext) {
 		this.conversationContext = conversationContext;
 	}
 
@@ -119,12 +118,7 @@ public class SemanticNetworkAccess implements NeoConstants {
             return;
         }
 		existing.getAssociations().clear();
-        conversationContext.detach(id.getQualifiedName());
-		tx().doTransacted(new TxAction() {
-			public void execute() {
-				new NodeRemover(conversationContext).remove(existing.getNeoNode(), false);
-			}
-		});
+        conversationContext.remove(id.getQualifiedName());
 	}
 	
 	// -----------------------------------------------------

@@ -67,11 +67,6 @@ public class NeoIndex implements NeoConstants {
     private static final String INDEX_LOCAL = "local";
 
     /**
-     * Mirror index for public statements: "global public"
-     */
-    private static final String INDEX_PUBLIC = "public";
-
-    /**
      * Index prefix for context specific statements
      */
     private static final String INDEX_CONTEXT_PREFIX = "context-";
@@ -94,13 +89,6 @@ public class NeoIndex implements NeoConstants {
     }
 	
 	// -- LOOKUP ------------------------------------------
-	
-	/**
-	 * Find in Index by key and value.
-	 */
-	public Node lookup(final QualifiedName qn) {
-		return qnIndex().get(INDEX_KEY_RESOURCE_URI, normalize(qn.toURI())).getSingle();
-	}
 	
 	/**
 	 * Find in Index by key and value.
@@ -133,12 +121,6 @@ public class NeoIndex implements NeoConstants {
 		indexResource(subject, INDEX_KEY_RESOURCE_URI, qn.toURI());
 	}
 	
-	// --REMOVE FROM INDEX --------------------------------
-	
-	public void remove(final Node node) {
-	    contextIndex().remove(node);
-	}
-
 	// -----------------------------------------------------
 	
 	private void indexResource(Node subject, String key, String value) {

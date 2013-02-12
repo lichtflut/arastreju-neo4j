@@ -95,8 +95,8 @@ public class SemanticNetworkAccessTest {
 		connection = new NeoGraphDataConnection(store);
 		ctx = new NeoConversationContext(connection);
 		index = new ArasIndexerImpl(ctx);
-		sna = new SemanticNetworkAccess(connection, ctx);
-		resolver = new NeoResourceResolver(connection, ctx);
+		sna = new SemanticNetworkAccess(ctx);
+		resolver = new NeoResourceResolver(ctx);
 		
 	}
 

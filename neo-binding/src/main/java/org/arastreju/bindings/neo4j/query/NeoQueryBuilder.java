@@ -17,6 +17,7 @@
 package org.arastreju.bindings.neo4j.query;
 
 import java.util.Arrays;
+import java.util.regex.Matcher;
 
 import org.arastreju.bindings.neo4j.index.NeoIndex;
 import org.arastreju.bindings.neo4j.index.ResourceIndex;
@@ -151,7 +152,7 @@ public class NeoQueryBuilder extends QueryBuilder {
 	}
 	
 	private String normalizeKey(final String key) {
-		return key.replaceAll(":", "\\\\:");
+		return key.replaceAll(":", Matcher.quoteReplacement("\\:"));
 	}
 	
 	private String normalizeValue(final Object value) {
@@ -162,7 +163,7 @@ public class NeoQueryBuilder extends QueryBuilder {
 		if (normalized.contains(" ")) {
 			normalized = "\"" + normalized + "\"";
 		}
-		return normalized.replaceAll(":", "\\\\:");
+		return normalized.replaceAll(":", Matcher.quoteReplacement("\\:"));
 	}
 	
 }

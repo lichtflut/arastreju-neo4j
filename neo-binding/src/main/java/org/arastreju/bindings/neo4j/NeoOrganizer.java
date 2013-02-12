@@ -16,25 +16,19 @@
  */
 package org.arastreju.bindings.neo4j;
 
-import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
 import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
-import org.arastreju.bindings.neo4j.index.ResourceIndex;
+import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
 import org.arastreju.sge.Conversation;
-import org.arastreju.sge.apriori.Aras;
-import org.arastreju.sge.apriori.RDF;
 import org.arastreju.sge.context.Context;
 import org.arastreju.sge.io.StatementContainer;
 import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.naming.Namespace;
-import org.arastreju.sge.query.Query;
-import org.arastreju.sge.query.QueryResult;
 import org.arastreju.sge.organize.AbstractOrganizer;
+import org.arastreju.sge.query.QueryResult;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * <p>
@@ -66,28 +60,6 @@ public class NeoOrganizer extends AbstractOrganizer {
     // -----------------------------------------------------
 
     @Override
-	public Collection<Namespace> getNamespaces() {
-		final List<Namespace> result = new ArrayList<Namespace>();
-		final List<ResourceNode> nodes = index().lookup(RDF.TYPE, Aras.NAMESPACE).toList();
-		for (ResourceNode node : nodes) {
-			result.add(createNamespace(node));
-		}
-		return result;
-	}
-
-	// -----------------------------------------------------
-
-    @Override
-	public Collection<Context> getContexts() {
-		final List<Context> result = new ArrayList<Context>();
-		final List<ResourceNode> nodes = index().lookup(RDF.TYPE, Aras.CONTEXT).toList();
-		for (ResourceNode node : nodes) {
-			result.add(createContext(node));
-		}
-		return result;
-	}
-
-    @Override
     public StatementContainer getStatements(final Context... ctx) {
         final NeoConversationContext conversationContext = new NeoConversationContext(connection);
         conversationContext.setReadContexts(ctx);
@@ -99,10 +71,11 @@ public class NeoOrganizer extends AbstractOrganizer {
 
             @Override
             public Iterator<Statement> iterator() {
-                final ResourceIndex index = new ResourceIndex(connection, conversationContext);
-                final QueryResult queryResult = index.getAllResources();
+                //final ResourceIndex index = new ResourceIndex(connection, conversationContext);
+                //final QueryResult queryResult = index.getAllResources();
+                final QueryResult queryResult = null;
                 final Iterator<ResourceNode> nodeIterator = queryResult.iterator();
-                return new StatementIterator(nodeIterator);
+                return newStatementIterator(nodeIterator);
             }
         } ;
     }
@@ -114,59 +87,4 @@ public class NeoOrganizer extends AbstractOrganizer {
         return gate.startConversation();
     }
 
-    protected Query query() {
-		return conversation().createQuery();
-	}
-
-    protected ResourceIndex index() {
-        return new ResourceIndex(connection, gate.newConversationContext());
-    }
-
-    private static class StatementIterator implements Iterator<Statement> {
-
-        private Iterator<Statement> stmtIterator;
-        private final Iterator<ResourceNode> nodeIterator;
-
-        public StatementIterator(Iterator<ResourceNode> nodeIterator) {
-            this.nodeIterator = nodeIterator;
-        }
-
-        @Override
-        public boolean hasNext() {
-            if (stmtIterator == null) {
-                forwardToNextResourceNode();
-            }
-            while (stmtIterator != null) {
-                if (stmtIterator.hasNext()) {
-                    return true;
-                } else {
-                    forwardToNextResourceNode();
-                }
-
-            }
-            return false;
-        }
-
-        @Override
-        public Statement next() {
-            return stmtIterator.next();
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
-
-        private void forwardToNextResourceNode() {
-            while (nodeIterator.hasNext()) {
-                ResourceNode node = nodeIterator.next();
-                if (node != null) {
-                    stmtIterator = node.getAssociations().iterator();
-                    return;
-                }
-            }
-
-            stmtIterator = null;
-        }
-    }
 }

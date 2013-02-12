@@ -18,6 +18,7 @@ package org.arastreju.bindings.neo4j.impl;
 
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
+import org.arastreju.sge.index.IndexProvider;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.naming.QualifiedName;

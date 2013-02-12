@@ -1,6 +1,5 @@
-package org.arastreju.bindings.neo4j.index;
+package org.arastreju.bindings.neo4j.impl;
 
-import org.arastreju.bindings.neo4j.impl.NeoPhysicalNodeID;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.persistence.NodeKeyTable;
 import org.arastreju.sge.spi.PhysicalNodeID;
@@ -25,6 +24,8 @@ import org.neo4j.graphdb.index.IndexManager;
 public class NeoNodeKeyTable implements NodeKeyTable {
 
     private static final String INDEX_NAME = "ARAS-NEO-QN";
+
+    private static final String KEY_QN = "qn";
 
     private GraphDatabaseService gdbService;
     private IndexManager manager;
@@ -70,13 +71,13 @@ public class NeoNodeKeyTable implements NodeKeyTable {
         if (existing != null) {
             throw new IllegalStateException("There is already a node registered for qn: " + qn);
         }
-        qnIndex().add(node, NeoIndex.INDEX_KEY_RESOURCE_URI, NeoIndex.normalize(qn.toURI()));
+        qnIndex().add(node, KEY_QN, normalize(qn.toURI()));
     }
 
     // ----------------------------------------------------
 
     private Node lookupSingleNode(QualifiedName qn) {
-        IndexHits<Node> hits = qnIndex().get(NeoIndex.INDEX_KEY_RESOURCE_URI, NeoIndex.normalize(qn.toURI()));
+        IndexHits<Node> hits = qnIndex().get(KEY_QN, normalize(qn.toURI()));
         if (hits.size() > 1) {
             throw new IllegalStateException("Found more than one node with QN " + qn);
         } else if (hits.size() == 0) {
@@ -88,6 +89,10 @@ public class NeoNodeKeyTable implements NodeKeyTable {
 
     private Index<Node> qnIndex() {
         return manager.forNodes(INDEX_NAME);
+    }
+
+    private String normalize(final String s) {
+        return s.trim().toLowerCase();
     }
 
 }

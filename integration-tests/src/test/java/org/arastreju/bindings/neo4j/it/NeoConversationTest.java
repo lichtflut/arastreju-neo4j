@@ -34,6 +34,7 @@ import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.apriori.Aras;
 import org.arastreju.sge.apriori.RDFS;
+import org.arastreju.sge.index.IndexProvider;
 import org.arastreju.sge.io.RdfXmlBinding;
 import org.arastreju.sge.io.SemanticGraphIO;
 import org.arastreju.sge.io.SemanticIOException;
@@ -74,7 +75,7 @@ public class NeoConversationTest {
 	@Before
 	public void setUp() throws Exception {
 		store = new NeoGraphDataStore();
-		connection = new NeoGraphDataConnection(store);
+		connection = new NeoGraphDataConnection(store, new IndexProvider(store.getStorageDir()));
 		mc = new NeoConversation(new NeoConversationContext(connection));
 	}
 

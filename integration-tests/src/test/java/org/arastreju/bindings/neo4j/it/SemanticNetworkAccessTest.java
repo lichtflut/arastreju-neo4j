@@ -28,6 +28,7 @@ import org.arastreju.sge.apriori.RDFS;
 import org.arastreju.sge.context.Context;
 import org.arastreju.sge.context.SimpleContextID;
 import org.arastreju.sge.index.ArasIndexerImpl;
+import org.arastreju.sge.index.IndexProvider;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.SimpleResourceID;
 import org.arastreju.sge.model.Statement;
@@ -92,9 +93,10 @@ public class SemanticNetworkAccessTest {
 	@Before
 	public void setUp() throws Exception {
 		store = new NeoGraphDataStore();
-		connection = new NeoGraphDataConnection(store);
+        IndexProvider indexProvider = new IndexProvider(store.getStorageDir());
+        connection = new NeoGraphDataConnection(store, indexProvider);
 		ctx = new NeoConversationContext(connection);
-		index = new ArasIndexerImpl(ctx);
+		index = new ArasIndexerImpl(ctx, indexProvider);
 		sna = new SemanticNetworkAccess(ctx);
 		resolver = new NeoResourceResolver(ctx);
 		
@@ -335,12 +337,9 @@ public class SemanticNetworkAccessTest {
 		assertNull(resolver.findResource(qnCar));
 		sna.remove(car1);
 		
-		assertTrue(car1.getAssociations().isEmpty());
 		assertFalse(car1.isAttached());
-		assertTrue(car.getAssociations().isEmpty());
 		assertFalse(car.isAttached());
 		
-		assertFalse(vehicle.getAssociations().isEmpty());
 		assertTrue(vehicle.isAttached());
 		
 		sna.detach(vehicle);

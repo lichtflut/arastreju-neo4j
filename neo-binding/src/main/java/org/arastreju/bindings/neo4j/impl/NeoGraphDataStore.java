@@ -19,7 +19,6 @@ package org.arastreju.bindings.neo4j.impl;
 import de.lichtflut.infra.exceptions.NotYetImplementedException;
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
-import org.arastreju.bindings.neo4j.index.NeoNodeKeyTable;
 import org.arastreju.sge.ArastrejuProfile;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.model.SimpleResourceID;
@@ -31,7 +30,6 @@ import org.arastreju.sge.spi.ProfileCloseListener;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,13 +52,13 @@ public class NeoGraphDataStore implements GraphDataStore<NeoAssociationKeeper>, 
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(NeoGraphDataStore.class);
 
-    private final NeoNodeKeyTable keyTable;
-	
 	private final GraphDatabaseService gdbService;
-	
-	private final IndexManager indexManager;
-	
-	// -----------------------------------------------------
+
+    private final NeoNodeKeyTable keyTable;
+
+    private final String storageDir;
+
+    // -----------------------------------------------------
 
 	/**
 	 * Default constructor. Will use a <b>temporary</b> datastore!.
@@ -74,14 +72,14 @@ public class NeoGraphDataStore implements GraphDataStore<NeoAssociationKeeper>, 
 	 * @param dir The directory for the store.
 	 */
 	public NeoGraphDataStore(final String dir) {
+        this.storageDir = dir;
         if (new File(dir).exists()) {
             LOGGER.info("Using existing Neo4jDataStore in {}.", dir);
         } else {
             LOGGER.info("New Neo4jDataStore created in {}.", dir);
         }
 		gdbService = new EmbeddedGraphDatabase(dir); 
-		indexManager = gdbService.index();
-        keyTable = new NeoNodeKeyTable(gdbService, indexManager);
+        keyTable = new NeoNodeKeyTable(gdbService,  gdbService.index());
 	}
 	
 	// -- GraphDataStore ----------------------------------
@@ -124,6 +122,10 @@ public class NeoGraphDataStore implements GraphDataStore<NeoAssociationKeeper>, 
         throw new NotYetImplementedException();
     }
 
+    public String getStorageDir() {
+        return storageDir;
+    }
+
     // -- Neo Services ------------------------------------
 
 	/**
@@ -132,14 +134,7 @@ public class NeoGraphDataStore implements GraphDataStore<NeoAssociationKeeper>, 
 	public GraphDatabaseService getGdbService() {
 		return gdbService;
 	}
-	
-	/**
-	 * @return the indexManager
-	 */
-	public IndexManager getIndexManager() {
-		return indexManager;
-	}
-	
+
 	// -- ProfileCloseListener ----------------------------
 
     @Override

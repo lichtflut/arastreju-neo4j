@@ -96,7 +96,7 @@ public class AssociationHandler implements NeoConstants {
         this.convContext = conversationContext;
 		this.resourceResolver = new NeoResourceResolver(conversationContext);
         this.neoNodeResolver = new NeoNodeResolver(conversationContext);
-		this.index = new ArasIndexerImpl(conversationContext);
+		this.index = new ArasIndexerImpl(conversationContext, conversationContext.getIndexProvider());
 		this.ctxAccess = new ContextAccess(resourceResolver);
 		this.softInferencer = new NeoSoftInferencer(resourceResolver);
 		this.hardInferencer = new NeoHardInferencer(resourceResolver);

@@ -45,6 +45,7 @@ import org.arastreju.sge.model.nodes.views.SNText;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.query.Query;
 import org.arastreju.sge.query.QueryResult;
+import org.arastreju.sge.spi.GraphDataConnection;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -90,9 +91,9 @@ public class NeoConversationTest {
     private final QualifiedName qnKnows = new QualifiedName("http://q#", "knows");
 
 	private NeoGraphDataStore store;
+    private GraphDataConnection connection;
 	private Conversation conversation;
-	private NeoGraphDataConnection connection;
-	
+
 	// -----------------------------------------------------
 
 	@Before

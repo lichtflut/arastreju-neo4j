@@ -20,6 +20,7 @@ import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.Statement;
+import org.arastreju.sge.spi.GraphDataConnection;
 import org.arastreju.sge.spi.abstracts.AbstractConversationContext;
 
 import java.util.Collections;
@@ -46,7 +47,7 @@ public class NeoConversationContext extends AbstractConversationContext<NeoAssoc
 	 * Creates a new Working Context.
 	 * @param connection The connection.
 	 */
-	public NeoConversationContext(NeoGraphDataConnection connection) {
+	public NeoConversationContext(GraphDataConnection connection) {
         super(connection);
         this.handler = new AssociationHandler(connection, this);
 	}

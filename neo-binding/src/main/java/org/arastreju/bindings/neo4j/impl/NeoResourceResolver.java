@@ -3,7 +3,6 @@
  */
 package org.arastreju.bindings.neo4j.impl;
 
-import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
 import org.arastreju.bindings.neo4j.extensions.SNResourceNeo;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.associations.AssociationKeeper;

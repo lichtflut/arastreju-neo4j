@@ -52,6 +52,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import static org.arastreju.sge.SNOPS.id;
+
 /**
  * <p>
  *  Handler for resolving, adding and removing of a node's association.
@@ -98,7 +100,7 @@ public class AssociationHandler implements NeoConstants {
 		this.resourceResolver = new NeoResourceResolver(conversationContext);
         this.neoNodeResolver = new NeoNodeResolver(conversationContext);
 		this.index = new ArasIndexerImpl(conversationContext, conversationContext.getIndexProvider());
-		this.ctxAccess = new ContextAccess(resourceResolver);
+		this.ctxAccess = new ContextAccess(connection.getStore());
 		this.softInferencer = new NeoSoftInferencer(resourceResolver);
 		this.hardInferencer = new NeoHardInferencer(resourceResolver);
 	}
@@ -123,7 +125,7 @@ public class AssociationHandler implements NeoConstants {
 			}
 			final ResourceNode predicate = resourceResolver.resolve(new SimpleResourceID(rel.getProperty(PREDICATE_URI).toString()));
 			final StatementMetaInfo mi = new StatementMetaInfo(ctx, new Date((Long)rel.getProperty(TIMESTAMP, 0L)));
-			keeper.addAssociationDirectly(new DetachedStatement(keeper.getID(), predicate, object, mi));
+			keeper.addAssociationDirectly(new DetachedStatement(id(keeper.getQualifiedName()), predicate, object, mi));
 		}
 	}
 
@@ -137,7 +139,7 @@ public class AssociationHandler implements NeoConstants {
             final ResourceNode subject = neoNodeResolver.resolve(rel.getStartNode());
             final ResourceNode predicate = resourceResolver.resolve(new SimpleResourceID(rel.getProperty(PREDICATE_URI).toString()));
             final StatementMetaInfo mi = new StatementMetaInfo(ctx, new Date((Long)rel.getProperty(TIMESTAMP, 0L)));
-           result.add(new DetachedStatement(subject, predicate, keeper.getID(), mi));
+           result.add(new DetachedStatement(subject, predicate, id(keeper.getQualifiedName()), mi));
         }
         return result;
     }
@@ -155,7 +157,7 @@ public class AssociationHandler implements NeoConstants {
 
                 final ResourceNode predicate = resourceResolver.resolve(stmt.getPredicate());
                 final SemanticNode object = resolve(stmt.getObject());
-                final Statement assoc = new DetachedStatement(keeper.getID(), predicate, object, stmt.getMetaInfo());
+                final Statement assoc = new DetachedStatement(id(keeper.getQualifiedName()), predicate, object, stmt.getMetaInfo());
                 keeper.addAssociationDirectly(assoc);
 
                 createRelationships(keeper.getNeoNode(), stmt);

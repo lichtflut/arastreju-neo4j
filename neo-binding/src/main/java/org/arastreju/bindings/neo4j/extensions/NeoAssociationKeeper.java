@@ -16,6 +16,7 @@
  */
 package org.arastreju.bindings.neo4j.extensions;
 
+import org.arastreju.bindings.neo4j.impl.NeoPhysicalNodeID;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.Statement;
@@ -47,7 +48,7 @@ public class NeoAssociationKeeper extends AttachedAssociationKeeper {
 	 * @param neoNode The neo node.
 	 */
 	public NeoAssociationKeeper(final ResourceID id, final Node neoNode) {
-        super(id.getQualifiedName(), null);
+        super(id.getQualifiedName(), new NeoPhysicalNodeID(neoNode));
 		this.neoNode = neoNode;
 	}
 	
@@ -57,10 +58,6 @@ public class NeoAssociationKeeper extends AttachedAssociationKeeper {
 		return neoNode;
 	}
 
-	public ResourceID getID() {
-		return SNOPS.id(getQualifiedName());
-	}
-	
 	// ----------------------------------------------------
 	
 	/**

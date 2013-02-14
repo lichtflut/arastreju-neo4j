@@ -19,13 +19,10 @@ package org.arastreju.bindings.neo4j.impl;
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.context.Context;
-import org.arastreju.sge.model.ResourceID;
-import org.arastreju.sge.model.nodes.ResourceNode;
-import org.arastreju.sge.model.nodes.views.SNContext;
-import org.arastreju.sge.persistence.ResourceResolver;
+import org.arastreju.sge.context.SimpleContextID;
+import org.arastreju.sge.naming.QualifiedName;
+import org.arastreju.sge.spi.GraphDataStore;
 import org.neo4j.graphdb.Relationship;
-
-import java.util.Arrays;
 
 /**
  * <p>
@@ -38,40 +35,38 @@ import java.util.Arrays;
  *
  * @author Oliver Tigges
  */
-public class ContextAccess implements NeoConstants {
+public class ContextAccess {
 	
 	public static final Context[] NO_CTX = new Context[0];
 	
-	private final ResourceResolver resolver;
-	
+    private GraphDataStore store;
+
 	// -----------------------------------------------------
 	
 	/**
 	 * Constructor.
-	 * @param resolver The resource resolver.
+	 * @param store The underlying store.
 	 */
-	public ContextAccess(final ResourceResolver resolver) {
-		this.resolver = resolver;
+	public ContextAccess(GraphDataStore store) {
+		this.store = store;
 	}
 	
 	// -----------------------------------------------------
 	
 	public Context[] getContextInfo(final Relationship rel) {
-		if (!rel.hasProperty(CONTEXT_URI)) {
+		if (!rel.hasProperty(NeoConstants.CONTEXT_URI)) {
 			return NO_CTX;
 		} 
-		final String[] ctxUris = (String[]) rel.getProperty(CONTEXT_URI);
+		final String[] ctxUris = (String[]) rel.getProperty(NeoConstants.CONTEXT_URI);
 		final Context[] ctxs = new Context[ctxUris.length];
 		for (int i = 0; i < ctxUris.length; i++) {
-			final String uri = ctxUris[i];
-			final ResourceNode node = resolver.findResource(SNOPS.qualify(uri));
-			if (node instanceof Context){
-				ctxs[i] = (Context) node;
-			} else if (node != null) {
-				ctxs[i] = new SNContext(node);
-			} else {
-				throw new IllegalStateException("Could not find context(s): " + Arrays.toString(ctxUris));
-			}
+            final String uri = ctxUris[i];
+            final QualifiedName qn = SNOPS.qualify(uri);
+            if (!exists(qn)) {
+                throw new IllegalStateException("Could not find context: " + qn);
+            } else {
+                ctxs[i] = new SimpleContextID(qn);
+            }
 		}
 		return ctxs;
 	}
@@ -83,13 +78,25 @@ public class ContextAccess implements NeoConstants {
 	 */
 	public void assignContext(final Relationship relationship, final Context[] contexts) {
 		if (contexts != null && contexts.length > 0) {
-			String[] resolved = new String[contexts.length];
+			String[] uris = new String[contexts.length];
 			for (int i = 0; i < contexts.length; i++) {
-				final ResourceID ctx = resolver.resolve(contexts[i]);
-				resolved[i] = ctx.getQualifiedName().toURI();
+                assureExists(contexts[i].getQualifiedName());
+				uris[i] = contexts[i].toURI();
 			}
-			relationship.setProperty(CONTEXT_URI, resolved);
+			relationship.setProperty(NeoConstants.CONTEXT_URI, uris);
 		} 
 	}
+
+    // ----------------------------------------------------
+
+    private boolean exists(QualifiedName qn) {
+        return store.find(qn) != null;
+    }
+
+    private void assureExists(QualifiedName qn) {
+        if (!exists(qn)) {
+            store.create(qn);
+        }
+    }
 
 }

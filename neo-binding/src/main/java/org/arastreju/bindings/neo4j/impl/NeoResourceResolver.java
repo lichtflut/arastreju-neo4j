@@ -5,10 +5,14 @@ package org.arastreju.bindings.neo4j.impl;
 
 import org.arastreju.bindings.neo4j.extensions.SNResourceNeo;
 import org.arastreju.sge.model.ResourceID;
+import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.model.associations.AssociationKeeper;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.persistence.ResourceResolver;
+import org.arastreju.sge.spi.AssocKeeperAccess;
+
+import java.util.Set;
 
 /**
  * <p>
@@ -57,12 +61,27 @@ public class NeoResourceResolver implements ResourceResolver {
 			if (attached != null) {
 				return attached;
 			} else {
-                new SemanticNetworkAccess(conversationContext).create(node);
-                return node;
-                //NeoAssociationKeeper created = conversationContext.create(qn);
-                //return new SNResourceNeo(qn, created);
+                return persist(node);
 			}
 		}
 	}
+
+    // ----------------------------------------------------
+
+    protected ResourceNode persist(final ResourceNode node) {
+        // 1st: create a corresponding Neo node and attach the Resource with the current context.
+        AssociationKeeper keeper = conversationContext.create(node.getQualifiedName());
+
+        // 2nd: retain copy of current associations
+        final Set<Statement> copy = node.getAssociations();
+        AssocKeeperAccess.getInstance().setAssociationKeeper(node, keeper);
+
+        // 3rd: store all associations.
+        for (Statement assoc : copy) {
+            keeper.addAssociation(assoc);
+        }
+
+        return node;
+    }
 
 }

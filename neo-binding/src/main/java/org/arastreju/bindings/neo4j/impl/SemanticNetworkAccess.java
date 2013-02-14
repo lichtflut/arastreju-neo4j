@@ -16,8 +16,6 @@
  */
 package org.arastreju.bindings.neo4j.impl;
 
-import org.arastreju.bindings.neo4j.NeoConstants;
-import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
 import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.model.associations.AssociationKeeper;
 import org.arastreju.sge.model.associations.DetachedAssociationKeeper;
@@ -25,6 +23,7 @@ import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.persistence.TxAction;
 import org.arastreju.sge.persistence.TxProvider;
 import org.arastreju.sge.spi.AssocKeeperAccess;
+import org.arastreju.sge.spi.abstracts.WorkingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,11 +45,11 @@ import java.util.Set;
  *
  * @author Oliver Tigges
  */
-public class SemanticNetworkAccess implements NeoConstants {
+public class SemanticNetworkAccess<T extends AssociationKeeper> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SemanticNetworkAccess.class);
 	
-	private final NeoConversationContext conversationContext;
+	private final WorkingContext<T> conversationContext;
 
 	// -----------------------------------------------------
 
@@ -58,7 +57,7 @@ public class SemanticNetworkAccess implements NeoConstants {
 	 * Constructor. Creates a store using given directory.
      * @param conversationContext The conversation context.
      */
-	public SemanticNetworkAccess(final NeoConversationContext conversationContext) {
+	public SemanticNetworkAccess(final WorkingContext<T> conversationContext) {
 		this.conversationContext = conversationContext;
 	}
 
@@ -115,7 +114,7 @@ public class SemanticNetworkAccess implements NeoConstants {
 	 */
 	protected ResourceNode persist(final ResourceNode node) {
 		// 1st: create a corresponding Neo node and attach the Resource with the current context.
-        NeoAssociationKeeper keeper = conversationContext.create(node.getQualifiedName());
+        AssociationKeeper keeper = conversationContext.create(node.getQualifiedName());
 
 		// 2nd: retain copy of current associations
 		final Set<Statement> copy = node.getAssociations();
@@ -138,7 +137,7 @@ public class SemanticNetworkAccess implements NeoConstants {
         final AssociationKeeper detached = AssocKeeperAccess.getInstance().getAssociationKeeper(changed);
         AssocKeeperAccess.getInstance().merge(attached, detached);
         AssocKeeperAccess.getInstance().setAssociationKeeper(changed, attached);
-        conversationContext.attach(changed.getQualifiedName(), (NeoAssociationKeeper) attached);
+        conversationContext.attach(changed.getQualifiedName(), (T) attached);
 	}
 	
 	// ----------------------------------------------------

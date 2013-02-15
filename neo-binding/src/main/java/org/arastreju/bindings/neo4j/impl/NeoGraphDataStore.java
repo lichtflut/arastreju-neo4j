@@ -18,11 +18,9 @@ package org.arastreju.bindings.neo4j.impl;
 
 import de.lichtflut.infra.exceptions.NotYetImplementedException;
 import org.arastreju.bindings.neo4j.NeoConstants;
-import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
 import org.arastreju.sge.ArastrejuProfile;
-import org.arastreju.sge.SNOPS;
-import org.arastreju.sge.model.SimpleResourceID;
 import org.arastreju.sge.model.Statement;
+import org.arastreju.sge.model.associations.AttachedAssociationKeeper;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.spi.GraphDataStore;
 import org.arastreju.sge.spi.PhysicalNodeID;
@@ -48,7 +46,7 @@ import java.io.IOException;
  *
  * @author Oliver Tigges
  */
-public class NeoGraphDataStore implements GraphDataStore<NeoAssociationKeeper>, ProfileCloseListener {
+public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(NeoGraphDataStore.class);
 
@@ -85,23 +83,24 @@ public class NeoGraphDataStore implements GraphDataStore<NeoAssociationKeeper>, 
 	// -- GraphDataStore ----------------------------------
 
     @Override
-    public NeoAssociationKeeper find(QualifiedName qn) {
+    public AttachedAssociationKeeper find(QualifiedName qn) {
         NeoPhysicalNodeID found = keyTable.lookup(qn);
 
         if (found != null) {
             Node node = gdbService.getNodeById(found.getId());
-            return new NeoAssociationKeeper(new SimpleResourceID(qn), node);
+            return new AttachedAssociationKeeper(qn, new NeoPhysicalNodeID(node));
         } else {
             return null;
         }
     }
 
     @Override
-    public NeoAssociationKeeper create(QualifiedName qn) {
+    public AttachedAssociationKeeper create(QualifiedName qn) {
         Node node = gdbService.createNode();
         node.setProperty(NeoConstants.PROPERTY_URI, qn.toURI());
-        keyTable.put(qn, new NeoPhysicalNodeID(node));
-        return new NeoAssociationKeeper(SNOPS.id(qn), node);
+        NeoPhysicalNodeID nodeID = new NeoPhysicalNodeID(node);
+        keyTable.put(qn, nodeID);
+        return new AttachedAssociationKeeper(qn, nodeID);
     }
 
     @Override

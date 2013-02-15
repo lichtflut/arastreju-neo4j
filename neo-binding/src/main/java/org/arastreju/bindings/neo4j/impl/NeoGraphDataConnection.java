@@ -3,15 +3,10 @@
  */
 package org.arastreju.bindings.neo4j.impl;
 
-import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
 import org.arastreju.bindings.neo4j.tx.NeoTxProvider;
 import org.arastreju.sge.index.IndexProvider;
-import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.persistence.TxProvider;
-import org.arastreju.sge.spi.abstracts.AbstractConversationContext;
 import org.arastreju.sge.spi.abstracts.AbstractGraphDataConnection;
-import org.arastreju.sge.spi.abstracts.WorkingContext;
-import org.neo4j.graphdb.index.IndexManager;
 
 /**
  * <p>
@@ -24,7 +19,7 @@ import org.neo4j.graphdb.index.IndexManager;
  *
  * @author Oliver Tigges
  */
-public class NeoGraphDataConnection extends AbstractGraphDataConnection<NeoAssociationKeeper> {
+public class NeoGraphDataConnection extends AbstractGraphDataConnection {
 
     private final NeoTxProvider txProvider;
 
@@ -45,5 +40,10 @@ public class NeoGraphDataConnection extends AbstractGraphDataConnection<NeoAssoc
     @Override
     public TxProvider getTxProvider() {
         return txProvider;
+    }
+
+    @Override
+    public NeoGraphDataStore getStore() {
+        return (NeoGraphDataStore) super.getStore();
     }
 }

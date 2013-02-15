@@ -41,8 +41,6 @@ public class Neo4jGate extends AbstractArastrejuGate {
 
 	private final NeoGraphDataConnection connection;
 	
-	private boolean open;
-
 	// -----------------------------------------------------
 
 	/**
@@ -53,7 +51,6 @@ public class Neo4jGate extends AbstractArastrejuGate {
 	public Neo4jGate(DomainIdentifier domainIdentifier, NeoGraphDataConnection connection) throws GateInitializationException {
         super(domainIdentifier);
 		this.connection = connection;
-		this.open = true;
 	}
 	
 	// -----------------------------------------------------
@@ -79,7 +76,6 @@ public class Neo4jGate extends AbstractArastrejuGate {
     @Override
 	public void close() {
 		connection.close();
-		open = false;
 	}
 
     // ----------------------------------------------------

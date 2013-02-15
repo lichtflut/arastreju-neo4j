@@ -18,19 +18,18 @@ package org.arastreju.bindings.neo4j.impl;
 
 import org.arastreju.bindings.neo4j.ArasRelTypes;
 import org.arastreju.bindings.neo4j.NeoConstants;
-import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
-import org.arastreju.bindings.neo4j.extensions.SNResourceNeo;
 import org.arastreju.bindings.neo4j.extensions.SNValueNeo;
-import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.context.Context;
 import org.arastreju.sge.model.DetachedStatement;
 import org.arastreju.sge.model.SimpleResourceID;
 import org.arastreju.sge.model.StatementMetaInfo;
+import org.arastreju.sge.model.associations.AttachedAssociationKeeper;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.model.nodes.SemanticNode;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.persistence.ResourceResolver;
-import org.arastreju.sge.spi.GraphDataConnection;
+import org.arastreju.sge.spi.AttachedResourceNode;
+import org.arastreju.sge.spi.uow.ResourceResolverImpl;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -65,17 +64,20 @@ public class AssociationResolver implements NeoConstants {
 
 	private final ContextAccess ctxAccess;
 
-	// ----------------------------------------------------
+    private final NeoGraphDataStore store;
+
+    // ----------------------------------------------------
 
 	/**
 	 * Creates a new association handler.
-	 * @param connection The connection.
 	 * @param conversationContext The current working context.
+     * @param store The physical store.
 	 */
-	public AssociationResolver(GraphDataConnection connection, NeoConversationContext conversationContext) {
+	public AssociationResolver(NeoConversationContext conversationContext, NeoGraphDataStore store) {
         this.convContext = conversationContext;
-		this.resourceResolver = new NeoResourceResolver(conversationContext);
-		this.ctxAccess = new ContextAccess(connection.getStore());
+		this.resourceResolver = new ResourceResolverImpl(conversationContext);
+        this.store = store;
+		this.ctxAccess = new ContextAccess(store);
 	}
 
 	// ----------------------------------------------------
@@ -84,8 +86,9 @@ public class AssociationResolver implements NeoConstants {
 	 * Resolve the associations of given association keeper.
 	 * @param keeper The association keeper to be resolved.
 	 */
-	public void resolveAssociations(NeoAssociationKeeper keeper) {
-		for(Relationship rel : keeper.getNeoNode().getRelationships(Direction.OUTGOING)){
+	public void resolveAssociations(AttachedAssociationKeeper keeper) {
+        final Node neoNode = store.getNeoNode(keeper.getQualifiedName());
+        for(Relationship rel : neoNode.getRelationships(Direction.OUTGOING)){
 			final Context[] ctx = ctxAccess.getContextInfo(rel);
 			if (!regardContext(ctx, rel)) {
 				continue;
@@ -148,12 +151,12 @@ public class AssociationResolver implements NeoConstants {
             return null;
         }
         final QualifiedName qn = QualifiedName.create(uriProperty.toString());
-        NeoAssociationKeeper keeper = convContext.lookup(qn);
+        AttachedAssociationKeeper keeper = convContext.lookup(qn);
         if (keeper == null){
-            keeper = new NeoAssociationKeeper(SNOPS.id(qn), neoNode);
+            keeper = new AttachedAssociationKeeper(qn, new NeoPhysicalNodeID(neoNode));
             convContext.attach(qn, keeper);
         }
-        return new SNResourceNeo(qn, keeper);
+        return new AttachedResourceNode(qn, keeper);
     }
 
 }

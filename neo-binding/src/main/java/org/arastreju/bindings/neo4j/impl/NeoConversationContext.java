@@ -16,19 +16,19 @@
  */
 package org.arastreju.bindings.neo4j.impl;
 
-import org.arastreju.bindings.neo4j.NeoConstants;
-import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
 import org.arastreju.sge.index.ArasIndexerImpl;
 import org.arastreju.sge.inferencing.implicit.InverseOfInferencer;
 import org.arastreju.sge.inferencing.implicit.SubClassOfInferencer;
 import org.arastreju.sge.inferencing.implicit.TypeInferencer;
 import org.arastreju.sge.model.Statement;
+import org.arastreju.sge.model.associations.AttachedAssociationKeeper;
+import org.arastreju.sge.persistence.ResourceResolver;
 import org.arastreju.sge.persistence.TxAction;
-import org.arastreju.sge.spi.GraphDataConnection;
 import org.arastreju.sge.spi.abstracts.AbstractConversationContext;
 import org.arastreju.sge.spi.abstracts.AssociationManager;
 import org.arastreju.sge.spi.uow.IndexUpdateUOW;
 import org.arastreju.sge.spi.uow.InferencingInterceptor;
+import org.arastreju.sge.spi.uow.ResourceResolverImpl;
 
 /**
  * <p>
@@ -41,7 +41,7 @@ import org.arastreju.sge.spi.uow.InferencingInterceptor;
  *
  * @author Oliver Tigges
  */
-public class NeoConversationContext extends AbstractConversationContext<NeoAssociationKeeper> implements NeoConstants {
+public class NeoConversationContext extends AbstractConversationContext {
 
     private final AssociationResolver resolver;
     private final AssociationManager manager;
@@ -52,9 +52,9 @@ public class NeoConversationContext extends AbstractConversationContext<NeoAssoc
 	 * Creates a new Working Context.
 	 * @param connection The connection.
 	 */
-	public NeoConversationContext(GraphDataConnection connection) {
+	public NeoConversationContext(NeoGraphDataConnection connection) {
         super(connection);
-        this.resolver = new AssociationResolver(connection, this);
+        this.resolver = new AssociationResolver(this, connection.getStore());
         this.manager = createAssociationManager();
 	}
 
@@ -65,13 +65,13 @@ public class NeoConversationContext extends AbstractConversationContext<NeoAssoc
 	 * @param keeper The association keeper to be resolved.
 	 */
     @Override
-	public void resolveAssociations(NeoAssociationKeeper keeper) {
+	public void resolveAssociations(AttachedAssociationKeeper keeper) {
 		assertActive();
 		resolver.resolveAssociations(keeper);
 	}
 
     @Override
-	public void addAssociation(final NeoAssociationKeeper keeper, final Statement stmt) {
+	public void addAssociation(final AttachedAssociationKeeper keeper, final Statement stmt) {
 		assertActive();
         getTxProvider().doTransacted(new TxAction() {
             @Override
@@ -83,7 +83,7 @@ public class NeoConversationContext extends AbstractConversationContext<NeoAssoc
 	}
 
 	@Override
-	public boolean removeAssociation(final NeoAssociationKeeper keeper, final Statement stmt) {
+	public boolean removeAssociation(final AttachedAssociationKeeper keeper, final Statement stmt) {
 		assertActive();
         getTxProvider().doTransacted(new TxAction() {
             @Override
@@ -97,7 +97,7 @@ public class NeoConversationContext extends AbstractConversationContext<NeoAssoc
     // ----------------------------------------------------
 
     private AssociationManager createAssociationManager() {
-        NeoResourceResolver resolver = new NeoResourceResolver(this);
+        ResourceResolver resolver = new ResourceResolverImpl(this);
         NeoGraphDataStore store = (NeoGraphDataStore) getConnection().getStore();
 
         ArasIndexerImpl index = new ArasIndexerImpl(this, getIndexProvider());

@@ -2,14 +2,12 @@ package org.arastreju.bindings.neo4j.impl;
 
 import org.arastreju.bindings.neo4j.ArasRelTypes;
 import org.arastreju.bindings.neo4j.NeoConstants;
-import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
 import org.arastreju.sge.ConversationContext;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.context.Context;
 import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.model.nodes.ValueNode;
-import org.arastreju.sge.spi.AssocKeeperAccess;
 import org.arastreju.sge.spi.AssociationListener;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
@@ -78,7 +76,7 @@ public class RelationshipManager implements AssociationListener, NeoConstants {
     private void createRelationship(Node subject, Statement stmt) {
         if (stmt.getObject().isResourceNode()){
             final ResourceNode arasObject = stmt.getObject().asResource();
-            final Node neoObject = getNeoNode(arasObject);
+            final Node neoObject = store.getNeoNode(arasObject.getQualifiedName());
             createRelationship(subject, neoObject, stmt);
         } else {
             final Node neoValue = subject.getGraphDatabase().createNode();
@@ -152,16 +150,6 @@ public class RelationshipManager implements AssociationListener, NeoConstants {
             joined.add(convContext.getPrimaryContext());
             Collections.addAll(joined, stmt.getContexts());
             return joined.toArray(new Context[joined.size()]);
-        }
-    }
-
-    private Node getNeoNode(final ResourceNode node){
-        try {
-            NeoAssociationKeeper keeper =
-                    (NeoAssociationKeeper) AssocKeeperAccess.getInstance().getAssociationKeeper(node);
-            return keeper.getNeoNode();
-        } catch (ClassCastException e){
-            throw new RuntimeException(e);
         }
     }
 

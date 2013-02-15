@@ -28,7 +28,7 @@
 	</appender>
 
 	<logger name="org.arastreju">
-		<level value="info" />
+		<level value="debug" />
 	</logger>
 	
 	<logger name="org.arastreju.bindings.neo4j.query">

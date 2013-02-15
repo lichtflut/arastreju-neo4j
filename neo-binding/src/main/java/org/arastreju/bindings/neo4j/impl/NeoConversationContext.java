@@ -18,13 +18,17 @@ package org.arastreju.bindings.neo4j.impl;
 
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
-import org.arastreju.sge.model.ResourceID;
+import org.arastreju.sge.index.ArasIndexerImpl;
+import org.arastreju.sge.inferencing.implicit.InverseOfInferencer;
+import org.arastreju.sge.inferencing.implicit.SubClassOfInferencer;
+import org.arastreju.sge.inferencing.implicit.TypeInferencer;
 import org.arastreju.sge.model.Statement;
+import org.arastreju.sge.persistence.TxAction;
 import org.arastreju.sge.spi.GraphDataConnection;
 import org.arastreju.sge.spi.abstracts.AbstractConversationContext;
-
-import java.util.Collections;
-import java.util.Set;
+import org.arastreju.sge.spi.abstracts.AssociationManager;
+import org.arastreju.sge.spi.uow.IndexUpdateUOW;
+import org.arastreju.sge.spi.uow.InferencingInterceptor;
 
 /**
  * <p>
@@ -39,7 +43,8 @@ import java.util.Set;
  */
 public class NeoConversationContext extends AbstractConversationContext<NeoAssociationKeeper> implements NeoConstants {
 
-	private final AssociationHandler handler;
+    private final AssociationResolver resolver;
+    private final AssociationManager manager;
 
     // ----------------------------------------------------
 	
@@ -49,25 +54,10 @@ public class NeoConversationContext extends AbstractConversationContext<NeoAssoc
 	 */
 	public NeoConversationContext(GraphDataConnection connection) {
         super(connection);
-        this.handler = new AssociationHandler(connection, this);
+        this.resolver = new AssociationResolver(connection, this);
+        this.manager = createAssociationManager();
 	}
 
-	// ----------------------------------------------------
-	
-    /**
-     * Get the incoming statements of the given node.
-     * @param object The node which is the object of the searched statements.
-     * @return The statements.
-     */
-    public Set<Statement> getIncomingStatements(ResourceID object) {
-        assertActive();
-        NeoAssociationKeeper keeper = lookup(object.getQualifiedName());
-        if (keeper == null) {
-            return Collections.emptySet();
-        }
-        return handler.getIncomingStatements(keeper);
-    }
-	
 	// ----------------------------------------------------
 
 	/**
@@ -77,19 +67,48 @@ public class NeoConversationContext extends AbstractConversationContext<NeoAssoc
     @Override
 	public void resolveAssociations(NeoAssociationKeeper keeper) {
 		assertActive();
-		handler.resolveAssociations(keeper);
+		resolver.resolveAssociations(keeper);
 	}
 
     @Override
 	public void addAssociation(final NeoAssociationKeeper keeper, final Statement stmt) {
 		assertActive();
-		handler.addAssociation(keeper, stmt);
+        getTxProvider().doTransacted(new TxAction() {
+            @Override
+            public void execute() {
+                manager.addAssociation(keeper, stmt);
+            }
+        });
+
 	}
 
 	@Override
-	public boolean removeAssociation(final NeoAssociationKeeper keeper, final Statement assoc) {
+	public boolean removeAssociation(final NeoAssociationKeeper keeper, final Statement stmt) {
 		assertActive();
-		return handler.removeAssociation(keeper, assoc);
+        getTxProvider().doTransacted(new TxAction() {
+            @Override
+            public void execute() {
+                manager.removeAssociation(keeper, stmt);
+            }
+        });
+        return true;
 	}
+
+    // ----------------------------------------------------
+
+    private AssociationManager createAssociationManager() {
+        NeoResourceResolver resolver = new NeoResourceResolver(this);
+        NeoGraphDataStore store = (NeoGraphDataStore) getConnection().getStore();
+
+        ArasIndexerImpl index = new ArasIndexerImpl(this, getIndexProvider());
+        index.add(new TypeInferencer(resolver));
+        index.add(new SubClassOfInferencer(resolver));
+
+        AssociationManager am = new AssociationManager(resolver);
+        am.register(new RelationshipManager(this, store));
+        am.register(new IndexUpdateUOW(index));
+        am.register(new InferencingInterceptor(am).add(new InverseOfInferencer(resolver)));
+        return am;
+    }
 
 }

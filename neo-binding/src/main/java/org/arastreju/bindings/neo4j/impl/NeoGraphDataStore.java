@@ -122,11 +122,22 @@ public class NeoGraphDataStore implements GraphDataStore<NeoAssociationKeeper>, 
         throw new NotYetImplementedException();
     }
 
+    // -- ProfileCloseListener ----------------------------
+
+    @Override
+    public void onClosed(final ArastrejuProfile profile) {
+        close();
+    }
+
+    public void close() {
+        gdbService.shutdown();
+    }
+
+    // -- Neo Specifics -----------------------------------
+
     public String getStorageDir() {
         return storageDir;
     }
-
-    // -- Neo Services ------------------------------------
 
 	/**
 	 * @return the gdbService
@@ -135,17 +146,15 @@ public class NeoGraphDataStore implements GraphDataStore<NeoAssociationKeeper>, 
 		return gdbService;
 	}
 
-	// -- ProfileCloseListener ----------------------------
+    public Node getNeoNode(QualifiedName qn) {
+        NeoPhysicalNodeID id = keyTable.lookup(qn);
+        if (id != null) {
+            return gdbService.getNodeById(id.getId());
+        } else {
+            return null;
+        }
+    }
 
-    @Override
-	public void onClosed(final ArastrejuProfile profile) {
-		close();
-	}
-
-	public void close() {
-		gdbService.shutdown();
-	}
-	
 	// -----------------------------------------------------
 	
 	public static String prepareTempStore(String domain) throws IOException {

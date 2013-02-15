@@ -59,7 +59,9 @@ import java.io.ObjectOutputStream;
 
 import static org.arastreju.sge.SNOPS.associate;
 import static org.arastreju.sge.SNOPS.associations;
+import static org.arastreju.sge.SNOPS.objects;
 import static org.arastreju.sge.SNOPS.qualify;
+import static org.arastreju.sge.SNOPS.remove;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -407,11 +409,11 @@ public class NeoConversationTest {
 		
 		final ResourceNode hasChild = conversation.findResource(SNOPS.qualify("http://test.arastreju.org/common#hasChild"));
 		assertNotNull(hasChild);
-		assertEquals(new SimpleResourceID("http://test.arastreju.org/common#hasParent"), SNOPS.objects(hasChild, Aras.INVERSE_OF).iterator().next());
+		assertEquals(new SimpleResourceID("http://test.arastreju.org/common#hasParent"), objects(hasChild, Aras.INVERSE_OF).iterator().next());
 		
 		final ResourceNode marriedTo = conversation.findResource(SNOPS.qualify("http://test.arastreju.org/common#isMarriedTo"));
 		assertNotNull(marriedTo);
-		assertEquals(marriedTo, SNOPS.objects(marriedTo, Aras.INVERSE_OF).iterator().next());
+		assertEquals(marriedTo, objects(marriedTo, Aras.INVERSE_OF).iterator().next());
 	}
 	
 	@Test
@@ -445,7 +447,7 @@ public class NeoConversationTest {
 
         conversation.attach(knows);
 
-        assertTrue(SNOPS.objects(knows, Aras.INVERSE_OF).contains(knows));
+        assertTrue(objects(knows, Aras.INVERSE_OF).contains(knows));
 
         conversation.detach(knows);
 
@@ -462,7 +464,7 @@ public class NeoConversationTest {
 
         kent = conversation.findResource(kent.getQualifiedName());
 
-        assertTrue(SNOPS.objects(kent, knows).contains(mike));
+        assertTrue(objects(kent, knows).contains(mike));
 
     }
 
@@ -476,28 +478,32 @@ public class NeoConversationTest {
 
         conversation.attach(hasEmployees);
 
+        Assert.assertTrue(hasEmployees.isAttached());
+        Assert.assertTrue(isEmployedBy.isAttached());
+
         // preparation done.
 
         ResourceNode mike = new SNResource(qualify("http://q#Mike"));
         ResourceNode corp = new SNResource(qualify("http://q#Corp"));
 
         conversation.attach(mike);
+        Assert.assertTrue(mike.isAttached());
 
         associate(mike, isEmployedBy, corp);
+        Assert.assertTrue(corp.isAttached());
 
         conversation.detach(corp);
 
         corp = conversation.findResource(corp.getQualifiedName());
 
-        assertTrue(SNOPS.objects(corp, hasEmployees).contains(mike));
-        assertTrue(SNOPS.objects(mike, isEmployedBy).contains(corp));
+        assertTrue(objects(corp, hasEmployees).contains(mike));
+        assertTrue(objects(mike, isEmployedBy).contains(corp));
 
-        SNOPS.remove(corp, hasEmployees);
-
-        assertFalse(SNOPS.objects(corp, hasEmployees).contains(mike));
+        remove(corp, hasEmployees);
+        assertFalse(objects(corp, hasEmployees).contains(mike));
 
         mike = conversation.findResource(mike.getQualifiedName());
-        assertFalse(SNOPS.objects(mike, isEmployedBy).contains(corp));
+        assertFalse(objects(mike, isEmployedBy).contains(corp));
 
     }
 
@@ -518,7 +524,7 @@ public class NeoConversationTest {
 
         assertEquals(2, res.size());
 
-        SNOPS.remove(car, RDF.TYPE);
+        remove(car, RDF.TYPE);
 
         res = conversation.createQuery().addField(RDF.TYPE.toURI(), qnVehicle).getResult();
         assertNotNull(res);

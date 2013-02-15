@@ -16,6 +16,7 @@
  */
 package org.arastreju.bindings.neo4j;
 
+import de.lichtflut.infra.exceptions.NotYetImplementedException;
 import org.arastreju.bindings.neo4j.extensions.NeoAssociationKeeper;
 import org.arastreju.bindings.neo4j.extensions.SNResourceNeo;
 import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
@@ -68,16 +69,13 @@ public class NeoConversation extends AbstractConversation implements Conversatio
     // ----------------------------------------------------
 
     @Override
-    public Set<Statement> findIncomingStatements(ResourceID object) {
-        assertActive();
-        return conversationContext.getIncomingStatements(object);
+    public Set<Statement> findIncomingStatements(ResourceID id) {
+        throw new NotYetImplementedException();
     }
-
-    // ----------------------------------------------------
 
     @Override
 	public ResourceNode findResource(final QualifiedName qn) {
-        NeoAssociationKeeper existing = getConversationContext().find(qn);
+        AssociationKeeper existing = getConversationContext().find(qn);
         if (existing != null) {
             return new SNResourceNeo(qn, existing);
         }
@@ -86,7 +84,7 @@ public class NeoConversation extends AbstractConversation implements Conversatio
 	
 	@Override
     public ResourceNode resolve(final ResourceID resource) {
-        NeoAssociationKeeper existing = getConversationContext().find(resource.getQualifiedName());
+        AssociationKeeper existing = getConversationContext().find(resource.getQualifiedName());
         if (existing != null) {
             return new SNResourceNeo(resource.getQualifiedName(), existing);
         } else {
@@ -138,7 +136,7 @@ public class NeoConversation extends AbstractConversation implements Conversatio
         if (isAttached(node)) {
             return;
         }
-        NeoAssociationKeeper existing = getConversationContext().find(node.getQualifiedName());
+        AssociationKeeper existing = getConversationContext().find(node.getQualifiedName());
         if (existing != null) {
             AssocKeeperAccess.getInstance().setAssociationKeeper(node, existing);
         } else {
@@ -147,12 +145,6 @@ public class NeoConversation extends AbstractConversation implements Conversatio
     }
 	
 	// ----------------------------------------------------
-
-    public NeoConversationContext getConversationContext() {
-        return (NeoConversationContext) super.getConversationContext();
-    }
-
-    // ----------------------------------------------------
 
     @Override
     protected QNResolver getQNResolver() {
@@ -168,7 +160,7 @@ public class NeoConversation extends AbstractConversation implements Conversatio
         return conversationContext.getTxProvider().doTransacted(new TxResultAction<ResourceNode>() {
             @Override
             public ResourceNode execute() {
-                NeoAssociationKeeper created = getConversationContext().create(qn);
+                AssociationKeeper created = getConversationContext().create(qn);
                 return new SNResourceNeo(qn, created);
             }
         });

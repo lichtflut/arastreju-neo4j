@@ -28,6 +28,7 @@ import org.arastreju.sge.spi.abstracts.AbstractConversationContext;
 import org.arastreju.sge.spi.abstracts.AssociationManager;
 import org.arastreju.sge.spi.uow.IndexUpdateUOW;
 import org.arastreju.sge.spi.uow.InferencingInterceptor;
+import org.arastreju.sge.spi.uow.OpenConversationNotifier;
 import org.arastreju.sge.spi.uow.ResourceResolverImpl;
 
 /**
@@ -108,6 +109,7 @@ public class NeoConversationContext extends AbstractConversationContext {
         am.register(new RelationshipManager(this, store));
         am.register(new IndexUpdateUOW(index));
         am.register(new InferencingInterceptor(am).add(new InverseOfInferencer(resolver)));
+        am.register(new OpenConversationNotifier(getConnection(), this));
         return am;
     }
 

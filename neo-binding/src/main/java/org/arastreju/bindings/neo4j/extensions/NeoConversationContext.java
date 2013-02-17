@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 lichtflut Forschungs- und Entwicklungsgesellschaft mbH
+ * Copyright (C) 2013 lichtflut Forschungs- und Entwicklungsgesellschaft mbH
  *
  * The Arastreju-Neo4j binding is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,14 +19,9 @@ package org.arastreju.bindings.neo4j.extensions;
 import org.arastreju.bindings.neo4j.storage.AssociationResolver;
 import org.arastreju.bindings.neo4j.storage.NeoGraphDataStore;
 import org.arastreju.bindings.neo4j.storage.RelationshipManager;
-import org.arastreju.sge.index.ArasIndexerImpl;
 import org.arastreju.sge.inferencing.implicit.InverseOfInferencer;
-import org.arastreju.sge.inferencing.implicit.SubClassOfInferencer;
-import org.arastreju.sge.inferencing.implicit.TypeInferencer;
-import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.model.associations.AttachedAssociationKeeper;
 import org.arastreju.sge.persistence.ResourceResolver;
-import org.arastreju.sge.persistence.TxAction;
 import org.arastreju.sge.spi.abstracts.AbstractConversationContext;
 import org.arastreju.sge.spi.abstracts.AssociationManager;
 import org.arastreju.sge.spi.uow.IndexUpdateUOW;
@@ -74,43 +69,21 @@ public class NeoConversationContext extends AbstractConversationContext {
 		resolver.resolveAssociations(keeper);
 	}
 
+    // ----------------------------------------------------
+
     @Override
-	public void addAssociation(final AttachedAssociationKeeper keeper, final Statement stmt) {
-		assertActive();
-        getTxProvider().doTransacted(new TxAction() {
-            @Override
-            public void execute() {
-                manager.addAssociation(keeper, stmt);
-            }
-        });
-
-	}
-
-	@Override
-	public boolean removeAssociation(final AttachedAssociationKeeper keeper, final Statement stmt) {
-		assertActive();
-        getTxProvider().doTransacted(new TxAction() {
-            @Override
-            public void execute() {
-                manager.removeAssociation(keeper, stmt);
-            }
-        });
-        return true;
-	}
+    protected AssociationManager getAssociationManager() {
+        return manager;
+    }
 
     // ----------------------------------------------------
 
     private AssociationManager createAssociationManager() {
         ResourceResolver resolver = new ResourceResolverImpl(this);
         NeoGraphDataStore store = (NeoGraphDataStore) getConnection().getStore();
-
-        ArasIndexerImpl index = new ArasIndexerImpl(this, getIndexProvider());
-        index.add(new TypeInferencer(resolver));
-        index.add(new SubClassOfInferencer(resolver));
-
         AssociationManager am = new AssociationManager(resolver);
         am.register(new RelationshipManager(this, store));
-        am.register(new IndexUpdateUOW(index));
+        am.register(new IndexUpdateUOW(getIndexUpdator()));
         am.register(new InferencingInterceptor(am).add(new InverseOfInferencer(resolver)));
         am.register(new OpenConversationNotifier(getConnection(), this));
         return am;

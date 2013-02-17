@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 lichtflut Forschungs- und Entwicklungsgesellschaft mbH
+ * Copyright (C) 2013 lichtflut Forschungs- und Entwicklungsgesellschaft mbH
  *
  * The Arastreju-Neo4j binding is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,6 @@
  */
 package org.arastreju.bindings.neo4j.storage;
 
-import org.arastreju.bindings.neo4j.ArasRelTypes;
-import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.SNValueNeo;
 import org.arastreju.bindings.neo4j.extensions.NeoConversationContext;
 import org.arastreju.bindings.neo4j.extensions.NeoPhysicalNodeID;

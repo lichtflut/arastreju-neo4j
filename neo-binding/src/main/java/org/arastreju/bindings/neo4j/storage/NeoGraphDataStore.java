@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 lichtflut Forschungs- und Entwicklungsgesellschaft mbH
+ * Copyright (C) 2013 lichtflut Forschungs- und Entwicklungsgesellschaft mbH
  *
  * The Arastreju-Neo4j binding is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,15 +16,13 @@
  */
 package org.arastreju.bindings.neo4j.storage;
 
-import de.lichtflut.infra.exceptions.NotYetImplementedException;
-import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.NeoPhysicalNodeID;
+import org.arastreju.bindings.neo4j.tx.NeoTxProvider;
 import org.arastreju.sge.ArastrejuProfile;
-import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.model.associations.AttachedAssociationKeeper;
 import org.arastreju.sge.naming.QualifiedName;
+import org.arastreju.sge.persistence.TxProvider;
 import org.arastreju.sge.spi.GraphDataStore;
-import org.arastreju.sge.spi.PhysicalNodeID;
 import org.arastreju.sge.spi.ProfileCloseListener;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -55,6 +53,8 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
 
     private final NeoNodeKeyTable keyTable;
 
+    private final TxProvider txProvider;
+
     private final String storageDir;
 
     // -----------------------------------------------------
@@ -79,6 +79,7 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
         }
 		gdbService = new EmbeddedGraphDatabase(dir); 
         keyTable = new NeoNodeKeyTable(gdbService,  gdbService.index());
+        txProvider = new NeoTxProvider(gdbService);
 	}
 	
 	// -- GraphDataStore ----------------------------------
@@ -118,8 +119,8 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
     }
 
     @Override
-    public boolean addAssociation(PhysicalNodeID id, Statement assoc) {
-        throw new NotYetImplementedException();
+    public TxProvider getTxProvider() {
+        return txProvider;
     }
 
     // -- ProfileCloseListener ----------------------------

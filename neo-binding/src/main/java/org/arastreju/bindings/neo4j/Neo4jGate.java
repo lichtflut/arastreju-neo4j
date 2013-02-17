@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 lichtflut Forschungs- und Entwicklungsgesellschaft mbH
+ * Copyright (C) 2013 lichtflut Forschungs- und Entwicklungsgesellschaft mbH
  *
  * The Arastreju-Neo4j binding is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@ import org.arastreju.bindings.neo4j.extensions.NeoConversationContext;
 import org.arastreju.bindings.neo4j.extensions.NeoGraphDataConnection;
 import org.arastreju.sge.ArastrejuGate;
 import org.arastreju.sge.Conversation;
-import org.arastreju.sge.organize.Organizer;
 import org.arastreju.sge.context.Context;
 import org.arastreju.sge.context.DomainIdentifier;
 import org.arastreju.sge.spi.GateInitializationException;
@@ -46,7 +45,7 @@ public class Neo4jGate extends AbstractArastrejuGate {
 	/**
 	 * Initialize default gate.
 	 * @param domainIdentifier The gate context.
-     * @param connection The connection to the graph datastore.
+     * @param connection The connection to the graph data store.
 	 */
 	public Neo4jGate(DomainIdentifier domainIdentifier, NeoGraphDataConnection connection) throws GateInitializationException {
         super(domainIdentifier);
@@ -68,11 +67,6 @@ public class Neo4jGate extends AbstractArastrejuGate {
         return new NeoConversation(cc);
     }
 
-    @Override
-	public Organizer getOrganizer() {
-		return new NeoOrganizer(connection, this);
-	}
-	
     @Override
 	public void close() {
 		connection.close();

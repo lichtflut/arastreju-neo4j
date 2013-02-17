@@ -18,14 +18,12 @@ package org.arastreju.bindings.neo4j.it;
 
 import junit.framework.Assert;
 import org.arastreju.bindings.neo4j.Neo4jGate;
-import org.arastreju.bindings.neo4j.NeoOrganizer;
 import org.arastreju.bindings.neo4j.extensions.NeoGraphDataConnection;
 import org.arastreju.bindings.neo4j.storage.NeoGraphDataStore;
 import org.arastreju.sge.Conversation;
-import org.arastreju.sge.index.IndexProvider;
-import org.arastreju.sge.organize.Organizer;
 import org.arastreju.sge.context.Context;
 import org.arastreju.sge.context.PhysicalDomain;
+import org.arastreju.sge.index.IndexProvider;
 import org.arastreju.sge.io.StatementContainer;
 import org.arastreju.sge.model.ResourceID;
 import org.arastreju.sge.model.SimpleResourceID;
@@ -34,6 +32,7 @@ import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.model.nodes.SNResource;
 import org.arastreju.sge.naming.Namespace;
 import org.arastreju.sge.naming.QualifiedName;
+import org.arastreju.sge.organize.Organizer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -45,7 +44,7 @@ import java.util.List;
 
 /**
  * <p>
- *  Test case for {@link org.arastreju.bindings.neo4j.NeoOrganizer}.
+ *  Test case for Organizer with Neo4J binding.
  * </p>
  *
  * <p>
@@ -81,7 +80,7 @@ public class NeoOrganizerTest {
 		store = new NeoGraphDataStore();
 		connection = new NeoGraphDataConnection(store, new IndexProvider(store.getStorageDir()));
         gate = new Neo4jGate(new PhysicalDomain("test"), connection);
-        organizer = new NeoOrganizer(connection, gate);
+        organizer = new Organizer(gate);
 	}
 	
 	/**

@@ -18,7 +18,7 @@ package org.arastreju.bindings.neo4j.extensions;
 
 import java.util.Locale;
 
-import org.arastreju.bindings.neo4j.NeoConstants;
+import org.arastreju.bindings.neo4j.storage.NeoConstants;
 import org.arastreju.sge.model.ElementaryDataType;
 import org.arastreju.sge.model.nodes.SNValue;
 import org.neo4j.graphdb.Node;

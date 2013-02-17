@@ -14,52 +14,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.arastreju.bindings.neo4j;
+package org.arastreju.bindings.neo4j.storage;
 
-import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.RelationshipType;
 
 /**
  * <p>
- *  Constants for Arastreju Neo binding.
+ *  Arastreju knows to general types of relationships between nodes:
+ *  <ul>
+ *   <li>Values</li>
+ *   <li>References (to other resource nodes)</li>
+ *  </ul>
  * </p>
  *
  * <p>
- * 	Created Oct 11, 2010
+ * 	Created Jan 14, 2011
  * </p>
  *
  * @author Oliver Tigges
  */
-public interface NeoConstants {
-	
-	/**
-	 * The URI of a resource node.. 
-	 */
-	String PROPERTY_URI = "resource-uri";
-	
-	/**
-	 * Value string of a value node. 
-	 */
-	String PROPERTY_VALUE = "value";
-	
-	String PROPERTY_LOCALE = "locale";
-	
-	String PROPERTY_DATATYPE = "datatype";
-	
-	// ----------------------------------------------------
-	
-	/**
-	 * Attribute of a {@link Relationship}.
-	 */
-	String CONTEXT_URI = "context-uri";
-	
-	/**
-	 * Attribute of a {@link Relationship}.
-	 */
-	String PREDICATE_URI = "predicate-uri";
-	
-	/**
-	 * Attribute of a {@link Relationship}.
-	 */
-	String TIMESTAMP = "timestamp";
+public enum ArasRelTypes implements RelationshipType {
+
+	VALUE,
+	REFERENCE;
 	
 }

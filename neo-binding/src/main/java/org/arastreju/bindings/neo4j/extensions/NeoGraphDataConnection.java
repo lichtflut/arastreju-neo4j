@@ -1,12 +1,23 @@
 /*
- * Copyright 2012 by lichtflut Forschungs- und Entwicklungsgesellschaft mbH
+ * Copyright (C) 2013 lichtflut Forschungs- und Entwicklungsgesellschaft mbH
+ *
+ * The Arastreju-Neo4j binding is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.arastreju.bindings.neo4j.extensions;
 
 import org.arastreju.bindings.neo4j.storage.NeoGraphDataStore;
-import org.arastreju.bindings.neo4j.tx.NeoTxProvider;
 import org.arastreju.sge.index.IndexProvider;
-import org.arastreju.sge.persistence.TxProvider;
 import org.arastreju.sge.spi.abstracts.AbstractGraphDataConnection;
 
 /**
@@ -22,10 +33,6 @@ import org.arastreju.sge.spi.abstracts.AbstractGraphDataConnection;
  */
 public class NeoGraphDataConnection extends AbstractGraphDataConnection {
 
-    private final NeoTxProvider txProvider;
-
-    // ----------------------------------------------------
-
     /**
 	 * Constructor.
 	 * @param store The store.
@@ -33,15 +40,9 @@ public class NeoGraphDataConnection extends AbstractGraphDataConnection {
 	 */
 	public NeoGraphDataConnection(NeoGraphDataStore store, IndexProvider indexProvider) {
         super(store, indexProvider);
-        txProvider = new NeoTxProvider(store.getGdbService());
     }
 
     // ----------------------------------------------------
-
-    @Override
-    public TxProvider getTxProvider() {
-        return txProvider;
-    }
 
     @Override
     public NeoGraphDataStore getStore() {

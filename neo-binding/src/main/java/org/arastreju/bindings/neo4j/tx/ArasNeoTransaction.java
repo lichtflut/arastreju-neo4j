@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 lichtflut Forschungs- und Entwicklungsgesellschaft mbH
+ * Copyright (C) 2013 lichtflut Forschungs- und Entwicklungsgesellschaft mbH
  *
  * The Arastreju-Neo4j binding is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,25 +55,19 @@ class ArasNeoTransaction implements TransactionControl {
 	
 	// -----------------------------------------------------
 	
-	/** 
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void success() {
 		assertTxActive();
 		tx.success();
 	}
 
-	/** 
-	 * {@inheritDoc}
-	 */
+    @Override
 	public void fail() {
 		assertTxActive();
 		tx.failure();
 	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
+
+    @Override
 	public void finish() {
 		assertTxActive();
 		tx.finish();
@@ -81,18 +75,14 @@ class ArasNeoTransaction implements TransactionControl {
 	}
 	
 	// ----------------------------------------------------
-	
-	/** 
-	 * {@inheritDoc}
-	 */
+
+    @Override
 	public void commit() {
 		success();
 		finish();
 	}
 
-	/** 
-	 * {@inheritDoc}
-	 */
+    @Override
 	public void rollback() {
 		fail();
 		finish();
@@ -100,9 +90,7 @@ class ArasNeoTransaction implements TransactionControl {
 	
 	// ----------------------------------------------------
 
-	/** 
-	 * {@inheritDoc}
-	 */
+    @Override
 	public void flush() {
 	}
 	

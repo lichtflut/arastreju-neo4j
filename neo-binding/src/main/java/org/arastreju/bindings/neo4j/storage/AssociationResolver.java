@@ -14,12 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.arastreju.bindings.neo4j.impl;
+package org.arastreju.bindings.neo4j.storage;
 
 import org.arastreju.bindings.neo4j.ArasRelTypes;
 import org.arastreju.bindings.neo4j.NeoConstants;
 import org.arastreju.bindings.neo4j.extensions.SNValueNeo;
+import org.arastreju.bindings.neo4j.extensions.NeoConversationContext;
+import org.arastreju.bindings.neo4j.extensions.NeoPhysicalNodeID;
+import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.context.Context;
+import org.arastreju.sge.context.SimpleContextID;
 import org.arastreju.sge.model.DetachedStatement;
 import org.arastreju.sge.model.SimpleResourceID;
 import org.arastreju.sge.model.StatementMetaInfo;
@@ -56,13 +60,13 @@ public class AssociationResolver implements NeoConstants {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AssociationResolver.class);
 
+    public static final Context[] NO_CTX = new Context[0];
+
     // ----------------------------------------------------
 
     private final NeoConversationContext convContext;
 
 	private final ResourceResolver resourceResolver;
-
-	private final ContextAccess ctxAccess;
 
     private final NeoGraphDataStore store;
 
@@ -77,7 +81,6 @@ public class AssociationResolver implements NeoConstants {
         this.convContext = conversationContext;
 		this.resourceResolver = new ResourceResolverImpl(conversationContext);
         this.store = store;
-		this.ctxAccess = new ContextAccess(store);
 	}
 
 	// ----------------------------------------------------
@@ -89,7 +92,7 @@ public class AssociationResolver implements NeoConstants {
 	public void resolveAssociations(AttachedAssociationKeeper keeper) {
         final Node neoNode = store.getNeoNode(keeper.getQualifiedName());
         for(Relationship rel : neoNode.getRelationships(Direction.OUTGOING)){
-			final Context[] ctx = ctxAccess.getContextInfo(rel);
+			final Context[] ctx = getContextInfo(rel);
 			if (!regardContext(ctx, rel)) {
 				continue;
 			}
@@ -106,6 +109,24 @@ public class AssociationResolver implements NeoConstants {
 	}
 
 	// ----------------------------------------------------
+
+    private Context[] getContextInfo(final Relationship rel) {
+        if (!rel.hasProperty(NeoConstants.CONTEXT_URI)) {
+            return NO_CTX;
+        }
+        final String[] ctxUris = (String[]) rel.getProperty(NeoConstants.CONTEXT_URI);
+        final Context[] ctxs = new Context[ctxUris.length];
+        for (int i = 0; i < ctxUris.length; i++) {
+            final String uri = ctxUris[i];
+            final QualifiedName qn = SNOPS.qualify(uri);
+            if (!exists(qn)) {
+                throw new IllegalStateException("Could not find context: " + qn);
+            } else {
+                ctxs[i] = new SimpleContextID(qn);
+            }
+        }
+        return ctxs;
+    }
 	
 	private boolean regardContext(Context[] stmtContexts, Relationship rel) {
 		if (stmtContexts.length == 0) {
@@ -157,6 +178,10 @@ public class AssociationResolver implements NeoConstants {
             convContext.attach(qn, keeper);
         }
         return new AttachedResourceNode(qn, keeper);
+    }
+
+    private boolean exists(QualifiedName qn) {
+        return store.find(qn) != null;
     }
 
 }

@@ -14,8 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.arastreju.bindings.neo4j.impl;
+package org.arastreju.bindings.neo4j.extensions;
 
+import org.arastreju.bindings.neo4j.storage.AssociationResolver;
+import org.arastreju.bindings.neo4j.storage.NeoGraphDataStore;
+import org.arastreju.bindings.neo4j.storage.RelationshipManager;
 import org.arastreju.sge.index.ArasIndexerImpl;
 import org.arastreju.sge.inferencing.implicit.InverseOfInferencer;
 import org.arastreju.sge.inferencing.implicit.SubClassOfInferencer;

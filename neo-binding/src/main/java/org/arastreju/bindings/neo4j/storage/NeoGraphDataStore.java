@@ -14,10 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.arastreju.bindings.neo4j.impl;
+package org.arastreju.bindings.neo4j.storage;
 
 import de.lichtflut.infra.exceptions.NotYetImplementedException;
 import org.arastreju.bindings.neo4j.NeoConstants;
+import org.arastreju.bindings.neo4j.extensions.NeoPhysicalNodeID;
 import org.arastreju.sge.ArastrejuProfile;
 import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.model.associations.AttachedAssociationKeeper;

@@ -1,4 +1,4 @@
-package org.arastreju.bindings.neo4j.impl;
+package org.arastreju.bindings.neo4j.extensions;
 
 import org.arastreju.sge.spi.PhysicalNodeID;
 import org.neo4j.graphdb.Node;

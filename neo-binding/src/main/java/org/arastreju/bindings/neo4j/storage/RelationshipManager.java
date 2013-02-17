@@ -1,4 +1,4 @@
-package org.arastreju.bindings.neo4j.impl;
+package org.arastreju.bindings.neo4j.storage;
 
 import org.arastreju.bindings.neo4j.ArasRelTypes;
 import org.arastreju.bindings.neo4j.NeoConstants;
@@ -8,6 +8,7 @@ import org.arastreju.sge.context.Context;
 import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.model.nodes.ValueNode;
+import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.spi.AssociationListener;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
@@ -37,7 +38,7 @@ public class RelationshipManager implements AssociationListener, NeoConstants {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RelationshipManager.class);
 
-    private final ContextAccess ctxAccess;
+    public static final Context[] NO_CTX = new Context[0];
 
     private final ConversationContext convContext;
 
@@ -48,7 +49,6 @@ public class RelationshipManager implements AssociationListener, NeoConstants {
     public RelationshipManager(ConversationContext convContext, NeoGraphDataStore store) {
         this.convContext = convContext;
         this.store = store;
-        this.ctxAccess = new ContextAccess(store);
     }
 
     // ----------------------------------------------------
@@ -96,7 +96,7 @@ public class RelationshipManager implements AssociationListener, NeoConstants {
             relationship.setProperty(PREDICATE_URI, stmt.getPredicate().toURI());
             relationship.setProperty(PREDICATE_URI, stmt.getPredicate().toURI());
             relationship.setProperty(TIMESTAMP, new Date().getTime());
-            ctxAccess.assignContext(relationship, getCurrentContexts(stmt));
+            assignContext(relationship, getCurrentContexts(stmt));
         } catch (Exception e) {
             LOGGER.error("Failed to add relationship--> " + stmt + " to node " + subject, e);
         }
@@ -139,7 +139,7 @@ public class RelationshipManager implements AssociationListener, NeoConstants {
     private Context[] getCurrentContexts(Statement stmt) {
         if (stmt.getContexts().length == 0) {
             if (convContext.getPrimaryContext() == null) {
-                return ContextAccess.NO_CTX;
+                return NO_CTX;
             } else {
                 return new Context[] { convContext.getPrimaryContext() };
             }
@@ -150,6 +150,34 @@ public class RelationshipManager implements AssociationListener, NeoConstants {
             joined.add(convContext.getPrimaryContext());
             Collections.addAll(joined, stmt.getContexts());
             return joined.toArray(new Context[joined.size()]);
+        }
+    }
+
+    /**
+     * Assigns context information to a relationship.
+     * @param relationship The relationship to be assigned to the contexts.
+     * @param contexts The contexts.
+     */
+    private void assignContext(final Relationship relationship, final Context[] contexts) {
+        if (contexts != null && contexts.length > 0) {
+            String[] uris = new String[contexts.length];
+            for (int i = 0; i < contexts.length; i++) {
+                assureExists(contexts[i].getQualifiedName());
+                uris[i] = contexts[i].toURI();
+            }
+            relationship.setProperty(NeoConstants.CONTEXT_URI, uris);
+        }
+    }
+
+    // ----------------------------------------------------
+
+    private boolean exists(QualifiedName qn) {
+        return store.find(qn) != null;
+    }
+
+    private void assureExists(QualifiedName qn) {
+        if (!exists(qn)) {
+            store.create(qn);
         }
     }
 

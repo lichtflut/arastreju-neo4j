@@ -16,8 +16,8 @@
  */
 package org.arastreju.bindings.neo4j;
 
-import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
-import org.arastreju.bindings.neo4j.impl.NeoGraphDataStore;
+import org.arastreju.bindings.neo4j.extensions.NeoGraphDataConnection;
+import org.arastreju.bindings.neo4j.storage.NeoGraphDataStore;
 import org.arastreju.sge.ArastrejuGate;
 import org.arastreju.sge.ArastrejuProfile;
 import org.arastreju.sge.context.DomainIdentifier;
@@ -99,7 +99,7 @@ public class Neo4jGateFactory extends ArastrejuGateFactory {
     /**
      * Create and initialize the store.
      * @param domainIdentifier The identified of the data store.
-     * @return The {@link org.arastreju.bindings.neo4j.impl.NeoGraphDataStore}.
+     * @return The {@link org.arastreju.bindings.neo4j.storage.NeoGraphDataStore}.
      * @throws IOException
      */
     private NeoGraphDataStore createStore(DomainIdentifier domainIdentifier) throws IOException {

@@ -1,5 +1,6 @@
-package org.arastreju.bindings.neo4j.impl;
+package org.arastreju.bindings.neo4j.storage;
 
+import org.arastreju.bindings.neo4j.extensions.NeoPhysicalNodeID;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.persistence.NodeKeyTable;
 import org.arastreju.sge.spi.PhysicalNodeID;

@@ -17,9 +17,9 @@
 package org.arastreju.bindings.neo4j.it;
 
 import org.arastreju.bindings.neo4j.NeoConversation;
-import org.arastreju.bindings.neo4j.impl.NeoConversationContext;
-import org.arastreju.bindings.neo4j.impl.NeoGraphDataConnection;
-import org.arastreju.bindings.neo4j.impl.NeoGraphDataStore;
+import org.arastreju.bindings.neo4j.extensions.NeoConversationContext;
+import org.arastreju.bindings.neo4j.extensions.NeoGraphDataConnection;
+import org.arastreju.bindings.neo4j.storage.NeoGraphDataStore;
 import org.arastreju.sge.Conversation;
 import org.arastreju.sge.ConversationContext;
 import org.arastreju.sge.SNOPS;

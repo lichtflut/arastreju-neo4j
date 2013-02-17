@@ -1,8 +1,9 @@
 /*
  * Copyright 2012 by lichtflut Forschungs- und Entwicklungsgesellschaft mbH
  */
-package org.arastreju.bindings.neo4j.impl;
+package org.arastreju.bindings.neo4j.extensions;
 
+import org.arastreju.bindings.neo4j.storage.NeoGraphDataStore;
 import org.arastreju.bindings.neo4j.tx.NeoTxProvider;
 import org.arastreju.sge.index.IndexProvider;
 import org.arastreju.sge.persistence.TxProvider;

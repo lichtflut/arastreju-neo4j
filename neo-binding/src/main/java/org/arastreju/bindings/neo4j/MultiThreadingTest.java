@@ -1,5 +1,5 @@
-package org.arastreju.bindings.neo4j;/*
- * Copyright (C) 2012 lichtflut Forschungs- und Entwicklungsgesellschaft mbH
+/*
+ * Copyright (C) 2013 lichtflut Forschungs- und Entwicklungsgesellschaft mbH
  *
  * The Arastreju-Neo4j binding is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@ package org.arastreju.bindings.neo4j;/*
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.arastreju.bindings.neo4j;
 
 import de.lichtflut.infra.logging.StopWatch;
 import org.arastreju.sge.Arastreju;
@@ -25,6 +26,8 @@ import org.arastreju.sge.model.nodes.views.SNClass;
 import org.arastreju.sge.persistence.TransactionControl;
 import org.arastreju.sge.query.FieldParam;
 import org.arastreju.sge.query.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -40,6 +43,12 @@ import java.util.List;
  * @author Oliver Tigges
  */
 public class MultiThreadingTest {
+
+    public static final Logger LOGGER = LoggerFactory.getLogger(MultiThreadingTest.class);
+
+    public static final int NUM_THREADS = 10;
+
+    public static final int NUM_OPERATIONS = 1000;
 	
 	public MultiThreadingTest() {}
 
@@ -49,14 +58,14 @@ public class MultiThreadingTest {
         for(int i = 0; i < numberOfThreads; i++) {
             final Thread t = new Thread(new Worker(Arastreju.getInstance().openMasterGate()));
             t.start();
-            System.out.println("Startet Thread: " + t.getId());
+            LOGGER.info("Started Thread {} ", t.getId());
         }
     }
 	
 	// -----------------------------------------------------
 	
 	public static void main(String[] args) {
-		new MultiThreadingTest().start(10);
+		new MultiThreadingTest().start(NUM_THREADS);
 	}
 	
 	// -----------------------------------------------------
@@ -78,7 +87,7 @@ public class MultiThreadingTest {
 			final SNClass clazz = new SNClass();
 			mc.attach(clazz);
 			
-			for (int i = 1; i <= (1000); i++) {
+			for (int i = 1; i <= (NUM_OPERATIONS); i++) {
 				mc.attach(clazz.createInstance());
 			}
 			
@@ -90,7 +99,7 @@ public class MultiThreadingTest {
 			
 			txc.commit();
 			
-			System.out.println("Thread '" + Thread.currentThread().getId() + "' finished.");
+			LOGGER.info("Thread '{}' finished.", Thread.currentThread().getId());
 		}
 		
 	}

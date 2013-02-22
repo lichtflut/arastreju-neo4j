@@ -56,7 +56,7 @@ public class Neo4jGateFactory extends ArastrejuGateFactory {
 	// -----------------------------------------------------
 	
 	@Override
-	public synchronized ArastrejuGate create(final DomainIdentifier domainIdentifier) throws GateInitializationException {
+	public synchronized ArastrejuGate create(final DomainIdentifier domainIdentifier) {
 		try {
             final GraphDataConnection connection = openConnection(domainIdentifier);
             final ArastrejuGate gate = new ArastrejuGateImpl(connection, domainIdentifier);

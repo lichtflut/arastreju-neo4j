@@ -52,8 +52,6 @@ public class NeoAssociationWriter implements AssociationWriter, NeoConstants {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NeoAssociationWriter.class);
 
-    public static final Context[] NO_CTX = new Context[0];
-
     private final ConversationContext convContext;
 
     private final NeoGraphDataStore store;

@@ -16,7 +16,6 @@
  */
 package org.arastreju.bindings.neo4j.storage;
 
-import org.arastreju.bindings.neo4j.extensions.NeoPhysicalNodeID;
 import org.arastreju.bindings.neo4j.tx.NeoTxProvider;
 import org.arastreju.sge.ArastrejuProfile;
 import org.arastreju.sge.model.associations.AttachedAssociationKeeper;
@@ -27,6 +26,7 @@ import org.arastreju.sge.spi.AssociationWriter;
 import org.arastreju.sge.spi.GraphDataStore;
 import org.arastreju.sge.spi.ProfileCloseListener;
 import org.arastreju.sge.spi.WorkingContext;
+import org.arastreju.sge.spi.impl.NumericPhysicalNodeID;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -89,11 +89,11 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
 
     @Override
     public AttachedAssociationKeeper find(QualifiedName qn) {
-        NeoPhysicalNodeID found = keyTable.lookup(qn);
+        NumericPhysicalNodeID found = keyTable.lookup(qn);
 
         if (found != null) {
-            Node node = gdbService.getNodeById(found.getId());
-            return new AttachedAssociationKeeper(qn, new NeoPhysicalNodeID(node));
+            Node node = gdbService.getNodeById(found.asLong());
+            return new AttachedAssociationKeeper(qn, new NumericPhysicalNodeID(node.getId()));
         } else {
             return null;
         }
@@ -103,16 +103,16 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
     public AttachedAssociationKeeper create(QualifiedName qn) {
         Node node = gdbService.createNode();
         node.setProperty(NeoConstants.PROPERTY_URI, qn.toURI());
-        NeoPhysicalNodeID nodeID = new NeoPhysicalNodeID(node);
+        NumericPhysicalNodeID nodeID = new NumericPhysicalNodeID(node.getId());
         keyTable.put(qn, nodeID);
         return new AttachedAssociationKeeper(qn, nodeID);
     }
 
     @Override
     public void remove(QualifiedName qn) {
-        NeoPhysicalNodeID existing = keyTable.lookup(qn);
+        NumericPhysicalNodeID existing = keyTable.lookup(qn);
         if (existing != null) {
-            Node node = gdbService.getNodeById(existing.getId());
+            Node node = gdbService.getNodeById(existing.asLong());
             for (Relationship rel : node.getRelationships()) {
                 rel.delete();
             }
@@ -154,9 +154,9 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
     }
 
     public Node getNeoNode(QualifiedName qn) {
-        NeoPhysicalNodeID id = keyTable.lookup(qn);
+        NumericPhysicalNodeID id = keyTable.lookup(qn);
         if (id != null) {
-            return gdbService.getNodeById(id.getId());
+            return gdbService.getNodeById(id.asLong());
         } else {
             return null;
         }

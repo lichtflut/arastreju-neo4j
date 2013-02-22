@@ -30,7 +30,7 @@ import org.neo4j.graphdb.Transaction;
  *
  * @author Oliver Tigges
  */
-class ArasNeoTransaction implements TransactionControl {
+class NeoTransaction implements TransactionControl {
 
 	private Transaction tx;
 	
@@ -40,7 +40,7 @@ class ArasNeoTransaction implements TransactionControl {
 	 * Constructor.
 	 * @param tx The transaction.
 	 */
-	public ArasNeoTransaction(final Transaction tx) {
+	public NeoTransaction(final Transaction tx) {
 		this.tx = tx;
 	}
 	

@@ -16,6 +16,7 @@
  */
 package org.arastreju.bindings.neo4j.storage;
 
+import org.arastreju.sge.context.Context;
 import org.neo4j.graphdb.RelationshipType;
 
 /**
@@ -30,6 +31,8 @@ import org.neo4j.graphdb.RelationshipType;
  * @author Oliver Tigges
  */
 public interface NeoConstants {
+
+    Context[] NO_CTX = new Context[0];
 
     enum ArasRelationshipType implements RelationshipType {
         VALUE,

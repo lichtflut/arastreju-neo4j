@@ -1,4 +1,4 @@
-/*
+package org.arastreju.bindings.neo4j;/*
  * Copyright (C) 2012 lichtflut Forschungs- und Entwicklungsgesellschaft mbH
  *
  * The Arastreju-Neo4j binding is free software: you can redistribute it and/or modify

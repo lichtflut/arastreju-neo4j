@@ -16,10 +16,10 @@
  */
 package org.arastreju.bindings.neo4j.storage;
 
-import org.arastreju.bindings.neo4j.extensions.NeoPhysicalNodeID;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.persistence.NodeKeyTable;
 import org.arastreju.sge.spi.PhysicalNodeID;
+import org.arastreju.sge.spi.impl.NumericPhysicalNodeID;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.Index;
@@ -57,10 +57,10 @@ public class NeoNodeKeyTable implements NodeKeyTable {
     // ----------------------------------------------------
 
     @Override
-    public NeoPhysicalNodeID lookup(QualifiedName qn) {
+    public NumericPhysicalNodeID lookup(QualifiedName qn) {
         Node node = lookupSingleNode(qn);
         if (node != null) {
-            return new NeoPhysicalNodeID(node.getId());
+            return new NumericPhysicalNodeID(node.getId());
         } else {
             return null;
         }
@@ -68,8 +68,8 @@ public class NeoNodeKeyTable implements NodeKeyTable {
 
     @Override
     public void put(QualifiedName qn, PhysicalNodeID physicalID) {
-        NeoPhysicalNodeID neoNodeID = (NeoPhysicalNodeID) physicalID;
-        Node node = gdbService.getNodeById(neoNodeID.getId());
+        NumericPhysicalNodeID neoNodeID = (NumericPhysicalNodeID) physicalID;
+        Node node = gdbService.getNodeById(neoNodeID.asLong());
         put(qn, node);
     }
 

@@ -16,22 +16,24 @@
  */
 package org.arastreju.bindings.neo4j.storage;
 
-import org.arastreju.bindings.neo4j.extensions.NeoPhysicalNodeID;
-import org.arastreju.bindings.neo4j.extensions.SNValueNeo;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.context.Context;
 import org.arastreju.sge.context.SimpleContextID;
 import org.arastreju.sge.model.DetachedStatement;
+import org.arastreju.sge.model.ElementaryDataType;
 import org.arastreju.sge.model.SimpleResourceID;
 import org.arastreju.sge.model.StatementMetaInfo;
 import org.arastreju.sge.model.associations.AttachedAssociationKeeper;
 import org.arastreju.sge.model.nodes.ResourceNode;
+import org.arastreju.sge.model.nodes.SNValue;
 import org.arastreju.sge.model.nodes.SemanticNode;
+import org.arastreju.sge.model.nodes.ValueNode;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.persistence.ResourceResolver;
 import org.arastreju.sge.spi.AssociationResolver;
 import org.arastreju.sge.spi.AttachedResourceNode;
 import org.arastreju.sge.spi.WorkingContext;
+import org.arastreju.sge.spi.impl.NumericPhysicalNodeID;
 import org.arastreju.sge.spi.uow.ResourceResolverImpl;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
@@ -41,6 +43,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Locale;
 
 import static org.arastreju.sge.SNOPS.id;
 
@@ -58,8 +61,6 @@ import static org.arastreju.sge.SNOPS.id;
 public class NeoAssociationResolver implements AssociationResolver, NeoConstants {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(NeoAssociationResolver.class);
-
-    public static final Context[] NO_CTX = new Context[0];
 
     // ----------------------------------------------------
 
@@ -100,7 +101,7 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
 			if (rel.isType(ArasRelationshipType.REFERENCE)){
 				object = resolve(rel.getEndNode());
 			} else if (rel.isType(ArasRelationshipType.VALUE)){
-				object = new SNValueNeo(rel.getEndNode());
+				object = toValueNode(rel.getEndNode());
 			}
 			final ResourceNode predicate = resourceResolver.resolve(new SimpleResourceID(rel.getProperty(PREDICATE_URI).toString()));
 			final StatementMetaInfo mi = new StatementMetaInfo(ctx, new Date((Long)rel.getProperty(TIMESTAMP, 0L)));
@@ -160,7 +161,7 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
         if (rel.isType(ArasRelationshipType.REFERENCE)){
             return resolve(node);
         } else if (rel.isType(ArasRelationshipType.VALUE)){
-            return new SNValueNeo(node);
+            return toValueNode(node);
         } else {
             return null;
         }
@@ -174,7 +175,7 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
         final QualifiedName qn = QualifiedName.create(uriProperty.toString());
         AttachedAssociationKeeper keeper = convContext.lookup(qn);
         if (keeper == null){
-            keeper = new AttachedAssociationKeeper(qn, new NeoPhysicalNodeID(neoNode));
+            keeper = new AttachedAssociationKeeper(qn, new NumericPhysicalNodeID(neoNode.getId()));
             convContext.attach(qn, keeper);
         }
         return new AttachedResourceNode(qn, keeper);
@@ -182,6 +183,37 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
 
     private boolean exists(QualifiedName qn) {
         return store.find(qn) != null;
+    }
+
+    private ValueNode toValueNode(Node neoNode) {
+        return new SNValue(getDatatype(neoNode), neoNode.getProperty(PROPERTY_VALUE), getLocale(neoNode));
+    }
+
+    /**
+     * @param neoNode The Neo Node.
+     * @return The corresponding datatype.
+     */
+    private ElementaryDataType getDatatype(final Node neoNode) {
+        final String datatypeName = (String) neoNode.getProperty(PROPERTY_DATATYPE);
+        return ElementaryDataType.valueOf(datatypeName);
+    }
+
+    /**
+     * @param neoNode The Neo Node.
+     * @return The corresponding datatype.
+     */
+    private Locale getLocale(final Node neoNode) {
+        if (!neoNode.hasProperty(PROPERTY_LOCALE)) {
+            return null;
+        }
+        final String localeName = (String) neoNode.getProperty(PROPERTY_LOCALE);
+        String language = localeName.substring(0, 2);
+        if (localeName.length() >= 5 ) {
+            String country = localeName.substring(3, 5);
+            return new Locale(language, country);
+        } else {
+            return new Locale(language);
+        }
     }
 
 }

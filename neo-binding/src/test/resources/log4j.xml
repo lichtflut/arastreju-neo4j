@@ -35,7 +35,7 @@
 		<level value="warn" />
 	</logger>
     
-    <logger name="org.arastreju.bindings.neo4j.extensions.NeoConversationContext">
+    <logger name="org.arastreju.sge.spi.impl.WorkingContextImpl">
         <level value="info" />
     </logger>
 

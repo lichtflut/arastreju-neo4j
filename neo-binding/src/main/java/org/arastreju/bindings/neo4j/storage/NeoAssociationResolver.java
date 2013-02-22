@@ -16,9 +16,8 @@
  */
 package org.arastreju.bindings.neo4j.storage;
 
-import org.arastreju.bindings.neo4j.extensions.SNValueNeo;
-import org.arastreju.bindings.neo4j.extensions.NeoConversationContext;
 import org.arastreju.bindings.neo4j.extensions.NeoPhysicalNodeID;
+import org.arastreju.bindings.neo4j.extensions.SNValueNeo;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.context.Context;
 import org.arastreju.sge.context.SimpleContextID;
@@ -32,6 +31,7 @@ import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.persistence.ResourceResolver;
 import org.arastreju.sge.spi.AssociationResolver;
 import org.arastreju.sge.spi.AttachedResourceNode;
+import org.arastreju.sge.spi.WorkingContext;
 import org.arastreju.sge.spi.uow.ResourceResolverImpl;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
@@ -63,7 +63,7 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
 
     // ----------------------------------------------------
 
-    private final NeoConversationContext convContext;
+    private final WorkingContext convContext;
 
 	private final ResourceResolver resourceResolver;
 
@@ -76,7 +76,7 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
 	 * @param conversationContext The current working context.
      * @param store The physical store.
 	 */
-	public NeoAssociationResolver(NeoConversationContext conversationContext, NeoGraphDataStore store) {
+	public NeoAssociationResolver(WorkingContext conversationContext, NeoGraphDataStore store) {
         this.convContext = conversationContext;
 		this.resourceResolver = new ResourceResolverImpl(conversationContext);
         this.store = store;
@@ -97,9 +97,9 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
 				continue;
 			}
 			SemanticNode object = null;
-			if (rel.isType(ArasRelTypes.REFERENCE)){
+			if (rel.isType(ArasRelationshipType.REFERENCE)){
 				object = resolve(rel.getEndNode());
-			} else if (rel.isType(ArasRelTypes.VALUE)){
+			} else if (rel.isType(ArasRelationshipType.VALUE)){
 				object = new SNValueNeo(rel.getEndNode());
 			}
 			final ResourceNode predicate = resourceResolver.resolve(new SimpleResourceID(rel.getProperty(PREDICATE_URI).toString()));
@@ -157,9 +157,9 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
 	}
 
     private SemanticNode convert(Relationship rel, Node node) {
-        if (rel.isType(ArasRelTypes.REFERENCE)){
+        if (rel.isType(ArasRelationshipType.REFERENCE)){
             return resolve(node);
-        } else if (rel.isType(ArasRelTypes.VALUE)){
+        } else if (rel.isType(ArasRelationshipType.VALUE)){
             return new SNValueNeo(node);
         } else {
             return null;

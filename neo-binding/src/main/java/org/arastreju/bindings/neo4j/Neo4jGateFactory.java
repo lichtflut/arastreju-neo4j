@@ -24,7 +24,8 @@ import org.arastreju.sge.index.IndexProvider;
 import org.arastreju.sge.spi.ArastrejuGateFactory;
 import org.arastreju.sge.spi.GateInitializationException;
 import org.arastreju.sge.spi.GraphDataConnection;
-import org.arastreju.sge.spi.abstracts.DefaultGraphDataConnection;
+import org.arastreju.sge.spi.impl.ArastrejuGateImpl;
+import org.arastreju.sge.spi.impl.GraphDataConnectionImpl;
 
 import java.io.IOException;
 
@@ -58,7 +59,7 @@ public class Neo4jGateFactory extends ArastrejuGateFactory {
 	public synchronized ArastrejuGate create(final DomainIdentifier domainIdentifier) throws GateInitializationException {
 		try {
             final GraphDataConnection connection = openConnection(domainIdentifier);
-            final Neo4jGate gate = new Neo4jGate(domainIdentifier, connection);
+            final ArastrejuGate gate = new ArastrejuGateImpl(connection, domainIdentifier);
 			getProfile().onOpen(gate);
 			return gate;
 		} catch (IOException e) {
@@ -77,7 +78,7 @@ public class Neo4jGateFactory extends ArastrejuGateFactory {
     private GraphDataConnection openConnection(DomainIdentifier ctx) throws IOException {
         final NeoGraphDataStore store = getOrCreateStore(ctx);
         IndexProvider indexProvider = new IndexProvider(store.getStorageDir());
-        return new DefaultGraphDataConnection(store, indexProvider);
+        return new GraphDataConnectionImpl(store, indexProvider);
     }
 
     private NeoGraphDataStore getOrCreateStore(DomainIdentifier domainIdentifier) throws IOException {

@@ -16,8 +16,6 @@
  */
 package org.arastreju.bindings.neo4j.it;
 
-import org.arastreju.bindings.neo4j.NeoConversation;
-import org.arastreju.bindings.neo4j.extensions.NeoConversationContext;
 import org.arastreju.bindings.neo4j.storage.NeoGraphDataStore;
 import org.arastreju.sge.Conversation;
 import org.arastreju.sge.ConversationContext;
@@ -45,7 +43,9 @@ import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.query.Query;
 import org.arastreju.sge.query.QueryResult;
 import org.arastreju.sge.spi.GraphDataConnection;
-import org.arastreju.sge.spi.abstracts.DefaultGraphDataConnection;
+import org.arastreju.sge.spi.impl.ConversationImpl;
+import org.arastreju.sge.spi.impl.GraphDataConnectionImpl;
+import org.arastreju.sge.spi.impl.WorkingContextImpl;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -73,7 +73,7 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * <p>
- *  Test case for the {@link org.arastreju.bindings.neo4j.NeoConversation}.
+ *  Black box tests against conversation using Neo4J backend.
  * </p>
  *
  * <p>
@@ -101,8 +101,8 @@ public class NeoConversationTest {
 	@Before
 	public void setUp() throws Exception {
 		store = new NeoGraphDataStore();
-		connection = new DefaultGraphDataConnection(store, new IndexProvider(store.getStorageDir()));
-		conversation = new NeoConversation(new NeoConversationContext(connection));
+		connection = new GraphDataConnectionImpl(store, new IndexProvider(store.getStorageDir()));
+		conversation = new ConversationImpl(new WorkingContextImpl(connection));
 	}
 
 	@After

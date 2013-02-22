@@ -17,8 +17,8 @@
 package org.arastreju.bindings.neo4j.it;
 
 import junit.framework.Assert;
-import org.arastreju.bindings.neo4j.Neo4jGate;
 import org.arastreju.bindings.neo4j.storage.NeoGraphDataStore;
+import org.arastreju.sge.ArastrejuGate;
 import org.arastreju.sge.Conversation;
 import org.arastreju.sge.context.Context;
 import org.arastreju.sge.context.PhysicalDomain;
@@ -33,7 +33,8 @@ import org.arastreju.sge.naming.Namespace;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.organize.Organizer;
 import org.arastreju.sge.spi.GraphDataConnection;
-import org.arastreju.sge.spi.abstracts.DefaultGraphDataConnection;
+import org.arastreju.sge.spi.impl.ArastrejuGateImpl;
+import org.arastreju.sge.spi.impl.GraphDataConnectionImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -69,15 +70,15 @@ public class NeoOrganizerTest {
 	private Organizer organizer;
 	private NeoGraphDataStore store;
 	private GraphDataConnection connection;
-    private Neo4jGate gate;
+    private ArastrejuGate gate;
 
     // -----------------------------------------------------
 
 	@Before
 	public void setUp() throws Exception {
 		store = new NeoGraphDataStore();
-		connection = new DefaultGraphDataConnection(store, new IndexProvider(store.getStorageDir()));
-        gate = new Neo4jGate(new PhysicalDomain("test"), connection);
+		connection = new GraphDataConnectionImpl(store, new IndexProvider(store.getStorageDir()));
+        gate = new ArastrejuGateImpl(connection, new PhysicalDomain("test"));
         organizer = new Organizer(gate);
 	}
 	

@@ -30,7 +30,7 @@ import java.util.List;
 
 /**
  * <p>
- *  Test case for multithreading.
+ *  Test case for multi threading.
  * </p>
  *
  * <p>
@@ -41,22 +41,22 @@ import java.util.List;
  */
 public class MultiThreadingTest {
 	
-	/**
-	 * Constructor.
-	 */
-	public MultiThreadingTest(final int numberOfThreads) {
-		
-		for(int i = 0; i < numberOfThreads; i++) {
-			final Thread t = new Thread(new Worker(Arastreju.getInstance().openMasterGate()));
-			t.start();
-			System.out.println("Startet Thread: " + t.getId());
-		}
-	}
+	public MultiThreadingTest() {}
+
+    // ----------------------------------------------------
+
+    public void start(int numberOfThreads) {
+        for(int i = 0; i < numberOfThreads; i++) {
+            final Thread t = new Thread(new Worker(Arastreju.getInstance().openMasterGate()));
+            t.start();
+            System.out.println("Startet Thread: " + t.getId());
+        }
+    }
 	
 	// -----------------------------------------------------
 	
 	public static void main(String[] args) {
-		new MultiThreadingTest(10);
+		new MultiThreadingTest().start(10);
 	}
 	
 	// -----------------------------------------------------
@@ -75,7 +75,7 @@ public class MultiThreadingTest {
 			
 			final TransactionControl txc = mc.beginTransaction();
 			
-			final SNClass clazz = createClass();
+			final SNClass clazz = new SNClass();
 			mc.attach(clazz);
 			
 			for (int i = 1; i <= (1000); i++) {
@@ -91,11 +91,6 @@ public class MultiThreadingTest {
 			txc.commit();
 			
 			System.out.println("Thread '" + Thread.currentThread().getId() + "' finished.");
-		}
-		
-		public SNClass createClass() {
-			SNClass clazz = new SNClass();
-			return clazz;
 		}
 		
 	}

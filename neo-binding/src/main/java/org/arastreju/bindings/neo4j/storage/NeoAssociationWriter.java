@@ -104,7 +104,7 @@ public class NeoAssociationWriter implements AssociationWriter, NeoConstants {
     }
 
     private void createRelationship(final Node subject, final Node object, final Statement stmt) {
-        final RelationshipType type = stmt.getObject().isResourceNode() ? ArasRelTypes.REFERENCE : ArasRelTypes.VALUE;
+        final RelationshipType type = stmt.getObject().isResourceNode() ? ArasRelationshipType.REFERENCE : ArasRelationshipType.VALUE;
         try {
             final Relationship relationship = subject.createRelationshipTo(object, type);
             relationship.setProperty(PREDICATE_URI, stmt.getPredicate().toURI());

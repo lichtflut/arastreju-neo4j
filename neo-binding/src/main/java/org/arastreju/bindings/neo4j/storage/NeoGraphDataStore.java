@@ -22,8 +22,11 @@ import org.arastreju.sge.ArastrejuProfile;
 import org.arastreju.sge.model.associations.AttachedAssociationKeeper;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.persistence.TxProvider;
+import org.arastreju.sge.spi.AssociationResolver;
+import org.arastreju.sge.spi.AssociationWriter;
 import org.arastreju.sge.spi.GraphDataStore;
 import org.arastreju.sge.spi.ProfileCloseListener;
+import org.arastreju.sge.spi.WorkingContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -119,6 +122,16 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
     }
 
     @Override
+    public AssociationResolver createAssociationResolver(WorkingContext ctx) {
+        return new NeoAssociationResolver(ctx, this);
+    }
+
+    @Override
+    public AssociationWriter crateAssociationWriter(WorkingContext ctx) {
+        return new NeoAssociationWriter(ctx, this);
+    }
+
+    @Override
     public TxProvider getTxProvider() {
         return txProvider;
     }
@@ -139,13 +152,6 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
     public String getStorageDir() {
         return storageDir;
     }
-
-	/**
-	 * @return the gdbService
-	 */
-	public GraphDatabaseService getGdbService() {
-		return gdbService;
-	}
 
     public Node getNeoNode(QualifiedName qn) {
         NeoPhysicalNodeID id = keyTable.lookup(qn);

@@ -43,6 +43,7 @@ import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.query.Query;
 import org.arastreju.sge.query.QueryResult;
 import org.arastreju.sge.spi.GraphDataConnection;
+import org.arastreju.sge.spi.GraphDataStore;
 import org.arastreju.sge.spi.impl.ConversationImpl;
 import org.arastreju.sge.spi.impl.GraphDataConnectionImpl;
 import org.arastreju.sge.spi.impl.WorkingContextImpl;
@@ -92,7 +93,7 @@ public class NeoConversationTest {
     private final QualifiedName qnHasEmployees = new QualifiedName("http://q#", "hasEmployees");
     private final QualifiedName qnKnows = new QualifiedName("http://q#", "knows");
 
-	private NeoGraphDataStore store;
+	private GraphDataStore store;
     private GraphDataConnection connection;
 	private Conversation conversation;
 
@@ -100,9 +101,10 @@ public class NeoConversationTest {
 
 	@Before
 	public void setUp() throws Exception {
-		store = new NeoGraphDataStore();
-		connection = new GraphDataConnectionImpl(store, new IndexProvider(store.getStorageDir()));
+        NeoGraphDataStore neoStore = new NeoGraphDataStore();
+		connection = new GraphDataConnectionImpl(store, new IndexProvider(neoStore.getStorageDir()));
 		conversation = new ConversationImpl(new WorkingContextImpl(connection));
+        store = neoStore;
 	}
 
 	@After

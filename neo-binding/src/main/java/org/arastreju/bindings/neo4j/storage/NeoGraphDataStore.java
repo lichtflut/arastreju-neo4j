@@ -136,15 +136,16 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
         return txProvider;
     }
 
+    @Override
+    public void close() {
+        gdbService.shutdown();
+    }
+
     // -- ProfileCloseListener ----------------------------
 
     @Override
     public void onClosed(final ArastrejuProfile profile) {
         close();
-    }
-
-    public void close() {
-        gdbService.shutdown();
     }
 
     // -- Neo Specifics -----------------------------------

@@ -26,6 +26,7 @@ import org.arastreju.sge.spi.GateInitializationException;
 import org.arastreju.sge.spi.GraphDataConnection;
 import org.arastreju.sge.spi.impl.ArastrejuGateImpl;
 import org.arastreju.sge.spi.impl.GraphDataConnectionImpl;
+import org.arastreju.sge.spi.util.FileStoreUtil;
 
 import java.io.IOException;
 
@@ -119,7 +120,7 @@ public class Neo4jGateFactory extends ArastrejuGateFactory {
             String basedir = profile.getProperty(ArastrejuProfile.ARAS_STORE_DIRECTORY);
             return new NeoGraphDataStore(basedir + "/" + store);
         } else {
-            return new NeoGraphDataStore(NeoGraphDataStore.prepareTempStore(store));
+            return new NeoGraphDataStore(FileStoreUtil.prepareTempStore(store));
         }
     }
 

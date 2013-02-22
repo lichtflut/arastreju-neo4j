@@ -17,23 +17,10 @@
 package org.arastreju.bindings.neo4j.it;
 
 import org.arastreju.bindings.neo4j.storage.NeoGraphDataStore;
-import org.arastreju.sge.index.IndexProvider;
 import org.arastreju.sge.spi.AbstractConversationTest;
-import org.arastreju.sge.spi.impl.ConversationImpl;
-import org.arastreju.sge.spi.impl.GraphDataConnectionImpl;
-import org.arastreju.sge.spi.impl.WorkingContextImpl;
-import org.junit.Before;
+import org.arastreju.sge.spi.GraphDataStore;
 
-import static org.arastreju.sge.SNOPS.objects;
-import static org.arastreju.sge.SNOPS.remove;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
+import java.io.IOException;
 
 /**
  * <p>
@@ -48,13 +35,9 @@ import static org.junit.Assert.assertTrue;
  */
 public class NeoConversationTest extends AbstractConversationTest {
 
-	@Override
-    @Before
-	public void setUp() throws Exception {
-        NeoGraphDataStore neoStore = new NeoGraphDataStore();
-        store = neoStore;
-		connection = new GraphDataConnectionImpl(store, new IndexProvider(neoStore.getStorageDir()));
-		conversation = new ConversationImpl(new WorkingContextImpl(connection));
-	}
+    @Override
+    protected GraphDataStore createStore() throws IOException {
+        return new NeoGraphDataStore();
+    }
 
 }

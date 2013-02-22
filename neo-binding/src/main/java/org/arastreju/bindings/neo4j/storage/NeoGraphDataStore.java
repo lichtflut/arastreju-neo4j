@@ -27,6 +27,7 @@ import org.arastreju.sge.spi.GraphDataStore;
 import org.arastreju.sge.spi.ProfileCloseListener;
 import org.arastreju.sge.spi.WorkingContext;
 import org.arastreju.sge.spi.impl.NumericPhysicalNodeID;
+import org.arastreju.sge.spi.util.FileStoreUtil;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -66,7 +67,7 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
 	 * Default constructor. Will use a <b>temporary</b> datastore!.
 	 */
 	public NeoGraphDataStore() throws IOException {
-		this(prepareTempStore());
+		this(FileStoreUtil.prepareTempStore());
 	}
 	
 	/**
@@ -121,6 +122,8 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
         }
     }
 
+    // ----------------------------------------------------
+
     @Override
     public AssociationResolver createAssociationResolver(WorkingContext ctx) {
         return new NeoAssociationResolver(ctx, this);
@@ -162,25 +165,5 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
             return null;
         }
     }
-
-	// -----------------------------------------------------
-	
-	public static String prepareTempStore(String domain) throws IOException {
-		final File temp = File.createTempFile(domain, Long.toString(System.nanoTime()));
-		if (!temp.delete()) {
-			throw new IOException("Could not delete temp file: "
-					+ temp.getAbsolutePath());
-		}
-		if (!temp.mkdir()) {
-			throw new IOException("Could not create temp directory: "
-					+ temp.getAbsolutePath());
-		}
-		
-		return temp.getAbsolutePath();
-	}
-	
-	private static String prepareTempStore() throws IOException {
-		return prepareTempStore("default");
-	}
 
 }

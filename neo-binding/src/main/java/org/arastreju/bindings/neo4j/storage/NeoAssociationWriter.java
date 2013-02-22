@@ -22,8 +22,7 @@ import org.arastreju.sge.context.Context;
 import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.model.nodes.ValueNode;
-import org.arastreju.sge.naming.QualifiedName;
-import org.arastreju.sge.spi.AssociationWriter;
+import org.arastreju.sge.spi.impl.AbstractAssociationWriter;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -31,11 +30,8 @@ import org.neo4j.graphdb.RelationshipType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Locale;
-import java.util.Set;
 
 /**
  * <p>
@@ -48,18 +44,16 @@ import java.util.Set;
  *
  * @author Oliver Tigges
  */
-public class NeoAssociationWriter implements AssociationWriter, NeoConstants {
+public class NeoAssociationWriter extends AbstractAssociationWriter implements NeoConstants {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NeoAssociationWriter.class);
-
-    private final ConversationContext convContext;
 
     private final NeoGraphDataStore store;
 
     // ----------------------------------------------------
 
     public NeoAssociationWriter(ConversationContext convContext, NeoGraphDataStore store) {
-        this.convContext = convContext;
+        super(convContext, store);
         this.store = store;
     }
 
@@ -148,23 +142,6 @@ public class NeoAssociationWriter implements AssociationWriter, NeoConstants {
         node.setProperty(PROPERTY_LOCALE, sb.toString());
     }
 
-    private Context[] getCurrentContexts(Statement stmt) {
-        if (stmt.getContexts().length == 0) {
-            if (convContext.getPrimaryContext() == null) {
-                return NO_CTX;
-            } else {
-                return new Context[] { convContext.getPrimaryContext() };
-            }
-        } else if (convContext.getPrimaryContext() == null) {
-            return stmt.getContexts();
-        } else {
-            Set<Context> joined = new HashSet<Context>();
-            joined.add(convContext.getPrimaryContext());
-            Collections.addAll(joined, stmt.getContexts());
-            return joined.toArray(new Context[joined.size()]);
-        }
-    }
-
     /**
      * Assigns context information to a relationship.
      * @param relationship The relationship to be assigned to the contexts.
@@ -178,18 +155,6 @@ public class NeoAssociationWriter implements AssociationWriter, NeoConstants {
                 uris[i] = contexts[i].toURI();
             }
             relationship.setProperty(NeoConstants.CONTEXT_URI, uris);
-        }
-    }
-
-    // ----------------------------------------------------
-
-    private boolean exists(QualifiedName qn) {
-        return store.find(qn) != null;
-    }
-
-    private void assureExists(QualifiedName qn) {
-        if (!exists(qn)) {
-            store.create(qn);
         }
     }
 

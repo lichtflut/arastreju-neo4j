@@ -16,12 +16,14 @@
  */
 package org.arastreju.bindings.neo4j.extensions;
 
-import org.arastreju.bindings.neo4j.storage.AssociationResolver;
+import org.arastreju.sge.spi.AssociationResolver;
+import org.arastreju.bindings.neo4j.storage.NeoAssociationResolver;
+import org.arastreju.bindings.neo4j.storage.NeoAssociationWriter;
 import org.arastreju.bindings.neo4j.storage.NeoGraphDataStore;
-import org.arastreju.bindings.neo4j.storage.RelationshipManager;
 import org.arastreju.sge.inferencing.implicit.InverseOfInferencer;
 import org.arastreju.sge.model.associations.AttachedAssociationKeeper;
 import org.arastreju.sge.persistence.ResourceResolver;
+import org.arastreju.sge.spi.GraphDataConnection;
 import org.arastreju.sge.spi.abstracts.AbstractConversationContext;
 import org.arastreju.sge.spi.abstracts.AssociationManager;
 import org.arastreju.sge.spi.uow.IndexUpdateUOW;
@@ -51,9 +53,10 @@ public class NeoConversationContext extends AbstractConversationContext {
 	 * Creates a new Working Context.
 	 * @param connection The connection.
 	 */
-	public NeoConversationContext(NeoGraphDataConnection connection) {
+	public NeoConversationContext(GraphDataConnection connection) {
         super(connection);
-        this.resolver = new AssociationResolver(this, connection.getStore());
+        NeoGraphDataStore store = (NeoGraphDataStore) getConnection().getStore();
+        this.resolver = new NeoAssociationResolver(this, store);
         this.manager = createAssociationManager();
 	}
 
@@ -82,7 +85,7 @@ public class NeoConversationContext extends AbstractConversationContext {
         ResourceResolver resolver = new ResourceResolverImpl(this);
         NeoGraphDataStore store = (NeoGraphDataStore) getConnection().getStore();
         AssociationManager am = new AssociationManager(resolver);
-        am.register(new RelationshipManager(this, store));
+        am.register(new NeoAssociationWriter(this, store));
         am.register(new IndexUpdateUOW(getIndexUpdator()));
         am.register(new InferencingInterceptor(am).add(new InverseOfInferencer(resolver)));
         am.register(new OpenConversationNotifier(getConnection(), this));

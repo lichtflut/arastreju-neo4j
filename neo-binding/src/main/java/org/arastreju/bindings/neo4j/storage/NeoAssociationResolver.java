@@ -30,6 +30,7 @@ import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.model.nodes.SemanticNode;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.persistence.ResourceResolver;
+import org.arastreju.sge.spi.AssociationResolver;
 import org.arastreju.sge.spi.AttachedResourceNode;
 import org.arastreju.sge.spi.uow.ResourceResolverImpl;
 import org.neo4j.graphdb.Direction;
@@ -54,9 +55,9 @@ import static org.arastreju.sge.SNOPS.id;
  *
  * @author Oliver Tigges
  */
-public class AssociationResolver implements NeoConstants {
+public class NeoAssociationResolver implements AssociationResolver, NeoConstants {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(AssociationResolver.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(NeoAssociationResolver.class);
 
     public static final Context[] NO_CTX = new Context[0];
 
@@ -75,7 +76,7 @@ public class AssociationResolver implements NeoConstants {
 	 * @param conversationContext The current working context.
      * @param store The physical store.
 	 */
-	public AssociationResolver(NeoConversationContext conversationContext, NeoGraphDataStore store) {
+	public NeoAssociationResolver(NeoConversationContext conversationContext, NeoGraphDataStore store) {
         this.convContext = conversationContext;
 		this.resourceResolver = new ResourceResolverImpl(conversationContext);
         this.store = store;
@@ -87,7 +88,8 @@ public class AssociationResolver implements NeoConstants {
 	 * Resolve the associations of given association keeper.
 	 * @param keeper The association keeper to be resolved.
 	 */
-	public void resolveAssociations(AttachedAssociationKeeper keeper) {
+	@Override
+    public void resolveAssociations(AttachedAssociationKeeper keeper) {
         final Node neoNode = store.getNeoNode(keeper.getQualifiedName());
         for(Relationship rel : neoNode.getRelationships(Direction.OUTGOING)){
 			final Context[] ctx = getContextInfo(rel);

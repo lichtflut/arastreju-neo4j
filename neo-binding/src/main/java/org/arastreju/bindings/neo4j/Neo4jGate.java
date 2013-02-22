@@ -17,13 +17,13 @@
 package org.arastreju.bindings.neo4j;
 
 import org.arastreju.bindings.neo4j.extensions.NeoConversationContext;
-import org.arastreju.bindings.neo4j.extensions.NeoGraphDataConnection;
 import org.arastreju.sge.ArastrejuGate;
 import org.arastreju.sge.Conversation;
-import org.arastreju.sge.context.Context;
 import org.arastreju.sge.context.DomainIdentifier;
 import org.arastreju.sge.spi.GateInitializationException;
+import org.arastreju.sge.spi.GraphDataConnection;
 import org.arastreju.sge.spi.abstracts.AbstractArastrejuGate;
+import org.arastreju.sge.spi.abstracts.WorkingContext;
 
 /**
  * <p>
@@ -38,46 +38,25 @@ import org.arastreju.sge.spi.abstracts.AbstractArastrejuGate;
  */
 public class Neo4jGate extends AbstractArastrejuGate {
 
-	private final NeoGraphDataConnection connection;
-	
-	// -----------------------------------------------------
-
 	/**
 	 * Initialize default gate.
 	 * @param domainIdentifier The gate context.
      * @param connection The connection to the graph data store.
 	 */
-	public Neo4jGate(DomainIdentifier domainIdentifier, NeoGraphDataConnection connection) throws GateInitializationException {
-        super(domainIdentifier);
-		this.connection = connection;
+	public Neo4jGate(DomainIdentifier domainIdentifier, GraphDataConnection connection)
+            throws GateInitializationException {
+        super(connection, domainIdentifier);
 	}
 	
 	// -----------------------------------------------------
 
     @Override
-	public Conversation startConversation() {
-        return new NeoConversation(newConversationContext());
-	}
-
-    @Override
-    public Conversation startConversation(Context primary, Context... readContexts) {
-        NeoConversationContext cc = new NeoConversationContext(connection);
-        cc.setPrimaryContext(primary);
-        cc.setReadContexts(readContexts);
-        return new NeoConversation(cc);
+    protected WorkingContext newWorkingContext(GraphDataConnection connection) {
+        return new NeoConversationContext(connection);
     }
 
     @Override
-	public void close() {
-		connection.close();
-	}
-
-    // ----------------------------------------------------
-
-    public NeoConversationContext newConversationContext() {
-        NeoConversationContext cc = new NeoConversationContext(connection);
-        super.initContext(cc);
-        return cc;
+    protected Conversation newConversation(WorkingContext ctx) {
+        return new NeoConversation(ctx);
     }
-
 }

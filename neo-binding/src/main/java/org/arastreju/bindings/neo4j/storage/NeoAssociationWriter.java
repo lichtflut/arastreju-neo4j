@@ -23,7 +23,7 @@ import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.model.nodes.ValueNode;
 import org.arastreju.sge.naming.QualifiedName;
-import org.arastreju.sge.spi.AssociationListener;
+import org.arastreju.sge.spi.AssociationWriter;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -48,9 +48,9 @@ import java.util.Set;
  *
  * @author Oliver Tigges
  */
-public class RelationshipManager implements AssociationListener, NeoConstants {
+public class NeoAssociationWriter implements AssociationWriter, NeoConstants {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RelationshipManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NeoAssociationWriter.class);
 
     public static final Context[] NO_CTX = new Context[0];
 
@@ -60,7 +60,7 @@ public class RelationshipManager implements AssociationListener, NeoConstants {
 
     // ----------------------------------------------------
 
-    public RelationshipManager(ConversationContext convContext, NeoGraphDataStore store) {
+    public NeoAssociationWriter(ConversationContext convContext, NeoGraphDataStore store) {
         this.convContext = convContext;
         this.store = store;
     }

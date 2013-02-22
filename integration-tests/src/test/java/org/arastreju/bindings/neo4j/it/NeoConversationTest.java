@@ -18,7 +18,6 @@ package org.arastreju.bindings.neo4j.it;
 
 import org.arastreju.bindings.neo4j.NeoConversation;
 import org.arastreju.bindings.neo4j.extensions.NeoConversationContext;
-import org.arastreju.bindings.neo4j.extensions.NeoGraphDataConnection;
 import org.arastreju.bindings.neo4j.storage.NeoGraphDataStore;
 import org.arastreju.sge.Conversation;
 import org.arastreju.sge.ConversationContext;
@@ -45,6 +44,8 @@ import org.arastreju.sge.model.nodes.views.SNText;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.query.Query;
 import org.arastreju.sge.query.QueryResult;
+import org.arastreju.sge.spi.GraphDataConnection;
+import org.arastreju.sge.spi.abstracts.DefaultGraphDataConnection;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -92,7 +93,7 @@ public class NeoConversationTest {
     private final QualifiedName qnKnows = new QualifiedName("http://q#", "knows");
 
 	private NeoGraphDataStore store;
-    private NeoGraphDataConnection connection;
+    private GraphDataConnection connection;
 	private Conversation conversation;
 
 	// -----------------------------------------------------
@@ -100,7 +101,7 @@ public class NeoConversationTest {
 	@Before
 	public void setUp() throws Exception {
 		store = new NeoGraphDataStore();
-		connection = new NeoGraphDataConnection(store, new IndexProvider(store.getStorageDir()));
+		connection = new DefaultGraphDataConnection(store, new IndexProvider(store.getStorageDir()));
 		conversation = new NeoConversation(new NeoConversationContext(connection));
 	}
 

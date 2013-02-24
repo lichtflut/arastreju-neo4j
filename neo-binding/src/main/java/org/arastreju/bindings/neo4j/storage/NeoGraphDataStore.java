@@ -57,8 +57,6 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
 
     private final NeoNodeKeyTable keyTable;
 
-    private final TxProvider txProvider;
-
     private final String storageDir;
 
     // -----------------------------------------------------
@@ -83,7 +81,6 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
         }
 		gdbService = new EmbeddedGraphDatabase(dir); 
         keyTable = new NeoNodeKeyTable(gdbService,  gdbService.index());
-        txProvider = new NeoTxProvider(gdbService);
 	}
 	
 	// -- GraphDataStore ----------------------------------
@@ -135,8 +132,8 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
     }
 
     @Override
-    public TxProvider getTxProvider() {
-        return txProvider;
+    public TxProvider createTxProvider(WorkingContext ctx) {
+        return new NeoTxProvider(gdbService);
     }
 
     @Override

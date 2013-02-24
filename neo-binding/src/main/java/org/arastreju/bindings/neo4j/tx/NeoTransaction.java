@@ -57,20 +57,17 @@ class NeoTransaction extends AbstractTransactionControl {
 	// -----------------------------------------------------
 	
 	@Override
-	public void success() {
-		assertTxActive();
+	public void onSuccess() {
 		tx.success();
 	}
 
     @Override
-	public void fail() {
-		assertTxActive();
+	public void onFail() {
 		tx.failure();
 	}
 
     @Override
-	public void finish() {
-		assertTxActive();
+	public void onFinish() {
 		tx.finish();
 		tx = null;
 	}

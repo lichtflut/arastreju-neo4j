@@ -16,7 +16,7 @@
  */
 package org.arastreju.bindings.neo4j.tx;
 
-import org.arastreju.sge.persistence.TransactionControl;
+import org.arastreju.sge.spi.tx.AbstractTransactionControl;
 import org.neo4j.graphdb.Transaction;
 
 /**
@@ -30,10 +30,10 @@ import org.neo4j.graphdb.Transaction;
  *
  * @author Oliver Tigges
  */
-class NeoTransaction implements TransactionControl {
+class NeoTransaction extends AbstractTransactionControl {
 
 	private Transaction tx;
-	
+
 	// -----------------------------------------------------
 
 	/**
@@ -49,6 +49,7 @@ class NeoTransaction implements TransactionControl {
 	/**
 	 * @return true if the transaction is active.
 	 */
+    @Override
 	public boolean isActive() {
 		return tx != null;
 	}
@@ -77,28 +78,7 @@ class NeoTransaction implements TransactionControl {
 	// ----------------------------------------------------
 
     @Override
-	public void commit() {
-		success();
-		finish();
-	}
-
-    @Override
-	public void rollback() {
-		fail();
-		finish();
-	}
-	
-	// ----------------------------------------------------
-
-    @Override
 	public void flush() {
 	}
-	
-	// ----------------------------------------------------
-	
-	protected void assertTxActive() {
-		if (!isActive()) {
-			throw new IllegalStateException("Transaction has already been closed.");
-		}
-	}
+
 }

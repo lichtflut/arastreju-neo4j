@@ -16,9 +16,8 @@
  */
 package org.arastreju.bindings.neo4j.tx;
 
-import org.arastreju.sge.persistence.SubTransaction;
-import org.arastreju.sge.persistence.TransactionControl;
-import org.arastreju.sge.persistence.TxProvider;
+import org.arastreju.sge.spi.tx.AbstractTxProvider;
+import org.arastreju.sge.spi.tx.BoundTransactionControl;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 /**
@@ -32,7 +31,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
  *
  * @author Oliver Tigges
  */
-public class NeoTxProvider extends TxProvider {
+public class NeoTxProvider extends AbstractTxProvider {
 	
 	private final GraphDatabaseService gdbService;
 	
@@ -49,12 +48,8 @@ public class NeoTxProvider extends TxProvider {
 	// -----------------------------------------------------
 
     @Override
-    protected TransactionControl newTx() {
+    protected BoundTransactionControl newTx() {
         return new NeoTransaction(gdbService.beginTx());
     }
 
-    @Override
-    protected TransactionControl newSubTx(TransactionControl tx) {
-        return new SubTransaction(tx);
-    }
 }

@@ -17,8 +17,8 @@
 package org.arastreju.bindings.neo4j.it;
 
 import org.arastreju.bindings.neo4j.storage.NeoGraphDataStore;
-import org.arastreju.sge.spi.AbstractConversationTest;
 import org.arastreju.sge.spi.GraphDataStore;
+import org.arastreju.tck.AbstractConversationTest;
 
 import java.io.IOException;
 

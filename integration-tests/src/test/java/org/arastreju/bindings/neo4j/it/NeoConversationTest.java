@@ -17,8 +17,18 @@
 package org.arastreju.bindings.neo4j.it;
 
 import org.arastreju.bindings.neo4j.storage.NeoGraphDataStore;
+import org.arastreju.sge.SNOPS;
+import org.arastreju.sge.apriori.Aras;
+import org.arastreju.sge.model.nodes.ResourceNode;
+import org.arastreju.sge.model.nodes.SNResource;
+import org.arastreju.sge.model.nodes.views.SNText;
+import org.arastreju.sge.persistence.TransactionControl;
+import org.arastreju.sge.query.Query;
+import org.arastreju.sge.query.QueryResult;
 import org.arastreju.sge.spi.GraphDataStore;
 import org.arastreju.tck.AbstractConversationTest;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 
@@ -40,4 +50,31 @@ public class NeoConversationTest extends AbstractConversationTest {
         return new NeoGraphDataStore();
     }
 
+    @Test
+    public void testNonCommitIndexing() throws IOException {
+        final ResourceNode car = new SNResource(qnCar);
+        SNOPS.associate(car, Aras.HAS_PROPER_NAME, new SNText("BMW"));
+
+        TransactionControl ctl = conversation.beginTransaction();
+        conversation.attach(car);
+
+        /* no commit here */
+
+        Query query = conversation.createQuery().addField(Aras.HAS_PROPER_NAME.toURI(), "BMW");
+        QueryResult result = query.getResult();
+        Assert.assertNotNull(result);
+        Assert.assertFalse(result.isEmpty());
+        Assert.assertEquals(qnCar, result.getSingleNode().getQualifiedName());
+
+//        conversation.remove(car);
+//
+//        query = conversation.createQuery().addField(Aras.HAS_PROPER_NAME.toURI(), "BMW");
+//        result = query.getResult();
+//        Assert.assertNotNull(result);
+//        Assert.assertTrue(result.isEmpty());
+
+        /* commit just for completeness */
+        ctl.finish();
+
+    }
 }

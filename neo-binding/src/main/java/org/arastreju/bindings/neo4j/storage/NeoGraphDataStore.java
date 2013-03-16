@@ -18,6 +18,7 @@ package org.arastreju.bindings.neo4j.storage;
 
 import org.arastreju.bindings.neo4j.tx.NeoTxProvider;
 import org.arastreju.sge.ArastrejuProfile;
+import org.arastreju.sge.index.IndexProvider;
 import org.arastreju.sge.model.associations.AttachedAssociationKeeper;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.spi.AssociationResolver;
@@ -27,7 +28,6 @@ import org.arastreju.sge.spi.ProfileCloseListener;
 import org.arastreju.sge.spi.WorkingContext;
 import org.arastreju.sge.spi.impl.NumericPhysicalNodeID;
 import org.arastreju.sge.spi.tx.TxProvider;
-import org.arastreju.sge.spi.util.FileStoreUtil;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -36,7 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 
 /**
  * <p>
@@ -57,23 +56,15 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
 
     private final NeoNodeKeyTable keyTable;
 
-    private final String storageDir;
+    private final IndexProvider indexProvider;
 
     // -----------------------------------------------------
 
-	/**
-	 * Default constructor. Will use a <b>temporary</b> datastore!.
-	 */
-	public NeoGraphDataStore() throws IOException {
-		this(FileStoreUtil.prepareTempStore());
-	}
-	
 	/**
 	 * Constructor. Creates a store using given directory.
 	 * @param dir The directory for the store.
 	 */
 	public NeoGraphDataStore(final String dir) {
-        this.storageDir = dir;
         if (new File(dir).exists()) {
             LOGGER.info("Using existing Neo4jDataStore in {}.", dir);
         } else {
@@ -81,6 +72,7 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
         }
 		gdbService = new EmbeddedGraphDatabase(dir); 
         keyTable = new NeoNodeKeyTable(gdbService,  gdbService.index());
+        indexProvider = new IndexProvider(dir);
 	}
 	
 	// -- GraphDataStore ----------------------------------
@@ -137,8 +129,14 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
     }
 
     @Override
+    public IndexProvider getIndexProvider() {
+        return indexProvider;
+    }
+
+    @Override
     public void close() {
         gdbService.shutdown();
+        indexProvider.shutdown();
     }
 
     // -- ProfileCloseListener ----------------------------
@@ -149,10 +147,6 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
     }
 
     // -- Neo Specifics -----------------------------------
-
-    public String getStorageDir() {
-        return storageDir;
-    }
 
     public Node getNeoNode(QualifiedName qn) {
         NumericPhysicalNodeID id = keyTable.lookup(qn);

@@ -78,8 +78,7 @@ public class Neo4jGateFactory extends ArastrejuGateFactory {
      */
     private GraphDataConnection openConnection(DomainIdentifier ctx) throws IOException {
         final NeoGraphDataStore store = getOrCreateStore(ctx);
-        IndexProvider indexProvider = new IndexProvider(store.getStorageDir());
-        return new GraphDataConnectionImpl(store, indexProvider);
+        return new GraphDataConnectionImpl(store);
     }
 
     private NeoGraphDataStore getOrCreateStore(DomainIdentifier domainIdentifier) throws IOException {
@@ -116,12 +115,14 @@ public class Neo4jGateFactory extends ArastrejuGateFactory {
 
     private NeoGraphDataStore createStore(String store) throws IOException {
         final ArastrejuProfile profile = getProfile();
+        final String storeDir;
         if (isStoreDirDefined(profile)){
-            String basedir = profile.getProperty(ArastrejuProfile.ARAS_STORE_DIRECTORY);
-            return new NeoGraphDataStore(basedir + "/" + store);
+            String baseDir = profile.getProperty(ArastrejuProfile.ARAS_STORE_DIRECTORY);
+            storeDir = baseDir + "/" + store;
         } else {
-            return new NeoGraphDataStore(FileStoreUtil.prepareTempStore(store));
+            storeDir = FileStoreUtil.prepareTempStore(store);
         }
+        return new NeoGraphDataStore(storeDir);
     }
 
 	// -----------------------------------------------------

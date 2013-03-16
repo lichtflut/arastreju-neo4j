@@ -27,6 +27,7 @@ import org.arastreju.sge.persistence.TransactionControl;
 import org.arastreju.sge.query.Query;
 import org.arastreju.sge.query.QueryResult;
 import org.arastreju.sge.spi.GraphDataStore;
+import org.arastreju.sge.spi.util.FileStoreUtil;
 import org.arastreju.tck.AbstractConversationTest;
 import org.junit.Assert;
 import org.junit.Test;
@@ -48,7 +49,7 @@ public class NeoConversationTest extends AbstractConversationTest {
 
     @Override
     protected GraphDataStore createStore() throws IOException {
-        return new NeoGraphDataStore();
+        return new NeoGraphDataStore(FileStoreUtil.prepareTempStore());
     }
 
     @Test

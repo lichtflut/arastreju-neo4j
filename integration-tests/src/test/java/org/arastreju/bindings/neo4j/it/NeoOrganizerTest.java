@@ -35,6 +35,7 @@ import org.arastreju.sge.organize.Organizer;
 import org.arastreju.sge.spi.GraphDataConnection;
 import org.arastreju.sge.spi.impl.ArastrejuGateImpl;
 import org.arastreju.sge.spi.impl.GraphDataConnectionImpl;
+import org.arastreju.sge.spi.util.FileStoreUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -76,8 +77,9 @@ public class NeoOrganizerTest {
 
 	@Before
 	public void setUp() throws Exception {
-		store = new NeoGraphDataStore();
-		connection = new GraphDataConnectionImpl(store, new IndexProvider(store.getStorageDir()));
+        String workDir = FileStoreUtil.prepareTempStore();
+        store = new NeoGraphDataStore(workDir);
+		connection = new GraphDataConnectionImpl(store);
         gate = new ArastrejuGateImpl(connection, new PhysicalDomain("test"));
         organizer = new Organizer(gate);
 	}

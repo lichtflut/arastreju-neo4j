@@ -92,6 +92,10 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
 	@Override
     public void resolveAssociations(AttachedAssociationKeeper keeper) {
         final Node neoNode = store.getNeoNode(keeper.getQualifiedName());
+        if (neoNode == null) {
+            LOGGER.warn("Found no neo node in data store for attached node {}", keeper.getQualifiedName());
+            return;
+        }
         for(Relationship rel : neoNode.getRelationships(Direction.OUTGOING)){
 			final Context[] ctx = getContextInfo(rel);
 			if (!regardContext(ctx, rel)) {

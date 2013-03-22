@@ -21,11 +21,13 @@ import org.arastreju.sge.ArastrejuProfile;
 import org.arastreju.sge.index.IndexProvider;
 import org.arastreju.sge.model.associations.AttachedAssociationKeeper;
 import org.arastreju.sge.naming.QualifiedName;
+import org.arastreju.sge.persistence.NodeKeyTable;
 import org.arastreju.sge.spi.AssociationResolver;
 import org.arastreju.sge.spi.AssociationWriter;
 import org.arastreju.sge.spi.GraphDataStore;
 import org.arastreju.sge.spi.ProfileCloseListener;
 import org.arastreju.sge.spi.WorkingContext;
+import org.arastreju.sge.spi.impl.LuceneBasedNodeKeyTable;
 import org.arastreju.sge.spi.impl.NumericPhysicalNodeID;
 import org.arastreju.sge.spi.tx.TxProvider;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -36,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * <p>
@@ -54,9 +57,9 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
 
 	private final GraphDatabaseService gdbService;
 
-    private final NeoNodeKeyTable keyTable;
-
     private final IndexProvider indexProvider;
+
+    private final NodeKeyTable<NumericPhysicalNodeID> keyTable;
 
     // -----------------------------------------------------
 
@@ -71,9 +74,14 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
             LOGGER.info("New Neo4jDataStore created in {}.", dir);
         }
 		gdbService = new EmbeddedGraphDatabase(dir); 
-        keyTable = new NeoNodeKeyTable(gdbService,  gdbService.index());
         indexProvider = new IndexProvider(dir);
-	}
+
+        try {
+            keyTable = LuceneBasedNodeKeyTable.forNumericIDs(dir);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 	
 	// -- GraphDataStore ----------------------------------
 
@@ -137,6 +145,11 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
     public void close() {
         gdbService.shutdown();
         indexProvider.shutdown();
+        try {
+            keyTable.shutdown();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // -- ProfileCloseListener ----------------------------

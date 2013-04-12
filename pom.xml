@@ -36,7 +36,7 @@
 			<artifactId>arastreju.sge</artifactId>
 			<version>${arastreju.sge.version}</version>
 		</dependency>
-		<dependency>
+		<!--dependency>
 			<groupId>org.neo4j</groupId>
 			<artifactId>neo4j</artifactId>
 			<version>${neo4j.version}</version>
@@ -45,21 +45,19 @@
 					<groupId>org.neo4j</groupId>
 					<artifactId>neo4j-cypher</artifactId>
 				</exclusion>
+                <exclusion>
+                    <groupId>org.neo4j</groupId>
+                    <artifactId>neo4j-lucene-index</artifactId>
+                </exclusion>
 			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.neo4j</groupId>
-			<artifactId>neo4j-kernel</artifactId>
-			<version>${neo4j.version}</version>
-			<type>test-jar</type>
-		</dependency>
-        <!--
-		<dependency>
-			<groupId>org.neo4j</groupId>
-			<artifactId>neo4j-lucene-index</artifactId>
-			<version>${neo4j.version}</version>
-		</dependency>
-		-->
+		</dependency-->
+
+        <dependency>
+            <groupId>org.neo4j</groupId>
+            <artifactId>neo4j-kernel</artifactId>
+            <version>${neo4j.version}</version>
+        </dependency>
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

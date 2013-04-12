@@ -16,18 +16,25 @@
  */
 package org.arastreju.bindings.neo4j.it;
 
-import java.io.File;
-
 import junit.framework.Assert;
-
 import org.arastreju.bindings.neo4j.Neo4jGateFactory;
 import org.arastreju.sge.Arastreju;
 import org.arastreju.sge.ArastrejuGate;
 import org.arastreju.sge.ArastrejuProfile;
+import org.arastreju.sge.Conversation;
 import org.arastreju.sge.ConversationContext;
+import org.arastreju.sge.apriori.Aras;
+import org.arastreju.sge.model.DetachedStatement;
+import org.arastreju.sge.model.Statement;
+import org.arastreju.sge.model.nodes.SNResource;
+import org.arastreju.sge.model.nodes.views.SNScalar;
 import org.arastreju.sge.naming.Namespace;
 import org.arastreju.sge.naming.QualifiedName;
+import org.arastreju.sge.spi.util.FileStoreUtil;
+import org.junit.Ignore;
 import org.junit.Test;
+
+import java.io.IOException;
 
 
 /**
@@ -44,12 +51,10 @@ import org.junit.Test;
 public class ArastrejuInitializationTest {
 	
 	@Test
-	public void testRootGate() {
-		final File tempDir = new File(System.getProperty("java.io.tmpdir"), Long.toString(System.currentTimeMillis()));
-		
+	public void testRootGate() throws IOException {
 		final ArastrejuProfile profile = new ArastrejuProfile("any profile");
 		profile.setProperty(ArastrejuProfile.GATE_FACTORY, Neo4jGateFactory.class.getCanonicalName());
-		profile.setProperty(ArastrejuProfile.ARAS_STORE_DIRECTORY, tempDir.getAbsolutePath());
+		profile.setProperty(ArastrejuProfile.ARAS_STORE_DIRECTORY, FileStoreUtil.prepareTempStore());
 		
 		final Arastreju aras = Arastreju.getInstance(profile);
 		Assert.assertNotNull(aras);
@@ -85,12 +90,10 @@ public class ArastrejuInitializationTest {
 	}
 
     @Test
-    public void shouldPropagateContextsOfVirtualDomains() {
-        final File tempDir = new File(System.getProperty("java.io.tmpdir"), Long.toString(System.currentTimeMillis()));
-
+    public void shouldPropagateContextsOfVirtualDomains() throws IOException {
         final ArastrejuProfile profile = new ArastrejuProfile("virtual profile");
         profile.setProperty(ArastrejuProfile.GATE_FACTORY, Neo4jGateFactory.class.getCanonicalName());
-        profile.setProperty(ArastrejuProfile.ARAS_STORE_DIRECTORY, tempDir.getAbsolutePath());
+        profile.setProperty(ArastrejuProfile.ARAS_STORE_DIRECTORY, FileStoreUtil.prepareTempStore());
         profile.setProperty(ArastrejuProfile.ENABLE_VIRTUAL_DOMAINS, "true");
 
         final Arastreju aras = Arastreju.getInstance(profile);
@@ -104,6 +107,27 @@ public class ArastrejuInitializationTest {
         Assert.assertNotNull(cc.getPrimaryContext());
         Assert.assertEquals(new QualifiedName(Namespace.LOCAL_CONTEXTS, "mydomain"), cc.getPrimaryContext().getQualifiedName());
 
+    }
+
+    @Test
+    @Ignore
+    public void testSequentialIndexCreation() throws IOException {
+        final ArastrejuProfile profile = new ArastrejuProfile("any profile");
+        profile.setProperty(ArastrejuProfile.GATE_FACTORY, Neo4jGateFactory.class.getCanonicalName());
+        profile.setProperty(ArastrejuProfile.ARAS_STORE_DIRECTORY, FileStoreUtil.prepareTempStore());
+        Arastreju instance = Arastreju.getInstance(profile);
+
+        for (int i = 0; i < 5; i++) {
+            ArastrejuGate gate = instance.openGate("idx-test");
+            Conversation conversation = gate.startConversation();
+
+            Statement stmt = new DetachedStatement(new SNResource(), Aras.HAS_SERIAL_NUMBER, new SNScalar(1));
+            conversation.addStatement(stmt);
+            conversation.close();
+            gate.close();
+        }
+
+        profile.close();
     }
 	
 }

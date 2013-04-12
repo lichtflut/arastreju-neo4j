@@ -144,8 +144,8 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
     @Override
     public void close() {
         gdbService.shutdown();
-        indexProvider.shutdown();
         try {
+            indexProvider.shutdown();
             keyTable.shutdown();
         } catch (IOException e) {
             throw new RuntimeException(e);

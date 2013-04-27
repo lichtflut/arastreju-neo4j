@@ -32,6 +32,7 @@ import org.arastreju.sge.spi.impl.NumericPhysicalNodeID;
 import org.arastreju.sge.spi.tx.TxProvider;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
 import org.slf4j.Logger;
@@ -87,14 +88,18 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
 
     @Override
     public AttachedAssociationKeeper find(QualifiedName qn) {
-        NumericPhysicalNodeID found = keyTable.lookup(qn);
+        NumericPhysicalNodeID id = keyTable.lookup(qn);
 
-        if (found != null) {
-            Node node = gdbService.getNodeById(found.asLong());
-            return new AttachedAssociationKeeper(qn, new NumericPhysicalNodeID(node.getId()));
-        } else {
-            return null;
+        if (id != null) {
+            try {
+                Node node = gdbService.getNodeById(id.asLong());
+                return new AttachedAssociationKeeper(qn, new NumericPhysicalNodeID(node.getId()));
+            } catch (NotFoundException e) {
+                keyTable.remove(qn);
+                LOGGER.warn("No more neo node found with id {} and qn {}.", id, qn);
+            }
         }
+        return null;
     }
 
     @Override

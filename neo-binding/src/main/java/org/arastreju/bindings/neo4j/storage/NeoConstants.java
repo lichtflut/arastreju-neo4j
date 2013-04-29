@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 lichtflut Forschungs- und Entwicklungsgesellschaft mbH
+ * Copyright (C) 2013 lichtflut Forschungs- und Entwicklungsgesellschaft mbH
  *
  * The Arastreju-Neo4j binding is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,9 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.arastreju.bindings.neo4j;
+package org.arastreju.bindings.neo4j.storage;
 
-import org.neo4j.graphdb.Relationship;
+import org.arastreju.sge.context.Context;
+import org.neo4j.graphdb.RelationshipType;
 
 /**
  * <p>
@@ -30,6 +31,15 @@ import org.neo4j.graphdb.Relationship;
  * @author Oliver Tigges
  */
 public interface NeoConstants {
+
+    Context[] NO_CTX = new Context[0];
+
+    enum ArasRelationshipType implements RelationshipType {
+        VALUE,
+        REFERENCE
+    }
+
+    // ----------------------------------------------------
 	
 	/**
 	 * The URI of a resource node.. 
@@ -48,18 +58,18 @@ public interface NeoConstants {
 	// ----------------------------------------------------
 	
 	/**
-	 * Attribute of a {@link Relationship}.
+	 * Attribute of a {@link org.neo4j.graphdb.Relationship}.
 	 */
 	String CONTEXT_URI = "context-uri";
 	
 	/**
-	 * Attribute of a {@link Relationship}.
+	 * Attribute of a {@link org.neo4j.graphdb.Relationship}.
 	 */
 	String PREDICATE_URI = "predicate-uri";
 	
 	/**
-	 * Attribute of a {@link Relationship}.
+	 * Attribute of a {@link org.neo4j.graphdb.Relationship}.
 	 */
 	String TIMESTAMP = "timestamp";
-	
+
 }

@@ -28,14 +28,14 @@
 	</appender>
 
 	<logger name="org.arastreju">
-		<level value="info" />
+		<level value="debug" />
 	</logger>
 	
 	<logger name="org.arastreju.bindings.neo4j.query">
 		<level value="warn" />
 	</logger>
     
-    <logger name="org.arastreju.bindings.neo4j.impl.NeoConversationContext">
+    <logger name="org.arastreju.sge.spi.impl.WorkingContextImpl">
         <level value="info" />
     </logger>
 

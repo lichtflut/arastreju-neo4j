@@ -5,13 +5,13 @@
 	<artifactId>arastreju-neo4j-parent</artifactId>
 	<name>Arastreju Neo4J Parent</name>
 	<packaging>pom</packaging>
-	<version>0.8.0</version>
+	<version>0.9.0</version>
 	<description>Binding for Arastreju to Neo4J Graph Database - Parent</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<neo4j.version>1.8</neo4j.version>
-		<arastreju.sge.version>0.8.0</arastreju.sge.version>
+		<arastreju.sge.version>0.9.0</arastreju.sge.version>
 	</properties>
 
 	<modules>
@@ -33,31 +33,16 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.arastreju</groupId>
-			<artifactId>arastreju.sge</artifactId>
+			<artifactId>arastreju-sge</artifactId>
 			<version>${arastreju.sge.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.neo4j</groupId>
-			<artifactId>neo4j</artifactId>
-			<version>${neo4j.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.neo4j</groupId>
-					<artifactId>neo4j-cypher</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.neo4j</groupId>
-			<artifactId>neo4j-kernel</artifactId>
-			<version>${neo4j.version}</version>
-			<type>test-jar</type>
-		</dependency>
-		<dependency>
-			<groupId>org.neo4j</groupId>
-			<artifactId>neo4j-lucene-index</artifactId>
-			<version>${neo4j.version}</version>
-		</dependency>
+        <dependency>
+            <groupId>org.neo4j</groupId>
+            <artifactId>neo4j-kernel</artifactId>
+            <version>${neo4j.version}</version>
+        </dependency>
+
+        <!-- Test -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 lichtflut Forschungs- und Entwicklungsgesellschaft mbH
+ * Copyright (C) 2013 lichtflut Forschungs- und Entwicklungsgesellschaft mbH
  *
  * The Arastreju-Neo4j binding is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,13 +16,17 @@
  */
 package org.arastreju.bindings.neo4j;
 
-import org.arastreju.bindings.neo4j.impl.GraphDataConnection;
-import org.arastreju.bindings.neo4j.impl.GraphDataStore;
+import org.arastreju.bindings.neo4j.storage.NeoGraphDataStore;
 import org.arastreju.sge.ArastrejuGate;
 import org.arastreju.sge.ArastrejuProfile;
 import org.arastreju.sge.context.DomainIdentifier;
+import org.arastreju.sge.index.IndexProvider;
 import org.arastreju.sge.spi.ArastrejuGateFactory;
 import org.arastreju.sge.spi.GateInitializationException;
+import org.arastreju.sge.spi.GraphDataConnection;
+import org.arastreju.sge.spi.impl.ArastrejuGateImpl;
+import org.arastreju.sge.spi.impl.GraphDataConnectionImpl;
+import org.arastreju.sge.spi.util.FileStoreUtil;
 
 import java.io.IOException;
 
@@ -52,14 +56,11 @@ public class Neo4jGateFactory extends ArastrejuGateFactory {
 	
 	// -----------------------------------------------------
 	
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
-	public synchronized ArastrejuGate create(final DomainIdentifier domainIdentifier) throws GateInitializationException {
+	public synchronized ArastrejuGate create(final DomainIdentifier domainIdentifier) {
 		try {
             final GraphDataConnection connection = openConnection(domainIdentifier);
-            final Neo4jGate gate = new Neo4jGate(domainIdentifier, connection);
+            final ArastrejuGate gate = new ArastrejuGateImpl(connection, domainIdentifier);
 			getProfile().onOpen(gate);
 			return gate;
 		} catch (IOException e) {
@@ -76,12 +77,12 @@ public class Neo4jGateFactory extends ArastrejuGateFactory {
      * @throws IOException
      */
     private GraphDataConnection openConnection(DomainIdentifier ctx) throws IOException {
-        final GraphDataStore store = getOrCreateStore(ctx);
-        return new GraphDataConnection(store);
+        final NeoGraphDataStore store = getOrCreateStore(ctx);
+        return new GraphDataConnectionImpl(store);
     }
 
-    private GraphDataStore getOrCreateStore(DomainIdentifier domainIdentifier) throws IOException {
-        final GraphDataStore store = getStore(domainIdentifier);
+    private NeoGraphDataStore getOrCreateStore(DomainIdentifier domainIdentifier) throws IOException {
+        final NeoGraphDataStore store = getStore(domainIdentifier);
         if (store != null) {
             return store;
         } else {
@@ -89,21 +90,21 @@ public class Neo4jGateFactory extends ArastrejuGateFactory {
         }
     }
 
-    private GraphDataStore getStore(DomainIdentifier domainIdentifier) {
+    private NeoGraphDataStore getStore(DomainIdentifier domainIdentifier) {
         final String key = KEY_GRAPH_DATA_STORE + ":" + domainIdentifier.getStorage();
-        return (GraphDataStore) getProfile().getProfileObject(key);
+        return (NeoGraphDataStore) getProfile().getProfileObject(key);
     }
 	
     /**
      * Create and initialize the store.
      * @param domainIdentifier The identified of the data store.
-     * @return The {@link GraphDataStore}.
+     * @return The {@link org.arastreju.bindings.neo4j.storage.NeoGraphDataStore}.
      * @throws IOException
      */
-    private GraphDataStore createStore(DomainIdentifier domainIdentifier) throws IOException {
+    private NeoGraphDataStore createStore(DomainIdentifier domainIdentifier) throws IOException {
         final ArastrejuProfile profile = getProfile();
         final String storeName = domainIdentifier.getStorage();
-        final GraphDataStore store = createStore(storeName);
+        final NeoGraphDataStore store = createStore(storeName);
         profile.addListener(store);
         if (isStoreDirDefined(profile)) {
             final String key = KEY_GRAPH_DATA_STORE + ":" + storeName;
@@ -112,14 +113,16 @@ public class Neo4jGateFactory extends ArastrejuGateFactory {
         return store;
     }
 
-    private GraphDataStore createStore(String store) throws IOException {
+    private NeoGraphDataStore createStore(String store) throws IOException {
         final ArastrejuProfile profile = getProfile();
+        final String storeDir;
         if (isStoreDirDefined(profile)){
-            String basedir = profile.getProperty(ArastrejuProfile.ARAS_STORE_DIRECTORY);
-            return new GraphDataStore(basedir + "/" + store);
+            String baseDir = profile.getProperty(ArastrejuProfile.ARAS_STORE_DIRECTORY);
+            storeDir = baseDir + "/" + store;
         } else {
-            return new GraphDataStore(GraphDataStore.prepareTempStore(store));
+            storeDir = FileStoreUtil.prepareTempStore(store);
         }
+        return new NeoGraphDataStore(storeDir);
     }
 
 	// -----------------------------------------------------

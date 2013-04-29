@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 lichtflut Forschungs- und Entwicklungsgesellschaft mbH
+ * Copyright (C) 2013 lichtflut Forschungs- und Entwicklungsgesellschaft mbH
  *
  * The Arastreju-Neo4j binding is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,24 +14,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import java.util.List;
+package org.arastreju.bindings.neo4j;
 
+import de.lichtflut.infra.logging.StopWatch;
 import org.arastreju.sge.Arastreju;
 import org.arastreju.sge.ArastrejuGate;
-import org.arastreju.sge.ModelingConversation;
-import org.arastreju.sge.SNOPS;
+import org.arastreju.sge.Conversation;
 import org.arastreju.sge.apriori.RDF;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.model.nodes.views.SNClass;
 import org.arastreju.sge.persistence.TransactionControl;
 import org.arastreju.sge.query.FieldParam;
 import org.arastreju.sge.query.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import de.lichtflut.infra.logging.StopWatch;
+import java.util.List;
 
 /**
  * <p>
- *  Test case for multithreading.
+ *  Test case for multi threading.
  * </p>
  *
  * <p>
@@ -41,23 +43,29 @@ import de.lichtflut.infra.logging.StopWatch;
  * @author Oliver Tigges
  */
 public class MultiThreadingTest {
+
+    public static final Logger LOGGER = LoggerFactory.getLogger(MultiThreadingTest.class);
+
+    public static final int NUM_THREADS = 10;
+
+    public static final int NUM_OPERATIONS = 1000;
 	
-	/**
-	 * Constructor.
-	 */
-	public MultiThreadingTest(final int numberOfThreads) {
-		
-		for(int i = 0; i < numberOfThreads; i++) {
-			final Thread t = new Thread(new Worker(Arastreju.getInstance().openMasterGate()));
-			t.start();
-			System.out.println("Startet Thread: " + t.getId());
-		}
-	}
+	public MultiThreadingTest() {}
+
+    // ----------------------------------------------------
+
+    public void start(int numberOfThreads) {
+        for(int i = 0; i < numberOfThreads; i++) {
+            final Thread t = new Thread(new Worker(Arastreju.getInstance().openMasterGate()));
+            t.start();
+            LOGGER.info("Started Thread {} ", t.getId());
+        }
+    }
 	
 	// -----------------------------------------------------
 	
 	public static void main(String[] args) {
-		new MultiThreadingTest(10);
+		new MultiThreadingTest().start(NUM_THREADS);
 	}
 	
 	// -----------------------------------------------------
@@ -72,14 +80,14 @@ public class MultiThreadingTest {
 		
 		public void run() {
 			final StopWatch sw = new StopWatch();
-			final ModelingConversation mc = gate.startConversation();
+			final Conversation mc = gate.startConversation();
 			
 			final TransactionControl txc = mc.beginTransaction();
 			
-			final SNClass clazz = createClass();
+			final SNClass clazz = new SNClass();
 			mc.attach(clazz);
 			
-			for (int i = 1; i <= (1000); i++) {
+			for (int i = 1; i <= (NUM_OPERATIONS); i++) {
 				mc.attach(clazz.createInstance());
 			}
 			
@@ -91,12 +99,7 @@ public class MultiThreadingTest {
 			
 			txc.commit();
 			
-			System.out.println("Thread '" + Thread.currentThread().getId() + "' finished.");
-		}
-		
-		public SNClass createClass() {
-			SNClass clazz = new SNClass();
-			return clazz;
+			LOGGER.info("Thread '{}' finished.", Thread.currentThread().getId());
 		}
 		
 	}

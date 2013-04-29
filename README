@@ -1,6 +1,6 @@
 Arastreju extension, integrating Neo4j for usage as datastore.
 
-Copyright 2012 by lichtflut Forschungs- und Entwicklungsgesellschaft mbH
+Copyright 2012-2013 by lichtflut Forschungs- und Entwicklungsgesellschaft mbH
 
 The Arastreju-Neo4j binding is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

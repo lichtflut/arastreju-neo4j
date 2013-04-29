@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.arastreju</groupId>
 		<artifactId>arastreju-neo4j-parent</artifactId>
-		<version>0.9.0</version>
+		<version>0.9.1-SNAPSHOT</version>
 	</parent>	
 	
 	<groupId>org.arastreju</groupId>
@@ -26,7 +26,7 @@
         <dependency>
             <groupId>org.arastreju</groupId>
             <artifactId>arastreju-tck</artifactId>
-            <version>0.9.0</version>
+            <version>0.9.1-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
 	</dependencies>

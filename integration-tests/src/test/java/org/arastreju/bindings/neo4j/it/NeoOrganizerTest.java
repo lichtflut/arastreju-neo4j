@@ -62,9 +62,9 @@ public class NeoOrganizerTest {
 	private static final String ns2 = "http://test.lf.de/ns2";
 	private static final String ns3 = "http://test.lf.de/ns3";
 	
-	private static final QualifiedName ctx1 = new QualifiedName("http://test.lf.de#", "Ctx1");
-	private static final QualifiedName ctx2 = new QualifiedName("http://test.lf.de#", "Ctx2");
-	private static final QualifiedName ctx3 = new QualifiedName("http://test.lf.de#", "Ctx3");
+	private static final QualifiedName ctx1 = QualifiedName.from("http://test.lf.de#", "Ctx1");
+	private static final QualifiedName ctx2 = QualifiedName.from("http://test.lf.de#", "Ctx2");
+	private static final QualifiedName ctx3 = QualifiedName.from("http://test.lf.de#", "Ctx3");
 
     private final ResourceID knows = new SimpleResourceID("http://q#", "knows");
 	
@@ -127,7 +127,7 @@ public class NeoOrganizerTest {
 
         Conversation conv = gate.startConversation();
 
-        ResourceNode mike = new SNResource(new QualifiedName(ns1, "Mike"));
+        ResourceNode mike = new SNResource(QualifiedName.from(ns1, "Mike"));
 
         conv.getConversationContext().setPrimaryContext(c1);
         conv.addStatement(mike.addAssociation(knows, new SNResource()));

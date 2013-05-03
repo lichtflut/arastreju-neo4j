@@ -105,7 +105,7 @@ public class ArastrejuInitializationTest {
         ConversationContext cc = gate.startConversation().getConversationContext();
         Assert.assertNotNull(cc);
         Assert.assertNotNull(cc.getPrimaryContext());
-        Assert.assertEquals(new QualifiedName(Namespace.LOCAL_CONTEXTS, "mydomain"), cc.getPrimaryContext().getQualifiedName());
+        Assert.assertEquals(QualifiedName.from(Namespace.LOCAL_CONTEXTS, "mydomain"), cc.getPrimaryContext().getQualifiedName());
 
     }
 

@@ -176,7 +176,7 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
         if (uriProperty == null) {
             return null;
         }
-        final QualifiedName qn = QualifiedName.create(uriProperty.toString());
+        final QualifiedName qn = QualifiedName.fromURI(uriProperty.toString());
         AttachedAssociationKeeper keeper = convContext.lookup(qn);
         if (keeper == null){
             keeper = new AttachedAssociationKeeper(qn, new NumericPhysicalNodeID(neoNode.getId()));

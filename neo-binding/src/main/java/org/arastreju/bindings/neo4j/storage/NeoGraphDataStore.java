@@ -21,7 +21,6 @@ import org.arastreju.sge.ArastrejuProfile;
 import org.arastreju.sge.index.IndexProvider;
 import org.arastreju.sge.model.associations.AttachedAssociationKeeper;
 import org.arastreju.sge.naming.QualifiedName;
-import org.arastreju.sge.persistence.NodeKeyTable;
 import org.arastreju.sge.spi.AssociationResolver;
 import org.arastreju.sge.spi.AssociationWriter;
 import org.arastreju.sge.spi.GraphDataStore;
@@ -60,7 +59,7 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
 
     private final IndexProvider indexProvider;
 
-    private final NodeKeyTable<NumericPhysicalNodeID> keyTable;
+    private final LuceneBasedNodeKeyTable<NumericPhysicalNodeID> keyTable;
 
     // -----------------------------------------------------
 
@@ -74,7 +73,8 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
         } else {
             LOGGER.info("New Neo4jDataStore created in {}.", dir);
         }
-		gdbService = new EmbeddedGraphDatabase(dir); 
+
+        gdbService = new EmbeddedGraphDatabase(dir);
         indexProvider = new IndexProvider(dir);
 
         try {
@@ -82,6 +82,7 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
     }
 	
 	// -- GraphDataStore ----------------------------------
@@ -138,7 +139,7 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
 
     @Override
     public TxProvider createTxProvider(WorkingContext ctx) {
-        return new NeoTxProvider(gdbService);
+        return new NeoTxProvider(gdbService).register(keyTable);
     }
 
     @Override

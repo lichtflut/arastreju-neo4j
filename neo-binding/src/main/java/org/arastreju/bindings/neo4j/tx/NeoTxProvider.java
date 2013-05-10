@@ -18,7 +18,12 @@ package org.arastreju.bindings.neo4j.tx;
 
 import org.arastreju.sge.spi.tx.AbstractTxProvider;
 import org.arastreju.sge.spi.tx.BoundTransactionControl;
+import org.arastreju.sge.spi.tx.TxListener;
 import org.neo4j.graphdb.GraphDatabaseService;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * <p>
@@ -34,22 +39,37 @@ import org.neo4j.graphdb.GraphDatabaseService;
 public class NeoTxProvider extends AbstractTxProvider {
 	
 	private final GraphDatabaseService gdbService;
-	
-	// -----------------------------------------------------
+
+    private List<TxListener> listeners = new ArrayList<TxListener>();
+
+    // -----------------------------------------------------
 	
 	/**
 	 * Constructor.
-	 * @param gdbService The service for this TX Control.
-	 */
-	public NeoTxProvider(final GraphDatabaseService gdbService) {
+     * @param gdbService The service for this TX Control.
+     */
+	public NeoTxProvider(GraphDatabaseService gdbService) {
 		this.gdbService = gdbService;
-	}
+    }
+
+    // ----------------------------------------------------
+
+    public NeoTxProvider register(TxListener... listeners) {
+        Collections.addAll(this.listeners, listeners);
+        return this;
+    }
 	
 	// -----------------------------------------------------
 
     @Override
     protected BoundTransactionControl newTx() {
-        return new NeoTransaction(gdbService.beginTx());
+        return new NeoTransaction(gdbService.beginTx())
+                .register(listeners());
+    }
+
+    private TxListener[] listeners() {
+        return this.listeners.toArray(new TxListener[listeners.size()]);
+
     }
 
 }

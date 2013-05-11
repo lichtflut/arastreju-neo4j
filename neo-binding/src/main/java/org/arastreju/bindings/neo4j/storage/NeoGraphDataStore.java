@@ -176,4 +176,7 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
         }
     }
 
+    public GraphDatabaseService getGraphDatabaseService() {
+        return gdbService;
+    }
 }

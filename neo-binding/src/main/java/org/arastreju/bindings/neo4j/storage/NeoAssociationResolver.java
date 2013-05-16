@@ -18,7 +18,7 @@ package org.arastreju.bindings.neo4j.storage;
 
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.context.Context;
-import org.arastreju.sge.context.SimpleContextID;
+import org.arastreju.sge.context.ContextID;
 import org.arastreju.sge.model.DetachedStatement;
 import org.arastreju.sge.model.ElementaryDataType;
 import org.arastreju.sge.model.SimpleResourceID;
@@ -127,7 +127,7 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
             if (!exists(qn)) {
                 throw new IllegalStateException("Could not find context: " + qn);
             } else {
-                ctxs[i] = new SimpleContextID(qn);
+                ctxs[i] = ContextID.forContext(qn);
             }
         }
         return ctxs;

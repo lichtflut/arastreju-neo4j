@@ -32,7 +32,7 @@ import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.persistence.ResourceResolver;
 import org.arastreju.sge.spi.AssociationResolver;
 import org.arastreju.sge.spi.AttachedResourceNode;
-import org.arastreju.sge.spi.WorkingContext;
+import org.arastreju.sge.spi.ConversationController;
 import org.arastreju.sge.spi.impl.NumericPhysicalNodeID;
 import org.arastreju.sge.spi.uow.ResourceResolverImpl;
 import org.neo4j.graphdb.Direction;
@@ -64,7 +64,7 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
 
     // ----------------------------------------------------
 
-    private final WorkingContext workingContext;
+    private final ConversationController conversationController;
 
 	private final ResourceResolver resourceResolver;
 
@@ -74,12 +74,12 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
 
 	/**
 	 * Creates a new association handler.
-	 * @param conversationContext The current working context.
+	 * @param controller The conversation controller.
      * @param store The physical store.
 	 */
-	public NeoAssociationResolver(WorkingContext conversationContext, NeoGraphDataStore store) {
-        this.workingContext = conversationContext;
-		this.resourceResolver = new ResourceResolverImpl(conversationContext);
+	public NeoAssociationResolver(ConversationController controller, NeoGraphDataStore store) {
+        this.conversationController = controller;
+		this.resourceResolver = new ResourceResolverImpl(controller);
         this.store = store;
 	}
 
@@ -138,7 +138,7 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
 			LOGGER.debug("Statement has no context.");
 			return true;
 		}
-		Context[] readContexts = workingContext.getConversationContext().getReadContexts();
+		Context[] readContexts = conversationController.getConversationContext().getReadContexts();
         for (Context readContext : readContexts) {
             for (Context stmtContext : stmtContexts) {
                 if (readContext.equals(stmtContext)) {
@@ -177,10 +177,10 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
             return null;
         }
         final QualifiedName qn = QualifiedName.fromURI(uriProperty.toString());
-        AttachedAssociationKeeper keeper = workingContext.lookup(qn);
+        AttachedAssociationKeeper keeper = conversationController.lookup(qn);
         if (keeper == null){
             keeper = new AttachedAssociationKeeper(qn, new NumericPhysicalNodeID(neoNode.getId()));
-            workingContext.attach(qn, keeper);
+            conversationController.attach(qn, keeper);
         }
         return new AttachedResourceNode(qn, keeper);
     }

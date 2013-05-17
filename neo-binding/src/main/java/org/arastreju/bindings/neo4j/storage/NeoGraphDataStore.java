@@ -23,9 +23,9 @@ import org.arastreju.sge.model.associations.AttachedAssociationKeeper;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.spi.AssociationResolver;
 import org.arastreju.sge.spi.AssociationWriter;
+import org.arastreju.sge.spi.ConversationController;
 import org.arastreju.sge.spi.GraphDataStore;
 import org.arastreju.sge.spi.ProfileCloseListener;
-import org.arastreju.sge.spi.WorkingContext;
 import org.arastreju.sge.spi.impl.LuceneBasedNodeKeyTable;
 import org.arastreju.sge.spi.impl.NumericPhysicalNodeID;
 import org.arastreju.sge.spi.tx.TxProvider;
@@ -128,17 +128,17 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
     // ----------------------------------------------------
 
     @Override
-    public AssociationResolver createAssociationResolver(WorkingContext ctx) {
+    public AssociationResolver createAssociationResolver(ConversationController ctx) {
         return new NeoAssociationResolver(ctx, this);
     }
 
     @Override
-    public AssociationWriter crateAssociationWriter(WorkingContext ctx) {
+    public AssociationWriter crateAssociationWriter(ConversationController ctx) {
         return new NeoAssociationWriter(ctx.getConversationContext(), this);
     }
 
     @Override
-    public TxProvider createTxProvider(WorkingContext ctx) {
+    public TxProvider createTxProvider(ConversationController ctx) {
         return new NeoTxProvider(gdbService).register(keyTable);
     }
 

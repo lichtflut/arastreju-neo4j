@@ -134,7 +134,7 @@ public class NeoGraphDataStore implements GraphDataStore, ProfileCloseListener {
 
     @Override
     public AssociationWriter crateAssociationWriter(WorkingContext ctx) {
-        return new NeoAssociationWriter(ctx, this);
+        return new NeoAssociationWriter(ctx.getConversationContext(), this);
     }
 
     @Override

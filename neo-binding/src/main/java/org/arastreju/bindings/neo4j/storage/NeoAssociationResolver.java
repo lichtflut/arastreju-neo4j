@@ -64,7 +64,7 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
 
     // ----------------------------------------------------
 
-    private final WorkingContext convContext;
+    private final WorkingContext workingContext;
 
 	private final ResourceResolver resourceResolver;
 
@@ -78,7 +78,7 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
      * @param store The physical store.
 	 */
 	public NeoAssociationResolver(WorkingContext conversationContext, NeoGraphDataStore store) {
-        this.convContext = conversationContext;
+        this.workingContext = conversationContext;
 		this.resourceResolver = new ResourceResolverImpl(conversationContext);
         this.store = store;
 	}
@@ -138,7 +138,7 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
 			LOGGER.debug("Statement has no context.");
 			return true;
 		}
-		Context[] readContexts = convContext.getReadContexts();
+		Context[] readContexts = workingContext.getConversationContext().getReadContexts();
         for (Context readContext : readContexts) {
             for (Context stmtContext : stmtContexts) {
                 if (readContext.equals(stmtContext)) {
@@ -177,10 +177,10 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
             return null;
         }
         final QualifiedName qn = QualifiedName.fromURI(uriProperty.toString());
-        AttachedAssociationKeeper keeper = convContext.lookup(qn);
+        AttachedAssociationKeeper keeper = workingContext.lookup(qn);
         if (keeper == null){
             keeper = new AttachedAssociationKeeper(qn, new NumericPhysicalNodeID(neoNode.getId()));
-            convContext.attach(qn, keeper);
+            workingContext.attach(qn, keeper);
         }
         return new AttachedResourceNode(qn, keeper);
     }

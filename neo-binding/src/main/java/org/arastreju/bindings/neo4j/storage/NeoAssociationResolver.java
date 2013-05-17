@@ -21,7 +21,6 @@ import org.arastreju.sge.context.Context;
 import org.arastreju.sge.context.ContextID;
 import org.arastreju.sge.model.DetachedStatement;
 import org.arastreju.sge.model.ElementaryDataType;
-import org.arastreju.sge.model.SimpleResourceID;
 import org.arastreju.sge.model.StatementMetaInfo;
 import org.arastreju.sge.model.associations.AttachedAssociationKeeper;
 import org.arastreju.sge.model.nodes.ResourceNode;
@@ -29,12 +28,10 @@ import org.arastreju.sge.model.nodes.SNValue;
 import org.arastreju.sge.model.nodes.SemanticNode;
 import org.arastreju.sge.model.nodes.ValueNode;
 import org.arastreju.sge.naming.QualifiedName;
-import org.arastreju.sge.persistence.ResourceResolver;
-import org.arastreju.sge.spi.AssociationResolver;
 import org.arastreju.sge.spi.AttachedResourceNode;
 import org.arastreju.sge.spi.ConversationController;
+import org.arastreju.sge.spi.impl.AbstractAssociationResolver;
 import org.arastreju.sge.spi.impl.NumericPhysicalNodeID;
-import org.arastreju.sge.spi.uow.ResourceResolverImpl;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -42,7 +39,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Locale;
 
 import static org.arastreju.sge.SNOPS.id;
@@ -58,15 +54,11 @@ import static org.arastreju.sge.SNOPS.id;
  *
  * @author Oliver Tigges
  */
-public class NeoAssociationResolver implements AssociationResolver, NeoConstants {
+public class NeoAssociationResolver extends AbstractAssociationResolver implements NeoConstants {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(NeoAssociationResolver.class);
 
     // ----------------------------------------------------
-
-    private final ConversationController controller;
-
-	private final ResourceResolver resourceResolver;
 
     private final NeoGraphDataStore store;
 
@@ -78,8 +70,7 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
      * @param store The physical store.
 	 */
 	public NeoAssociationResolver(ConversationController controller, NeoGraphDataStore store) {
-        this.controller = controller;
-		this.resourceResolver = new ResourceResolverImpl(controller);
+        super(controller);
         this.store = store;
 	}
 
@@ -107,13 +98,13 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
 			} else if (rel.isType(ArasRelationshipType.VALUE)){
 				object = toValueNode(rel.getEndNode());
 			}
-			final ResourceNode predicate = resourceResolver.resolve(new SimpleResourceID(rel.getProperty(PREDICATE_URI).toString()));
-			final StatementMetaInfo mi = new StatementMetaInfo(stmtContexts, new Date((Long)rel.getProperty(TIMESTAMP, 0L)));
+			final ResourceNode predicate = resolve(rel.getProperty(PREDICATE_URI).toString());
+			final StatementMetaInfo mi = createMetaInfo(stmtContexts, (Long)rel.getProperty(TIMESTAMP, 0L));
 			keeper.addAssociationDirectly(new DetachedStatement(id(keeper.getQualifiedName()), predicate, object, mi));
 		}
 	}
 
-	// ----------------------------------------------------
+    // ----------------------------------------------------
 
     private Context[] getContextInfo(final Relationship rel) {
         if (!rel.hasProperty(NeoConstants.CONTEXT_URI)) {
@@ -134,22 +125,10 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
     }
 	
 	private boolean regardContext(Context[] stmtContexts, Relationship rel) {
-		if (stmtContexts.length == 0) {
-			LOGGER.debug("Statement has no context.");
-			return true;
-		}
-		Context[] readContexts = controller.getConversationContext().getReadContexts();
-        for (Context readContext : readContexts) {
-            for (Context stmtContext : stmtContexts) {
-                if (readContext.equals(stmtContext)) {
-                    return true;
-                }
-            }
-        }
         if (LOGGER.isDebugEnabled()) {
-            logRelContexts(stmtContexts, readContexts, rel);
+            logRelContexts(stmtContexts, readContexts(), rel);
         }
-		return false;
+		return super.regardContext(stmtContexts);
 	}
 
     private SemanticNode convert(Relationship rel, Node node) {
@@ -168,10 +147,10 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
             return null;
         }
         final QualifiedName qn = QualifiedName.fromURI(uriProperty.toString());
-        AttachedAssociationKeeper keeper = controller.lookup(qn);
+        AttachedAssociationKeeper keeper = controller().lookup(qn);
         if (keeper == null){
             keeper = new AttachedAssociationKeeper(qn, new NumericPhysicalNodeID(neoNode.getId()));
-            controller.attach(qn, keeper);
+            controller().attach(qn, keeper);
         }
         return new AttachedResourceNode(qn, keeper);
     }

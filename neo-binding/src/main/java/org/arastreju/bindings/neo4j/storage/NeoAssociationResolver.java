@@ -64,7 +64,7 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
 
     // ----------------------------------------------------
 
-    private final ConversationController conversationController;
+    private final ConversationController controller;
 
 	private final ResourceResolver resourceResolver;
 
@@ -78,7 +78,7 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
      * @param store The physical store.
 	 */
 	public NeoAssociationResolver(ConversationController controller, NeoGraphDataStore store) {
-        this.conversationController = controller;
+        this.controller = controller;
 		this.resourceResolver = new ResourceResolverImpl(controller);
         this.store = store;
 	}
@@ -97,8 +97,8 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
             return;
         }
         for(Relationship rel : neoNode.getRelationships(Direction.OUTGOING)){
-			final Context[] ctx = getContextInfo(rel);
-			if (!regardContext(ctx, rel)) {
+			final Context[] stmtContexts = getContextInfo(rel);
+			if (!regardContext(stmtContexts, rel)) {
 				continue;
 			}
 			SemanticNode object = null;
@@ -108,7 +108,7 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
 				object = toValueNode(rel.getEndNode());
 			}
 			final ResourceNode predicate = resourceResolver.resolve(new SimpleResourceID(rel.getProperty(PREDICATE_URI).toString()));
-			final StatementMetaInfo mi = new StatementMetaInfo(ctx, new Date((Long)rel.getProperty(TIMESTAMP, 0L)));
+			final StatementMetaInfo mi = new StatementMetaInfo(stmtContexts, new Date((Long)rel.getProperty(TIMESTAMP, 0L)));
 			keeper.addAssociationDirectly(new DetachedStatement(id(keeper.getQualifiedName()), predicate, object, mi));
 		}
 	}
@@ -138,7 +138,7 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
 			LOGGER.debug("Statement has no context.");
 			return true;
 		}
-		Context[] readContexts = conversationController.getConversationContext().getReadContexts();
+		Context[] readContexts = controller.getConversationContext().getReadContexts();
         for (Context readContext : readContexts) {
             for (Context stmtContext : stmtContexts) {
                 if (readContext.equals(stmtContext)) {
@@ -147,16 +147,7 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
             }
         }
         if (LOGGER.isDebugEnabled()) {
-            final StringBuilder sb = new StringBuilder("Contexts of Statement ");
-            sb.append(resolve(rel.getStartNode()));
-            sb.append(" --> ");
-            sb.append(rel.getProperty(PREDICATE_URI));
-            sb.append(" --> ");
-            sb.append(convert(rel, rel.getEndNode()));
-            sb.append(" {} ");
-            sb.append("not in read contexts");
-            sb.append(" {}.");
-            LOGGER.debug(sb.toString(), Arrays.toString(stmtContexts), Arrays.toString(readContexts));
+            logRelContexts(stmtContexts, readContexts, rel);
         }
 		return false;
 	}
@@ -177,10 +168,10 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
             return null;
         }
         final QualifiedName qn = QualifiedName.fromURI(uriProperty.toString());
-        AttachedAssociationKeeper keeper = conversationController.lookup(qn);
+        AttachedAssociationKeeper keeper = controller.lookup(qn);
         if (keeper == null){
             keeper = new AttachedAssociationKeeper(qn, new NumericPhysicalNodeID(neoNode.getId()));
-            conversationController.attach(qn, keeper);
+            controller.attach(qn, keeper);
         }
         return new AttachedResourceNode(qn, keeper);
     }
@@ -218,6 +209,19 @@ public class NeoAssociationResolver implements AssociationResolver, NeoConstants
         } else {
             return new Locale(language);
         }
+    }
+
+    private void logRelContexts(Context[] stmtContexts, Context[] readContexts, Relationship rel) {
+        final StringBuilder sb = new StringBuilder("Contexts of Statement ");
+        sb.append(resolve(rel.getStartNode()));
+        sb.append(" --> ");
+        sb.append(rel.getProperty(PREDICATE_URI));
+        sb.append(" --> ");
+        sb.append(convert(rel, rel.getEndNode()));
+        sb.append(" {} ");
+        sb.append("not in read contexts");
+        sb.append(" {}.");
+        LOGGER.debug(sb.toString(), Arrays.toString(stmtContexts), Arrays.toString(readContexts));
     }
 
 }

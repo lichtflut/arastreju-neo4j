@@ -146,7 +146,7 @@ public class NeoAssociationResolver extends AbstractAssociationResolver implemen
         if (uriProperty == null) {
             return null;
         }
-        final QualifiedName qn = QualifiedName.fromURI(uriProperty.toString());
+        final QualifiedName qn = QualifiedName.from(uriProperty.toString());
         AttachedAssociationKeeper keeper = controller().lookup(qn);
         if (keeper == null){
             keeper = new AttachedAssociationKeeper(qn, new NumericPhysicalNodeID(neoNode.getId()));

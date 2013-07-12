@@ -24,11 +24,11 @@ import org.arastreju.sge.ArastrejuProfile;
 import org.arastreju.sge.Conversation;
 import org.arastreju.sge.ConversationContext;
 import org.arastreju.sge.apriori.Aras;
+import org.arastreju.sge.context.Context;
 import org.arastreju.sge.model.DetachedStatement;
 import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.model.nodes.SNResource;
 import org.arastreju.sge.model.nodes.views.SNScalar;
-import org.arastreju.sge.naming.Namespace;
 import org.arastreju.sge.naming.QualifiedName;
 import org.arastreju.sge.spi.util.FileStoreUtil;
 import org.junit.Ignore;
@@ -105,7 +105,7 @@ public class ArastrejuInitializationTest {
         ConversationContext cc = gate.startConversation().getConversationContext();
         Assert.assertNotNull(cc);
         Assert.assertNotNull(cc.getPrimaryContext());
-        Assert.assertEquals(QualifiedName.from(Namespace.LOCAL_CONTEXTS, "mydomain"), cc.getPrimaryContext().getQualifiedName());
+        Assert.assertEquals(QualifiedName.from(Context.LOCAL_CONTEXTS_NAMESPACE, "mydomain"), cc.getPrimaryContext().getQualifiedName());
 
     }
 

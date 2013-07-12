@@ -38,7 +38,7 @@ public class NeoAdministrator extends AbstractAdministrator {
             if (uriProperty == null) {
                 throw new IllegalStateException();
             }
-            final QualifiedName qn = QualifiedName.fromURI(uriProperty.toString());
+            final QualifiedName qn = QualifiedName.from(uriProperty.toString());
         }
     }
 

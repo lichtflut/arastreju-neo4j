@@ -20,7 +20,6 @@ import org.arastreju.bindings.neo4j.storage.NeoGraphDataStore;
 import org.arastreju.sge.ArastrejuGate;
 import org.arastreju.sge.ArastrejuProfile;
 import org.arastreju.sge.context.DomainIdentifier;
-import org.arastreju.sge.index.IndexProvider;
 import org.arastreju.sge.spi.ArastrejuGateFactory;
 import org.arastreju.sge.spi.GateInitializationException;
 import org.arastreju.sge.spi.GraphDataConnection;

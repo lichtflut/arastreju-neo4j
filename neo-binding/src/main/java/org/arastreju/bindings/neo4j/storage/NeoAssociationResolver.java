@@ -125,11 +125,12 @@ public class NeoAssociationResolver extends AbstractAssociationResolver implemen
     }
 	
 	private boolean regardContext(Context[] stmtContexts, Relationship rel) {
+        boolean match = super.regardContext(stmtContexts);
         if (LOGGER.isDebugEnabled()) {
-            logRelContexts(stmtContexts, readContexts(), rel);
+            logRelContexts(stmtContexts, readContexts(), rel, match);
         }
-		return super.regardContext(stmtContexts);
-	}
+        return match;
+    }
 
     private SemanticNode convert(Relationship rel, Node node) {
         if (rel.isType(ArasRelationshipType.REFERENCE)){
@@ -190,7 +191,7 @@ public class NeoAssociationResolver extends AbstractAssociationResolver implemen
         }
     }
 
-    private void logRelContexts(Context[] stmtContexts, Context[] readContexts, Relationship rel) {
+    private void logRelContexts(Context[] stmtContexts, Context[] readContexts, Relationship rel, boolean match) {
         final StringBuilder sb = new StringBuilder("Contexts of Statement ");
         sb.append(resolve(rel.getStartNode()));
         sb.append(" --> ");
@@ -198,7 +199,11 @@ public class NeoAssociationResolver extends AbstractAssociationResolver implemen
         sb.append(" --> ");
         sb.append(convert(rel, rel.getEndNode()));
         sb.append(" {} ");
-        sb.append("not in read contexts");
+        if (match) {
+            sb.append("are in read contexts");
+        } else {
+            sb.append("are NOT in read contexts");
+        }
         sb.append(" {}.");
         LOGGER.debug(sb.toString(), Arrays.toString(stmtContexts), Arrays.toString(readContexts));
     }

@@ -42,7 +42,10 @@ import java.io.IOException;
 
 /**
  * <p>
- *  Container for services, indexes and registries. 
+ *  Container for services, indexes and registries.
+ *
+ *  TODO: Make thread safe!
+ *
  * </p>
  *
  * <p>

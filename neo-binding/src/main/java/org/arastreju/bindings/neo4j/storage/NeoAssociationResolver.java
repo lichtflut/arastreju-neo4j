@@ -21,7 +21,7 @@ import org.arastreju.sge.context.Context;
 import org.arastreju.sge.context.ContextID;
 import org.arastreju.sge.model.DetachedStatement;
 import org.arastreju.sge.model.ElementaryDataType;
-import org.arastreju.sge.model.StatementMetaInfo;
+import org.arastreju.sge.model.associations.StatementMetaInfo;
 import org.arastreju.sge.model.associations.AttachedAssociationKeeper;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.model.nodes.SNValue;

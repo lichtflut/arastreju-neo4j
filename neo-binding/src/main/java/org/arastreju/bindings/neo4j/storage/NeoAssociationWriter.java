@@ -101,7 +101,9 @@ public class NeoAssociationWriter extends AbstractAssociationWriter implements N
             final Relationship relationship = subject.createRelationshipTo(object, type);
             relationship.setProperty(PREDICATE_URI, stmt.getPredicate().toURI());
             relationship.setProperty(PREDICATE_URI, stmt.getPredicate().toURI());
-            relationship.setProperty(TIMESTAMP, new Date().getTime());
+            relationship.setProperty(TIMESTAMP, tsp(stmt.getMetaInfo().getTimestamp()));
+            relationship.setProperty(VALID_FROM, tsp(stmt.getMetaInfo().getValidFrom()));
+            relationship.setProperty(VALID_UNTIL, tsp(stmt.getMetaInfo().getValidUntil()));
             assignContext(relationship, getCurrentContexts(stmt));
         } catch (Exception e) {
             LOGGER.error("Failed to add relationship--> " + stmt + " to node " + subject, e);
@@ -156,6 +158,10 @@ public class NeoAssociationWriter extends AbstractAssociationWriter implements N
             }
             relationship.setProperty(NeoConstants.CONTEXT_URI, uris);
         }
+    }
+
+    private long tsp(Date date) {
+        return date != null ? date.getTime() : 0;
     }
 
 }

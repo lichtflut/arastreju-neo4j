@@ -72,4 +72,14 @@ public interface NeoConstants {
 	 */
 	String TIMESTAMP = "timestamp";
 
+    /**
+     * Attribute of a {@link org.neo4j.graphdb.Relationship}.
+     */
+    String VALID_FROM = "valid-from";
+
+    /**
+     * Attribute of a {@link org.neo4j.graphdb.Relationship}.
+     */
+    String VALID_UNTIL = "valid-until";
+
 }

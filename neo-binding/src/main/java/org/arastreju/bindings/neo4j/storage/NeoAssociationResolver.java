@@ -19,9 +19,9 @@ package org.arastreju.bindings.neo4j.storage;
 import org.arastreju.sge.SNOPS;
 import org.arastreju.sge.context.Context;
 import org.arastreju.sge.context.ContextID;
-import org.arastreju.sge.model.DetachedStatement;
+import org.arastreju.sge.model.Assertor;
 import org.arastreju.sge.model.ElementaryDataType;
-import org.arastreju.sge.model.associations.StatementMetaInfo;
+import org.arastreju.sge.model.Statement;
 import org.arastreju.sge.model.associations.AttachedAssociationKeeper;
 import org.arastreju.sge.model.nodes.ResourceNode;
 import org.arastreju.sge.model.nodes.SNValue;
@@ -98,9 +98,15 @@ public class NeoAssociationResolver extends AbstractAssociationResolver implemen
 			} else if (rel.isType(ArasRelationshipType.VALUE)){
 				object = toValueNode(rel.getEndNode());
 			}
-			final ResourceNode predicate = resolve(rel.getProperty(PREDICATE_URI).toString());
-			final StatementMetaInfo mi = createMetaInfo(stmtContexts, (Long)rel.getProperty(TIMESTAMP, 0L));
-			keeper.addAssociationDirectly(new DetachedStatement(id(keeper.getQualifiedName()), predicate, object, mi));
+
+            final ResourceNode predicate = resolve(rel.getProperty(PREDICATE_URI).toString());
+            Statement stmt = Assertor.start(id(keeper.getQualifiedName()), predicate, object)
+                .context(stmtContexts)
+                .timestamp((Long) rel.getProperty(TIMESTAMP, 0L))
+                .validFrom((Long) rel.getProperty(VALID_FROM, 0L))
+                .validUntil((Long) rel.getProperty(VALID_UNTIL, 0L))
+                .build();
+			keeper.addAssociationDirectly(stmt);
 		}
 	}
 
